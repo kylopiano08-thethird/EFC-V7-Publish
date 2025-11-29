@@ -1,0 +1,748 @@
+body { 
+    background: #0f0f0f; 
+    color: white; 
+    font-family: 'Segoe UI', Arial, sans-serif; 
+    margin: 0; 
+    padding: 20px; 
+}
+
+.f1-container { 
+    max-width: 1400px;
+    margin: 0 auto; 
+    background: #1e1e1e; 
+    border-radius: 15px; 
+    overflow: hidden; 
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3); 
+}
+
+.header { 
+    background: linear-gradient(135deg, #024cad, #023a8a);
+    padding: 20px; 
+    text-align: center; 
+    position: relative;
+}
+
+.header h1 { 
+    margin: 0; 
+    font-size: 28px; 
+    font-weight: bold; 
+    text-transform: uppercase; 
+    letter-spacing: 2px; 
+}
+
+.header-logo {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 40px;
+    width: auto;
+    display: block;
+}
+
+.tabs {
+    display: flex;
+    background: #2a2a2a;
+    border-bottom: 1px solid #333;
+    flex-wrap: wrap;
+}
+
+.tab {
+    padding: 15px 20px;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 1px;
+    white-space: nowrap;
+}
+
+.tab.active {
+    border-bottom: 3px solid #024cad;
+    background: #1e1e1e;
+}
+
+.tab:hover {
+    background: #333;
+}
+
+.sub-tabs {
+    display: flex;
+    background: #333;
+    border-bottom: 1px solid #444;
+    flex-wrap: wrap;
+}
+
+.sub-tab {
+    padding: 12px 20px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.3s;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.sub-tab.active {
+    border-bottom: 2px solid #024cad;
+    background: #2a2a2a;
+}
+
+.content-section {
+    padding: 20px;
+    overflow-x: auto;
+}
+
+.driver-row { 
+    display: flex; 
+    align-items: center; 
+    padding: 12px 15px; 
+    border-bottom: 1px solid #333; 
+    transition: background 0.3s; 
+}
+
+.driver-row:hover { 
+    background: #2a2a2a; 
+}
+
+.position { 
+    width: 40px; 
+    font-size: 16px; 
+    font-weight: bold; 
+    text-align: center; 
+}
+
+.position-1 { color: gold; } 
+.position-2 { 
+    color: white;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.7);
+}
+.position-3 { color: #cd7f32; }
+
+.driver-info { 
+    flex: 1; 
+    min-width: 180px;
+}
+
+.driver-name { 
+    font-size: 16px; 
+    font-weight: 600; 
+    margin-bottom: 2px; 
+}
+
+.team-name { 
+    font-size: 11px; 
+    opacity: 0.7; 
+    text-transform: uppercase; 
+    letter-spacing: 0.5px; 
+}
+
+.team-Mercedes { color: #00D2BE; }
+.team-Red-Bull { color: #0600EF; }
+.team-Ferrari { color: #DC0000; }
+.team-McLaren { color: #FF8700; }
+.team-Alpine { color: #0090FF; }
+.team-Haas { color: #FFFFFF; }
+.team-Aston-Martin { color: #006F62; }
+.team-Williams { color: #005AFF; }
+.team-Racing-Bulls { color: #2B4562; }
+.team-Sauber { color: #900000; }
+
+.stats { 
+    display: flex; 
+    gap: 15px; 
+    text-align: center; 
+    flex-wrap: wrap;
+}
+
+.stat { 
+    min-width: 60px; 
+}
+
+.stat-value { 
+    font-size: 16px; 
+    font-weight: bold; 
+}
+
+.stat-label { 
+    font-size: 10px; 
+    opacity: 0.7; 
+    text-transform: uppercase; 
+    letter-spacing: 0.5px; 
+}
+
+.podium-1 {
+    background: linear-gradient(90deg, rgba(255,215,0,0.15), transparent);
+}
+
+.podium-2 {
+    background: linear-gradient(90deg, rgba(192,192,192,0.15), transparent);
+}
+
+.podium-3 {
+    background: linear-gradient(90deg, rgba(205,127,50,0.15), transparent);
+}
+
+.fastest-lap {
+    background: linear-gradient(to bottom, rgba(128,0,128,0.4), rgba(128,0,128,0.1)) !important;
+}
+
+.loading { 
+    text-align: center; 
+    padding: 40px; 
+    font-size: 18px; 
+}
+
+.last-updated { 
+    text-align: center; 
+    padding: 10px; 
+    font-size: 12px; 
+    opacity: 0.7; 
+    background: #2a2a2a;
+}
+
+.error { 
+    text-align: center; 
+    padding: 40px; 
+    color: #ff6b6b; 
+}
+
+.refresh-button {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255,255,255,0.1);
+    border: none;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background 0.3s;
+}
+
+.refresh-button:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+.race-header {
+    display: flex;
+    background: #333;
+    padding: 10px 15px;
+    font-weight: bold;
+    border-bottom: 2px solid #024cad;
+    font-size: 11px;
+}
+
+.race-driver {
+    min-width: 200px;
+    flex-shrink: 0;
+}
+
+.race-result {
+    width: 70px;
+    text-align: center;
+    flex-shrink: 0;
+    padding: 8px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    position: relative;
+}
+
+.race-row {
+    display: flex;
+    align-items: center;
+    padding: 8px 15px;
+    border-bottom: 1px solid #333;
+}
+
+.race-row:hover {
+    background: #2a2a2a;
+}
+
+.chart-container {
+    padding: 20px;
+    background: #2a2a2a;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.chart-line {
+    stroke-width: 2;
+    fill: none;
+}
+
+.full-stats-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    min-width: 1200px;
+}
+
+.full-stats-table th {
+    background: #333;
+    padding: 10px;
+    text-align: left;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.full-stats-table td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #333;
+    white-space: nowrap;
+}
+
+.full-stats-table tr:hover {
+    background: #2a2a2a;
+}
+
+.championship-progression {
+    margin-top: 0px;
+    overflow-x: auto;
+}
+
+.progression-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px;
+}
+
+.progression-table th {
+    background: #333;
+    padding: 10px;
+    text-align: center;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.progression-table td {
+    padding: 10px;
+    border-bottom: 1px solid #333;
+    text-align: center;
+}
+
+.progression-driver {
+    text-align: left;
+    min-width: 180px;
+}
+
+.completed-race {
+    font-weight: bold;
+}
+
+.future-race {
+    opacity: 0.5;
+}
+
+.constructor-row {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    border-bottom: 1px solid #333;
+    transition: background 0.3s;
+}
+
+.constructor-row:hover {
+    background: #2a2a2a;
+}
+
+.constructor-info {
+    flex: 1;
+    min-width: 180px;
+}
+
+.constructor-name {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.constructor-points {
+    font-size: 11px;
+    opacity: 0.7;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.position-up {
+    color: #4CAF50;
+    font-weight: bold;
+    font-size: 12px;
+    margin-left: 5px;
+}
+
+.position-down {
+    color: #f44336;
+    font-weight: bold;
+    font-size: 12px;
+    margin-left: 5px;
+}
+
+.position-same {
+    color: #888;
+    font-size: 11px;
+    margin-left: 5px;
+}
+
+/* EFC News Styles */
+.news-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 20px;
+    padding: 20px 0;
+}
+
+.news-card {
+    background: #2a2a2a;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+    border: 1px solid #333;
+}
+
+.news-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+}
+
+.news-image {
+    width: 100%;
+    height: 150px;
+    background: linear-gradient(135deg, #024cad, #023a8a);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 48px;
+}
+
+.track-info {
+    background: transparent !important;
+    padding: 0;
+    height: auto;
+}
+
+.track-image {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+}
+
+.news-content {
+    padding: 20px;
+}
+
+.news-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: white;
+    line-height: 1.4;
+}
+
+.news-date {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.news-description {
+    font-size: 14px;
+    color: #ccc;
+    line-height: 1.5;
+    margin-bottom: 15px;
+}
+
+.news-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 15px;
+}
+
+.news-tag {
+    background: #024cad;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.news-tag.closed {
+    background: #dc0000;
+}
+
+.news-tag.transfers {
+    background: #FF8700;
+}
+
+.news-tag.media {
+    background: #ff0000;
+}
+
+.news-tag.videos {
+    background: #cc0000;
+}
+
+.news-tag.circuit {
+    background: #00D2BE;
+}
+
+.news-tag.info {
+    background: #006F62;
+}
+
+.youtube-button {
+    background: #ff0000;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: background 0.3s;
+    width: 100%;
+}
+
+.youtube-button:hover {
+    background: #cc0000;
+}
+
+/* Responsive News Layout */
+@media (max-width: 768px) {
+    .news-container {
+        grid-template-columns: 1fr;
+        gap: 15px;
+        padding: 15px 0;
+    }
+    
+    .news-card {
+        margin: 0 10px;
+    }
+}
+/* Ensure position indicators are properly styled */
+.position-up, .position-down, .position-same {
+    display: inline-block;
+    font-weight: bold;
+    margin-left: 8px;
+    font-size: 12px;
+}
+
+.position-up {
+    color: #4CAF50;
+}
+
+.position-down {
+    color: #f44336;
+}
+
+.position-same {
+    color: #888;
+    font-size: 11px;
+}
+
+/* Countdown Timer Styles - FIXED VERSION */
+.countdown-timer {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(220, 0, 0, 0.3);
+    border: 2px solid #dc0000;
+    border-radius: 8px;
+    padding: 10px 15px;
+    color: white;
+    font-weight: 600;
+    text-align: center;
+    min-width: 180px;
+    z-index: 100;
+    display: block;
+    box-shadow: 0 4px 12px rgba(220, 0, 0, 0.3);
+}
+
+.countdown-time {
+    font-size: 14px;
+    font-weight: bold;
+    color: #ffd700;
+    font-family: 'Courier New', monospace;
+    line-height: 1.2;
+    margin: 0;
+    padding: 0;
+}
+
+.countdown-label {
+    font-size: 10px;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 0;
+    padding: 0;
+    line-height: 1.2;
+    font-weight: 600;
+}
+
+.countdown-finished {
+    background: rgba(46, 139, 87, 0.3);
+    border-color: #2E8B57;
+    box-shadow: 0 4px 12px rgba(46, 139, 87, 0.3);
+}
+
+.countdown-finished .countdown-time {
+    color: #90EE90;
+}
+
+.countdown-finished .countdown-label {
+    color: #98FB98;
+}
+
+/* Ensure header can accommodate the countdown */
+.header {
+    background: linear-gradient(135deg, #024cad, #023a8a);
+    padding: 20px;
+    text-align: center;
+    position: relative;
+    min-height: 80px;
+}
+
+/* Make sure no other elements are interfering */
+.header .refresh-button {
+    display: none !important;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .countdown-timer {
+        position: relative;
+        right: auto;
+        top: auto;
+        transform: none;
+        margin: 10px auto;
+        min-width: 160px;
+        display: inline-block;
+    }
+    
+    .header {
+        min-height: auto;
+        padding-bottom: 15px;
+    }
+}
+
+/* Admin Login Modal Styles */
+.admin-login-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.9);
+    z-index: 10000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.admin-login-modal.active {
+    display: flex;
+}
+
+.admin-login-content {
+    background: #2a2a2a;
+    padding: 30px;
+    border-radius: 10px;
+    max-width: 400px;
+    width: 100%;
+    border: 2px solid #024cad;
+    text-align: center;
+}
+
+.admin-login-content h2 {
+    margin: 0 0 15px 0;
+    color: #fff;
+}
+
+.admin-login-content p {
+    color: #ccc;
+    margin-bottom: 20px;
+}
+
+.admin-login-input {
+    width: 100%;
+    padding: 12px;
+    background: #333;
+    border: 1px solid #444;
+    border-radius: 5px;
+    color: white;
+    font-size: 16px;
+    margin-bottom: 15px;
+    box-sizing: border-box;
+}
+
+.admin-login-input:focus {
+    outline: none;
+    border-color: #024cad;
+}
+
+.admin-login-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.admin-login-buttons button {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.admin-login-buttons button:first-child {
+    background: #024cad;
+    color: white;
+}
+
+.admin-login-buttons button:first-child:hover {
+    background: #036ee0;
+}
+
+.admin-login-buttons button:last-child {
+    background: #666;
+    color: white;
+}
+
+.admin-login-buttons button:last-child:hover {
+    background: #888;
+}
+
+.admin-login-hint {
+    color: #888;
+    font-size: 12px;
+}
+
+.admin-login-error {
+    color: #ff4444;
+    font-size: 14px;
+    margin-top: 10px;
+    display: none;
+}

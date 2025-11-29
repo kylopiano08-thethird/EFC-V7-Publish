@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>EFC Championship</title>
+    <link rel="stylesheet" href="styles/style.css">
+    <link rel="stylesheet" href="styles/news-styles.css">
+    <link rel="stylesheet" href="styles/race-calendar.css">
+    <link rel="stylesheet" href="styles/circuit-maps.css">
+    <link rel="stylesheet" href="styles/combined-calendar.css">
+</head>
+<body>
+    <div class="f1-container">
+        <div class="header">
+            <img src="https://i.postimg.cc/SQ34Kccv/EFC.png" alt="EFC Logo" class="header-logo" onerror="this.style.display='none'">
+            <h1>🏆 EFC Championship</h1>
+            <!-- Discreet admin link -->
+            <!-- Replace the direct link with this -->
+<a href="#" class="admin-link" onclick="showAdminLogin()" title="Admin Dashboard">
+    ⚙️
+</a>
+        </div>
+        
+        <div class="tabs">
+            <div class="tab active" data-sheet="Overall Rating">Overall Rating</div>
+            <div class="tab" data-sheet="Championship Standings">Championship</div>
+            <div class="tab" data-sheet="Driver Ratings">Driver Ratings</div>
+            <div class="tab" data-sheet="Teammate Head to Head">Teammate H2H</div>
+            <div class="tab" data-sheet="Full Driver Stats">Full Stats</div>
+            <div class="tab" data-sheet="Race Results">Race Results</div>
+            <div class="tab" data-sheet="Quali Results">Quali Results</div>
+            <div class="tab" data-sheet="EFC News">EFC News</div>
+            <div class="tab" data-sheet="Race Calendar">Race Calendar</div>
+        </div>
+
+        <div class="sub-tabs" id="championship-subtabs" style="display: none;">
+            <div class="sub-tab active" data-type="drivers">Drivers</div>
+            <div class="sub-tab" data-type="constructors">Constructors</div>
+        </div>
+        
+        <div class="content-section">
+            <div id="standings-container">
+                <div class="loading">Loading standings...</div>
+            </div>
+        </div>
+        
+        <div class="last-updated" id="last-updated"></div>
+    </div>
+
+    <!-- Load position tracking first -->
+    <script src="scripts/position-tracking.js"></script>
+    <!-- Then load main script -->
+    <script src="scripts/script.js"></script>
+    <!-- Then load news extension -->
+    <script src="scripts/news-script.js"></script>
+    <!-- Then load new features -->
+    <script src="scripts/data-manager.js"></script>
+    <script src="scripts/race-calendar.js"></script>
+    <script src="scripts/circuit-maps.js"></script>
+
+    <!-- Admin Login Modal -->
+<div id="adminLoginModal" class="admin-login-modal">
+    <div class="admin-login-content">
+        <h2>🔐 Admin Login</h2>
+        <p>Enter the admin password to access the dashboard</p>
+        
+        <input type="password" id="adminPasswordInput" class="admin-login-input" placeholder="Enter admin password">
+        
+        <div id="adminLoginError" class="admin-login-error">
+            Incorrect password. Please try again.
+        </div>
+        
+        <div class="admin-login-buttons">
+            <button onclick="handleAdminLogin()">Login</button>
+            <button onclick="closeAdminLogin()">Cancel</button>
+        </div>
+        
+        <div class="admin-login-hint">
+            Helo you industrious little fellows
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
