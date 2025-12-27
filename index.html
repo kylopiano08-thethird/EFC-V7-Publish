@@ -1,84 +1,251 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>EFC Championship</title>
-    <link rel="stylesheet" href="styles/style.css">
-    <link rel="stylesheet" href="styles/news-styles.css">
-    <link rel="stylesheet" href="styles/race-calendar.css">
-    <link rel="stylesheet" href="styles/circuit-maps.css">
-    <link rel="stylesheet" href="styles/combined-calendar.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EFC Racing - Home</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <div class="f1-container">
-        <div class="header">
-            <img src="https://i.postimg.cc/SQ34Kccv/EFC.png" alt="EFC Logo" class="header-logo" onerror="this.style.display='none'">
-            <h1>🏆 EFC Championship</h1>
-            <!-- Discreet admin link -->
-            <!-- Replace the direct link with this -->
-<a href="#" class="admin-link" onclick="showAdminLogin()" title="Admin Dashboard">
-    ⚙️
-</a>
-        </div>
-        
-        <div class="tabs">
-            <div class="tab active" data-sheet="Overall Rating">Overall Rating</div>
-            <div class="tab" data-sheet="Championship Standings">Championship</div>
-            <div class="tab" data-sheet="Driver Ratings">Driver Ratings</div>
-            <div class="tab" data-sheet="Teammate Head to Head">Teammate H2H</div>
-            <div class="tab" data-sheet="Full Driver Stats">Full Stats</div>
-            <div class="tab" data-sheet="Race Results">Race Results</div>
-            <div class="tab" data-sheet="Quali Results">Quali Results</div>
-            <div class="tab" data-sheet="EFC News">EFC News</div>
-            <div class="tab" data-sheet="Race Calendar">Race Calendar</div>
-        </div>
-
-        <div class="sub-tabs" id="championship-subtabs" style="display: none;">
-            <div class="sub-tab active" data-type="drivers">Drivers</div>
-            <div class="sub-tab" data-type="constructors">Constructors</div>
-        </div>
-        
-        <div class="content-section">
-            <div id="standings-container">
-                <div class="loading">Loading standings...</div>
+    <!-- Header Bar -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo">
+                        <div class="logo-text">EFC</div>
+                    </div>
+                </div>
+                
+                <!-- Countdown Timer -->
+                <div class="countdown-timer">
+                    <div class="timer-label">NEXT RACE</div>
+                    <div class="timer-display" id="timer-display">Loading...</div>
+                </div>
+                
+                <!-- Navigation -->
+                <nav class="main-nav">
+                    <ul>
+                        <li><a href="index.html" class="active"><i class="fas fa-home"></i> HOME</a></li>
+                        <li><a href="championship.html"><i class="fas fa-trophy"></i> CHAMPIONSHIP</a></li>
+                        <li><a href="results.html"><i class="fas fa-flag-checkered"></i> RESULTS</a></li>
+                        <li><a href="drivers.html"><i class="fas fa-user"></i> DRIVERS</a></li>
+                        <li><a href="teams.html" ><i class="fas fa-car"></i> TEAMS</a></li>
+                        <li><a href="stats.html"><i class="fas fa-chart-bar"></i> STATS</a></li>
+                        <li><a href="calendar.html"><i class="fas fa-calendar"></i> CALENDAR</a></li>
+                        <li><a href="news.html"><i class="fas fa-newspaper"></i> NEWS</a></li>
+                        <li><a href="hof.html"><i class="fas fa-award"></i> HOF</a></li>
+                    </ul>
+                </nav>
             </div>
         </div>
-        
-        <div class="last-updated" id="last-updated"></div>
-    </div>
+    </header>
 
-    <!-- Load position tracking first -->
-    <script src="scripts/position-tracking.js"></script>
-    <!-- Then load main script -->
-    <script src="scripts/script.js"></script>
-    <!-- Then load news extension -->
-    <script src="scripts/news-script.js"></script>
-    <!-- Then load new features -->
-    <script src="scripts/data-manager.js"></script>
-    <script src="scripts/race-calendar.js"></script>
-    <script src="scripts/circuit-maps.js"></script>
+    <!-- Main Content -->
+    <main class="content">
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="container">
+                <h1 class="hero-title">Eurpoean Formula Championship</h1>
+                <p class="hero-subtitle">SEASON 2 Coming Soon</p>
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <div class="stat-value" id="total-races">10</div>
+                        <div class="stat-label">RACES</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="stat-value" id="total-drivers">20</div>
+                        <div class="stat-label">DRIVERS</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="stat-value" id="total-teams">10</div>
+                        <div class="stat-label">TEAMS</div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-    <!-- Admin Login Modal -->
-<div id="adminLoginModal" class="admin-login-modal">
-    <div class="admin-login-content">
-        <h2>🔐 Admin Login</h2>
-        <p>Enter the admin password to access the dashboard</p>
-        
-        <input type="password" id="adminPasswordInput" class="admin-login-input" placeholder="Enter admin password">
-        
-        <div id="adminLoginError" class="admin-login-error">
-            Incorrect password. Please try again.
-        </div>
-        
-        <div class="admin-login-buttons">
-            <button onclick="handleAdminLogin()">Login</button>
-            <button onclick="closeAdminLogin()">Cancel</button>
-        </div>
-        
-        <div class="admin-login-hint">
-            Helo you industrious little fellows
-        </div>
-    </div>
-</div>
+        <!-- Dashboard Section -->
+        <section class="dashboard">
+            <div class="container">
+                <h2 class="section-title">DASHBOARD</h2>
+                
+                <!-- Top Stats Grid -->
+                <div class="stats-grid">
+                    <!-- Next Race Card -->
+                    <div class="stat-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-flag-checkered"></i> NEXT RACE</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="race-name" id="next-gp-name">Loading...</div>
+                            <div class="race-details">
+                                <div><span class="detail-label">ROUND:</span> <span id="next-gp-round">-</span></div>
+                                <div><span class="detail-label">DATE:</span> <span id="next-gp-date">-</span></div>
+                                <div><span class="detail-label">Circuit:</span> <span id="next-gp-circuit">-</span></div>
+                            </div>
+                            <div class="countdown" id="next-gp-countdown">-</div>
+                        </div>
+                    </div>
 
+                    <!-- Previous Race Card -->
+                    <div class="stat-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-medal"></i> PREVIOUS RACE</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="race-name" id="prev-gp-name">Loading...</div>
+                            <div class="race-details">
+                                <div><span class="detail-label">WINNER:</span> <span id="prev-gp-winner">-</span></div>
+                                <div><span class="detail-label">FASTEST LAP:</span> <span id="prev-gp-fastest">-</span></div>
+                                <div><span class="detail-label">DATE:</span> <span id="prev-gp-date">-</span></div>
+                            </div>
+                            <div class="race-result" id="prev-gp-result">-</div>
+                        </div>
+                    </div>
+
+                    <!-- Driver of the Day - EXPANDED TO FILL SPACE -->
+                    <div class="stat-card driver-of-day-expanded">
+                        <div class="card-header">
+                            <h3><i class="fas fa-star"></i> DRIVER OF THE DAY</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="driver-of-day-expanded-content" id="driver-of-day">
+                                <div class="driver-avatar-large" id="dotd-avatar">
+                                    <div class="fallback">DOTD</div>
+                                </div>
+                                <div class="driver-name-centered" id="dotd-name">Loading...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Standings Grid -->
+                <div class="stats-grid">
+                    <!-- Driver Standings -->
+                    <div class="stat-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-user"></i> DRIVER STANDINGS</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="standings-table" id="driver-standings">
+                                <div class="standings-header">
+                                    <div class="header-pos">POS</div>
+                                    <div class="header-driver">DRIVER</div>
+                                    <div class="header-points">PTS</div>
+                                </div>
+                                <div class="standings-body">
+                                    <!-- Filled by JavaScript -->
+                                </div>
+                            </div>
+                            <a href="championship.html" class="view-more">VIEW FULL STANDINGS <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+
+                    <!-- Constructor Standings -->
+                    <div class="stat-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-car"></i> CONSTRUCTOR STANDINGS</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="standings-table" id="constructor-standings">
+                                <div class="standings-header">
+                                    <div class="header-pos">POS</div>
+                                    <div class="header-team">TEAM</div>
+                                    <div class="header-points">PTS</div>
+                                </div>
+                                <div class="standings-body">
+                                    <!-- Filled by JavaScript -->
+                                </div>
+                            </div>
+                            <a href="championship.html" class="view-more">VIEW FULL STANDINGS <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+
+                    <!-- Top Rated Drivers -->
+                    <div class="stat-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-chart-line"></i> TOP RATED DRIVERS</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="ratings-table" id="driver-ratings">
+                                <div class="ratings-header">
+                                    <div class="header-pos">POS</div>
+                                    <div class="header-driver">DRIVER</div>
+                                    <div class="header-rating">RATING</div>
+                                </div>
+                                <div class="ratings-body">
+                                    <!-- Filled by JavaScript -->
+                                </div>
+                            </div>
+                            <a href="stats.html" class="view-more">VIEW ALL RATINGS <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+
+                    <!-- Upcoming Calendar -->
+                    <div class="stat-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-calendar-alt"></i> UPCOMING RACES</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="calendar-container">
+                                <div class="calendar-list" id="upcoming-calendar">
+                                    <div class="calendar-empty">Loading calendar...</div>
+                                </div>
+                            </div>
+                            <a href="calendar.html" class="view-more">FULL CALENDAR <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Latest Content Section -->
+        <section class="latest-content">
+            <div class="container">
+                <div class="content-grid">
+                    <!-- Latest Article -->
+                    <div class="content-card large">
+                        <div class="card-header">
+                            <h3><i class="fas fa-newspaper"></i> LATEST ARTICLE</h3>
+                            <span class="article-date" id="article-date">-</span>
+                        </div>
+                        <div class="card-content">
+                            <h4 class="article-title" id="article-title">Loading latest article...</h4>
+                            <p class="article-excerpt" id="article-excerpt">Content loading...</p>
+                            <a href="news.html" class="read-more" id="article-link">READ FULL ARTICLE <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="footer-logo">EFC RACING</div>
+                    <p class="footer-tagline">Official Statistics Portal</p>
+                </div>
+                <div class="footer-section">
+                    <p>© 2026 European Formula Championship</p>
+                    <p>All rights reserved</p>
+                </div>
+                <div class="footer-section">
+                    <div class="footer-links">
+                        <a href="#" class="footer-link"><i class="fab fa-discord"></i> DISCORD</a>
+                        <a href="#" class="footer-link"><i class="fab fa-youtube"></i> YOUTUBE</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/data-loader.js"></script>
+    <script src="js/homepage.js"></script>
 </body>
 </html>

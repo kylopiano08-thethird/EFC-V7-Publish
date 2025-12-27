@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EFC Racing - Calendar</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/calendar.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header Bar -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo">
+                        <div class="logo-text">EFC</div>
+                    </div>
+                </div>
+                
+                <!-- Countdown Timer -->
+                <div class="countdown-timer">
+                    <div class="timer-label">NEXT RACE</div>
+                    <div class="timer-display" id="timer-display">Loading...</div>
+                </div>
+                
+                <!-- Navigation -->
+                <nav class="main-nav">
+                    <ul>
+                        <li><a href="index.html"><i class="fas fa-home"></i> HOME</a></li>
+                        <li><a href="championship.html"><i class="fas fa-trophy"></i> CHAMPIONSHIP</a></li>
+                        <li><a href="results.html"><i class="fas fa-flag-checkered"></i> RESULTS</a></li>
+                        <li><a href="drivers.html"><i class="fas fa-user"></i> DRIVERS</a></li>
+                        <li><a href="teams.html"><i class="fas fa-car"></i> TEAMS</a></li>
+                        <li><a href="stats.html"><i class="fas fa-chart-bar"></i> STATS</a></li>
+                        <li><a href="calendar.html" class="active"><i class="fas fa-calendar"></i> CALENDAR</a></li>
+                        <li><a href="news.html"><i class="fas fa-newspaper"></i> NEWS</a></li>
+                        <li><a href="hof.html"><i class="fas fa-award"></i> HOF</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="content">
+        <!-- Hero Section -->
+        <section class="calendar-hero">
+            <div class="container">
+                <h1 class="calendar-hero-title">TRACKS & CIRCUITS</h1>
+                <p class="calendar-hero-subtitle">SEASON 2 RACING VENUES</p>
+            </div>
+        </section>
+
+        <!-- Track Spotlight Section -->
+        <section class="track-spotlight">
+            <div class="container">
+                <div class="track-spotlight-grid">
+                    <!-- Main Track Image Display -->
+                    <div class="track-display-main">
+                        <div class="track-display-card">
+                            <div class="track-image-container">
+                                <div class="track-image-wrapper" id="main-track-image">
+                                    <div class="track-image-placeholder">
+                                        <i class="fas fa-flag-checkered"></i>
+                                        <span>Select a track to view circuit layout</span>
+                                    </div>
+                                </div>
+                                <div class="track-image-overlay">
+                                    <div class="track-image-info">
+                                        <h3 class="track-current-name" id="main-track-name">Select a Track</h3>
+                                        <div class="track-current-location" id="main-track-location">
+                                            <i class="fas fa-map-marker-alt"></i> Select a race from the calendar
+                                        </div>
+                                    </div>
+                                    <div class="track-image-actions">
+                                        <button class="track-action-btn" id="zoom-track-btn">
+                                            <i class="fas fa-search-plus"></i> ZOOM
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="track-details-panel">
+                                <div class="track-details-header">
+                                    <h3><i class="fas fa-info-circle"></i> CIRCUIT DETAILS</h3>
+                                    <span class="track-race-status" id="track-race-status">-</span>
+                                </div>
+                                
+                                <div class="track-details-grid">
+                                    <div class="track-stat">
+                                        <div class="track-stat-label">
+                                            <i class="fas fa-ruler"></i> LENGTH
+                                        </div>
+                                        <div class="track-stat-value" id="track-length">-</div>
+                                    </div>
+                                    <div class="track-stat">
+                                        <div class="track-stat-label">
+                                            <i class="fas fa-flag"></i> LAPS
+                                        </div>
+                                        <div class="track-stat-value" id="track-laps">-</div>
+                                    </div>
+                                    <div class="track-stat">
+                                        <div class="track-stat-label">
+                                            <i class="fas fa-road"></i> DISTANCE
+                                        </div>
+                                        <div class="track-stat-value" id="track-distance">-</div>
+                                    </div>
+                                    <div class="track-stat">
+                                        <div class="track-stat-label">
+                                            <i class="fas fa-tachometer-alt"></i> RECORD
+                                        </div>
+                                        <div class="track-stat-value" id="track-record">-</div>
+                                    </div>
+                                    <div class="track-stat">
+                                        <div class="track-stat-label">
+                                            <i class="fas fa-calendar-alt"></i> RACE DATE
+                                        </div>
+                                        <div class="track-stat-value" id="track-date">-</div>
+                                    </div>
+                                    <div class="track-stat">
+                                        <div class="track-stat-label">
+                                            <i class="fas fa-trophy"></i> STATUS
+                                        </div>
+                                        <div class="track-stat-value" id="track-status">-</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="track-description-container">
+                                    <h4><i class="fas fa-file-alt"></i> CIRCUIT DESCRIPTION</h4>
+                                    <p class="track-description" id="track-description">
+                                        Select a track from the calendar below to view detailed circuit information, layout, and specifications.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Race Calendar Sidebar -->
+                    <div class="track-calendar-sidebar">
+                        <div class="season-progress-card">
+                            <div class="season-progress-header">
+                                <h3><i class="fas fa-chart-line"></i> SEASON PROGRESS</h3>
+                            </div>
+                            <div class="season-progress-content">
+                                <div class="progress-visual">
+                                    <div class="progress-circle">
+                                        <div class="circle-background"></div>
+                                        <div class="circle-progress" id="season-progress-circle"></div>
+                                        <div class="circle-text">
+                                            <span class="progress-percent" id="season-progress-percent">0%</span>
+                                            <span class="progress-label">COMPLETE</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="progress-stats">
+                                    <div class="progress-stat">
+                                        <span class="stat-label">RACES COMPLETED</span>
+                                        <span class="stat-value" id="races-completed">0</span>
+                                    </div>
+                                    <div class="progress-stat">
+                                        <span class="stat-label">UPCOMING RACES</span>
+                                        <span class="stat-value" id="upcoming-races">0</span>
+                                    </div>
+                                    <div class="progress-stat">
+                                        <span class="stat-label">TOTAL RACES</span>
+                                        <span class="stat-value" id="total-races">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="quick-calendar-card">
+                            <div class="quick-calendar-header">
+                                <h3><i class="fas fa-calendar-week"></i> QUICK VIEW</h3>
+                            </div>
+                            <div class="quick-calendar-list" id="quick-calendar-list">
+                                <!-- Filled by JavaScript -->
+                                <div class="quick-calendar-loading">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                    <span>Loading races...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Full Track Calendar Section -->
+        <section class="full-track-calendar">
+            <div class="container">
+                <div class="section-header">
+                    <h2><i class="fas fa-map"></i> SEASON 2 TRACKS & CIRCUITS</h2>
+                </div>
+                
+                <!-- Track Grid View -->
+                <div class="track-grid-view">
+                    <div class="track-grid" id="track-grid">
+                        <!-- Filled by JavaScript -->
+                        <div class="track-grid-loading">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>Loading track data...</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Track Stats Footer -->
+                <div class="track-stats-footer">
+                    <div class="track-stat-item">
+                        <div class="stat-icon">
+                            <i class="fas fa-road"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="total-track-length">0 km</div>
+                            <div class="stat-label">TOTAL CIRCUIT LENGTH</div>
+                        </div>
+                    </div>
+                    <div class="track-stat-item">
+                        <div class="stat-icon">
+                            <i class="fas fa-flag"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="total-laps">0</div>
+                            <div class="stat-label">TOTAL SEASON LAPS</div>
+                        </div>
+                    </div>
+                    <div class="track-stat-item">
+                        <div class="stat-icon">
+                            <i class="fas fa-map-marked-alt"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="total-distance">0 km</div>
+                            <div class="stat-label">TOTAL RACE DISTANCE</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Track Gallery Modal (Hidden) -->
+        <div class="track-gallery-modal" id="track-gallery-modal">
+            <div class="modal-overlay"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modal-track-name">Track Gallery</h3>
+                    <button class="modal-close" id="modal-close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="gallery-main-image" id="gallery-main-image">
+                        <!-- Main image will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="footer-logo">EFC RACING</div>
+                    <p class="footer-tagline">Official Statistics Portal</p>
+                </div>
+                <div class="footer-section">
+                    <p>© 2026 European Formula Championship</p>
+                    <p>All rights reserved</p>
+                </div>
+                <div class="footer-section">
+                    <div class="footer-links">
+                        <a href="#" class="footer-link"><i class="fab fa-discord"></i> DISCORD</a>
+                        <a href="#" class="footer-link"><i class="fab fa-youtube"></i> YOUTUBE</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/data-loader.js"></script>
+    <script src="js/calendar.js"></script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EFC Racing - Drivers</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/drivers.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header Bar (EXACT SAME as results.html) -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo">
+                        <div class="logo-text">EFC</div>
+                    </div>
+                </div>
+                
+                <!-- Countdown Timer -->
+                <div class="countdown-timer">
+                    <div class="timer-label">NEXT RACE</div>
+                    <div class="timer-display" id="timer-display">Loading...</div>
+                </div>
+                
+                <!-- Navigation -->
+                <nav class="main-nav">
+                    <ul>
+                        <li><a href="index.html"><i class="fas fa-home"></i> HOME</a></li>
+                        <li><a href="championship.html"><i class="fas fa-trophy"></i> CHAMPIONSHIP</a></li>
+                        <li><a href="results.html"><i class="fas fa-flag-checkered"></i> RESULTS</a></li>
+                        <li><a href="drivers.html" class="active"><i class="fas fa-user"></i> DRIVERS</a></li>
+                        <li><a href="teams.html"><i class="fas fa-car"></i> TEAMS</a></li>
+                        <li><a href="stats.html"><i class="fas fa-chart-bar"></i> STATS</a></li>
+                        <li><a href="calendar.html"><i class="fas fa-calendar"></i> CALENDAR</a></li>
+                        <li><a href="news.html"><i class="fas fa-newspaper"></i> NEWS</a></li>
+                        <li><a href="#"><i class="fas fa-award"></i> HOF</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Drivers Hero Section -->
+    <section class="drivers-hero">
+        <div class="container">
+            <h1 class="drivers-hero-title">Drivers</h1>
+            <p class="drivers-hero-subtitle">Meet the Champions</p>
+            
+            <div class="drivers-search">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="driverSearch" placeholder="Search drivers by name, team, or nationality...">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Drivers Grid Section -->
+    <section class="drivers-grid-section">
+        <div class="container">
+            <div class="drivers-grid" id="driversGrid">
+                <!-- Driver cards will be loaded here via JavaScript -->
+                <div class="drivers-loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading drivers...</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Expanded Driver Modal (hidden by default) -->
+    <div class="driver-modal-overlay" id="driverModalOverlay">
+        <div class="driver-modal" id="driverModal">
+            <div class="driver-modal-header">
+                <h2 id="modalDriverName">Driver Name</h2>
+                <button class="modal-close" id="modalClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="driver-modal-content" id="modalContent">
+                <!-- Modal content will be populated via JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script src="js/data-loader.js"></script>
+    <script src="js/drivers.js"></script>
+    <!-- NO INLINE SCRIPTS - Countdown timer is in drivers.js -->
+</body>
+</html>

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EFC Racing - News</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/news.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header Bar -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo">
+                        <div class="logo-text">EFC</div>
+                    </div>
+                </div>
+                
+                <!-- Countdown Timer -->
+                <div class="countdown-timer">
+                    <div class="timer-label">NEXT RACE</div>
+                    <div class="timer-display" id="timer-display">Loading...</div>
+                </div>
+                
+                <!-- Navigation -->
+                <nav class="main-nav">
+                    <ul>
+                        <li><a href="index.html"><i class="fas fa-home"></i> HOME</a></li>
+                        <li><a href="championship.html"><i class="fas fa-trophy"></i> CHAMPIONSHIP</a></li>
+                        <li><a href="results.html"><i class="fas fa-flag-checkered"></i> RESULTS</a></li>
+                        <li><a href="drivers.html"><i class="fas fa-user"></i> DRIVERS</a></li>
+                        <li><a href="teams.html" ><i class="fas fa-car"></i> TEAMS</a></li>
+                        <li><a href="stats.html"><i class="fas fa-chart-bar"></i> STATS</a></li>
+                        <li><a href="calendar.html"><i class="fas fa-calendar"></i> CALENDAR</a></li>
+                        <li><a href="news.html" class="active"><i class="fas fa-newspaper"></i> NEWS</a></li>
+                        <li><a href="hof.html"><i class="fas fa-award"></i> HOF</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="content">
+        <!-- Hero Section -->
+        <section class="hero news-hero">
+            <div class="container">
+                <h1 class="hero-title">EFC NEWS CENTER</h1>
+                <p class="hero-subtitle">LATEST UPDATES, ARTICLES & MEDIA</p>
+                <!-- Hero stats removed as requested -->
+            </div>
+        </section>
+
+        <!-- News Dashboard -->
+        <section class="dashboard">
+            <div class="container">
+                <div class="news-dashboard-grid">
+                    <!-- YouTube Section -->
+                    <div class="news-card youtube-card">
+                        <div class="card-header">
+                            <h3><i class="fab fa-youtube"></i> LATEST YOUTUBE VIDEO</h3>
+                            <span class="video-date" id="youtube-date">-</span>
+                        </div>
+                        <div class="card-content">
+                            <div class="youtube-player" id="youtube-player">
+                                <div class="youtube-placeholder">
+                                    <i class="fab fa-youtube"></i>
+                                    <p>Loading YouTube content...</p>
+                                </div>
+                            </div>
+                            <div class="video-info">
+                                <h4 class="video-title" id="youtube-title">Loading video title...</h4>
+                                <p class="video-description" id="youtube-description">Video description loading...</p>
+                                <div class="video-stats">
+                                    <span class="video-stat"><i class="fas fa-eye"></i> <span id="youtube-views">-</span> views</span>
+                                    <span class="video-stat"><i class="fas fa-calendar"></i> <span id="youtube-upload-date">-</span></span>
+                                </div>
+                                <a href="#" class="view-more" id="youtube-link" target="_blank">WATCH ON YOUTUBE <i class="fas fa-external-link-alt"></i></a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Driver of the Day - Enhanced -->
+                    <div class="news-card dotd-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-star"></i> DRIVER OF THE DAY</h3>
+                            <span class="dotd-round" id="dotd-round">-</span>
+                        </div>
+                        <div class="card-content">
+                            <div class="dotd-content">
+                                <div class="driver-avatar-large" id="news-dotd-avatar">
+                                    <div class="fallback">DOTD</div>
+                                </div>
+                                <div class="dotd-info">
+                                    <div class="driver-name-large" id="news-dotd-name">Loading...</div>
+                                    <div class="driver-team" id="news-dotd-team">-</div>
+                                    <div class="dotd-stats">
+                                        <div class="dotd-stat">
+                                            <span class="stat-label">Points</span>
+                                            <span class="stat-value" id="news-dotd-points">-</span>
+                                        </div>
+                                        <div class="dotd-stat">
+                                            <span class="stat-label">Wins</span>
+                                            <span class="stat-value" id="news-dotd-wins">-</span>
+                                        </div>
+                                        <div class="dotd-stat">
+                                            <span class="stat-label">Rating</span>
+                                            <span class="stat-value" id="news-dotd-rating">-</span>
+                                        </div>
+                                        <div class="dotd-stat">
+                                            <span class="stat-label">Podiums</span>
+                                            <span class="stat-value" id="news-dotd-podiums">-</span>
+                                        </div>
+                                        <div class="dotd-stat">
+                                            <span class="stat-label">Fastest Laps</span>
+                                            <span class="stat-value" id="news-dotd-fastest-laps">-</span>
+                                        </div>
+                                        <div class="dotd-stat">
+                                            <span class="stat-label">Races</span>
+                                            <span class="stat-value" id="news-dotd-races">-</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="dotd-description" id="news-dotd-description">Latest Driver of the Day performance highlights...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Latest Articles Section -->
+        <section class="articles-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2><i class="fas fa-newspaper"></i> LATEST ARTICLES</h2>
+                </div>
+                
+                <div class="articles-grid" id="articles-grid">
+                    <!-- Articles will be loaded here by JavaScript -->
+                    <div class="loading-articles">
+                        <div class="loading-spinner"></div>
+                        <p>Loading articles...</p>
+                    </div>
+                </div>
+                
+                <div class="load-more-container">
+                    <button class="load-more-btn" id="load-more-articles">LOAD MORE ARTICLES</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Transfer Window Section -->
+        <section class="transfer-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2><i class="fas fa-exchange-alt"></i> TRANSFER WINDOW UPDATES</h2>
+                    <span class="transfer-status" id="transfer-status">CLOSED</span>
+                </div>
+                
+                <div class="transfers-container" id="transfers-container">
+                    <div class="transfer-card">
+                        <div class="transfer-icon">
+                            <i class="fas fa-exchange-alt"></i>
+                        </div>
+                        <div class="transfer-content">
+                            <h4>Transfer Window Status</h4>
+                            <p>Loading transfer window information...</p>
+                            <div class="transfer-date">Last updated: -</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="footer-logo">EFC RACING</div>
+                    <p class="footer-tagline">Official News & Media Portal</p>
+                </div>
+                <div class="footer-section">
+                    <p>© 2026 European Formula Championship</p>
+                    <p>All rights reserved</p>
+                </div>
+                <div class="footer-section">
+                    <div class="footer-links">
+                        <a href="#" class="footer-link" id="discord-link"><i class="fab fa-discord"></i> DISCORD</a>
+                        <a href="#" class="footer-link" id="youtube-footer-link"><i class="fab fa-youtube"></i> YOUTUBE</a>
+                        <a href="#" class="footer-link" id="article-submit-link"><i class="fas fa-edit"></i> SUBMIT ARTICLE</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/data-loader.js"></script>
+    <script src="js/news.js"></script>
+</body>
+</html>

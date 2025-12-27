@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EFC Racing - Statistics</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/stats.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Minimal inline styles - only what's not in CSS files */
+        body {
+            background-attachment: fixed;
+        }
+        
+        .hero {
+            background: linear-gradient(135deg, rgba(5, 5, 12, 0.9) 0%, rgba(26, 26, 46, 0.7) 100%);
+            margin-top: 80px;
+        }
+        
+        .hero::before {
+            z-index: -1;
+        }
+        
+    </style>
+</head>
+<body>
+    <!-- Header Bar - Matching index.html -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo">
+                        <div class="logo-text">EFC</div>
+                    </div>
+                </div>
+                
+                <!-- Countdown Timer -->
+                <div class="countdown-timer">
+                    <div class="timer-label">NEXT RACE</div>
+                    <div class="timer-display" id="timer-display">Loading...</div>
+                </div>
+                
+                <!-- Navigation - Matching index.html -->
+                <nav class="main-nav">
+                    <ul>
+                        <li><a href="index.html"><i class="fas fa-home"></i> HOME</a></li>
+                        <li><a href="championship.html"><i class="fas fa-trophy"></i> CHAMPIONSHIP</a></li>
+                        <li><a href="results.html"><i class="fas fa-flag-checkered"></i> RESULTS</a></li>
+                        <li><a href="drivers.html"><i class="fas fa-user"></i> DRIVERS</a></li>
+                        <li><a href="teams.html" ><i class="fas fa-car"></i> TEAMS</a></li>
+                        <li><a href="stats.html" class="active"><i class="fas fa-chart-bar"></i> STATS</a></li>
+                        <li><a href="calendar.html"><i class="fas fa-calendar"></i> CALENDAR</a></li>
+                        <li><a href="news.html"><i class="fas fa-newspaper"></i> NEWS</a></li>
+                        <li><a href="hof.html"><i class="fas fa-award"></i> HOF</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="content">
+        <!-- Hero Section - Simplified -->
+        <section class="hero" style="padding: 80px 0 40px 0; min-height: auto;">
+            <div class="container">
+                <h1 class="hero-title">STATISTICS CENTER</h1>
+                <p class="hero-subtitle">Comprehensive performance metrics, advanced analytics, and season insights</p>
+            </div>
+        </section>
+
+        <!-- Stats Dashboard Section -->
+        <section class="dashboard">
+            <div class="container" style="width: 100%; max-width: 1400px; margin: 0 auto; padding: 0 2rem;">
+                <h2 class="section-title">STATISTICS DASHBOARD</h2>
+                
+                <!-- Stats Tabs -->
+                <div class="championship-tabs" data-active-tab="driver-stats">
+                    <button class="tab-button active" data-tab="driver-stats">
+                        <i class="fas fa-user"></i>
+                        <span>DRIVER STATISTICS</span>
+                    </button>
+                    <button class="tab-button" data-tab="team-stats">
+                        <i class="fas fa-users"></i>
+                        <span>TEAM STATISTICS</span>
+                    </button>
+                </div>
+
+                <!-- View Options -->
+                <div class="view-options">
+                    <div class="view-option-group">
+                        <div class="option-label">
+                            <i class="fas fa-sort-amount-down"></i>
+                            <span>SORT BY:</span>
+                        </div>
+                        <div class="sort-dropdown">
+                            <select id="sortSelect" class="sort-select">
+                                <option value="points">Points</option>
+                                <option value="rating">Rating</option>
+                                <option value="wins">Wins</option>
+                                <option value="podiums">Podiums</option>
+                                <option value="poles">Poles</option>
+                                <option value="fastestLaps">Fastest Laps</option>
+                                <option value="driverRating">Driver Rating</option>
+                                <option value="consistencyScore">Consistency</option>
+                                <option value="avgFinish">Avg Finish</option>
+                                <option value="avgQuali">Avg Quali</option>
+                                <option value="racesAttended">Races Attended</option>
+                                <option value="ptsPerRace">Points Per Race</option>
+                                <option value="highestFinish">Best Finish</option>
+                                <option value="avgPosGainLoss">Pos Gain/Loss</option>
+                                <option value="podiumRate">Podium Rate</option>
+                                <option value="dnfs">DNFs</option>
+                                <option value="championships">Championships</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="Search drivers or teams...">
+                    </div>
+                </div>
+
+                <!-- Main Table Container -->
+                <div class="stats-container-wrapper">
+                    <!-- Driver Stats Content - INITIALLY VISIBLE -->
+                    <div id="driver-stats-content" class="tab-content active">
+                        <!-- Horizontal Scroll Slider -->
+                        <div class="stats-table-slider-container">
+                            <div class="table-scroll-slider">
+                                <div class="table-scroll-slider-track">
+                                    <div class="table-scroll-slider-thumb" id="driver-scroll-thumb"></div>
+                                </div>
+                            </div>
+                            <div class="scroll-indicator">
+                                <div class="scroll-indicator-left">
+                                    <i class="fas fa-chevron-left"></i>
+                                    <span class="scroll-hint">SCROLL</span>
+                                </div>
+                                <div class="scroll-indicator-right">
+                                    <span class="scroll-hint">ALL COLUMNS</span>
+                                    <i class="fas fa-chevron-right"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Driver Stats Table -->
+                        <div class="stats-table-container">
+                            <div class="stats-table-wrapper" id="driver-table-wrapper">
+                                <table class="stats-table">
+                                    <thead>
+                                        <tr>
+                                            <th class="sticky-col sticky-left">#</th>
+                                            <th class="sticky-col sticky-left sticky-col-name">DRIVER</th>
+                                            <th class="sticky-col sticky-left sticky-col-team">TEAM</th>
+                                            <th>RACES</th>
+                                            <th>POINTS</th>
+                                            <th>PTS/RACE</th>
+                                            <th>AVG FINISH</th>
+                                            <th>AVG QUALI</th>
+                                            <th>WINS</th>
+                                            <th>PODIUMS</th>
+                                            <th>POLES</th>
+                                            <th>RATING</th>
+                                            <th>CONSISTENCY</th>
+                                            <th>FAST LAPS</th>
+                                            <th>BEST FINISH</th>
+                                            <th>POS CHANGE</th>
+                                            <th>PODIUM %</th>
+                                            <th>DNFS</th>
+                                            <th class="sticky-col sticky-right">CHAMPIONSHIPS</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="driver-stats-body">
+                                        <!-- Dynamic content will be inserted here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Team Stats Content - INITIALLY HIDDEN -->
+                    <div id="team-stats-content" class="tab-content">
+                        <!-- Horizontal Scroll Slider -->
+                        <div class="stats-table-slider-container">
+                            <div class="table-scroll-slider">
+                                <div class="table-scroll-slider-track">
+                                    <div class="table-scroll-slider-thumb" id="team-scroll-thumb"></div>
+                                </div>
+                            </div>
+                            <div class="scroll-indicator">
+                                <div class="scroll-indicator-left">
+                                    <i class="fas fa-chevron-left"></i>
+                                    <span class="scroll-hint">SCROLL</span>
+                                </div>
+                                <div class="scroll-indicator-right">
+                                    <span class="scroll-hint">ALL COLUMNS</span>
+                                    <i class="fas fa-chevron-right"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Team Stats Table -->
+                        <div class="stats-table-container">
+                            <div class="stats-table-wrapper" id="team-table-wrapper">
+                                <table class="stats-table">
+                                    <thead>
+                                        <tr>
+                                            <th class="sticky-col sticky-left">#</th>
+                                            <th class="sticky-col sticky-left sticky-col-name">TEAM</th>
+                                            <th>POINTS</th>
+                                            <th>RATING</th>
+                                            <th>WINS</th>
+                                            <th>PODIUMS</th>
+                                            <th>FAST LAPS</th>
+                                            <th>POLES</th>
+                                            <th>DNFS</th>
+                                            <th>PTS/RACE</th>
+                                            <th>PODIUM %</th>
+                                            <th class="sticky-col sticky-right">CHAMPIONSHIPS</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="team-stats-body">
+                                        <!-- Dynamic content will be inserted here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Loading State -->
+                    <div id="loading-state" class="loading-state">
+                        <div class="spinner"></div>
+                        <p>Loading statistics...</p>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div id="empty-state" class="empty-state" style="display: none;">
+                        <i class="fas fa-database"></i>
+                        <p>No statistics data available. Please check back later.</p>
+                    </div>
+                </div>
+                
+                <!-- Division line between stats and metrics -->
+                <div class="stats-divider"></div>
+            </div>
+        </section>
+
+        <!-- Footer Section - Centered and full width -->
+        <section class="latest-content" style="flex-shrink: 0; padding-top: 40px; background: rgba(10, 10, 22, 0.5);">
+            <div class="container" style="width: 100%; max-width: 1400px; margin: 0 auto; padding: 0 2rem;">
+                <div class="content-grid centered">
+                    <!-- Advanced Stats Info - Centered and full width -->
+                    <div class="content-card full-width">
+                        <div class="card-header">
+                            <h3><i class="fas fa-chart-line"></i> ADVANCED STATISTICS</h3>
+                            <span class="article-date">UPDATED DAILY</span>
+                        </div>
+                        <div class="card-content">
+                            <h4 class="article-title">Understanding the Metrics</h4>
+                            <p class="article-excerpt">
+                                Our statistics dashboard provides comprehensive performance analysis for all EFC drivers and teams. 
+                                Metrics include traditional statistics like points and wins, plus advanced analytics such as consistency scores, 
+                                position change averages, and podium rates. All data is calculated from official race results and updated in real-time.
+                            </p>
+                            <p class="article-excerpt">
+                                <strong>Driver Rating:</strong> Composite score based on performance, consistency, and results.<br>
+                                <strong>Consistency Score:</strong> Measures finish position variance across the season.<br>
+                                <strong>Avg Position Change:</strong> Average positions gained/lost per race from starting position.
+                            </p>
+                            <a href="#" class="read-more">EXPLORE METHODOLOGY <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer - Matching index.html -->
+    <footer class="footer" style="flex-shrink: 0;">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="footer-logo">EFC RACING</div>
+                    <p class="footer-tagline">Official Statistics Portal</p>
+                </div>
+                <div class="footer-section">
+                    <p>© 2026 European Formula Championship</p>
+                    <p>All rights reserved</p>
+                </div>
+                <div class="footer-section">
+                    <div class="footer-links">
+                        <a href="#" class="footer-link"><i class="fab fa-discord"></i> DISCORD</a>
+                        <a href="#" class="footer-link"><i class="fab fa-youtube"></i> YOUTUBE</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/data-loader.js"></script>
+    <script src="js/stats.js"></script>
+    
+    <!-- Tab Switching JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tab switching functionality
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Remove active class from all buttons and contents
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabContents.forEach(content => {
+                        content.classList.remove('active');
+                        content.style.display = 'none';
+                    });
+                    
+                    // Add active class to clicked button
+                    button.classList.add('active');
+                    
+                    // Show corresponding content
+                    const tabId = button.getAttribute('data-tab');
+                    const tabContent = document.getElementById(`${tabId}-content`);
+                    if (tabContent) {
+                        tabContent.classList.add('active');
+                        tabContent.style.display = 'flex';
+                    }
+                    
+                    // Update active tab indicator
+                    const championshipTabs = document.querySelector('.championship-tabs');
+                    if (championshipTabs) {
+                        championshipTabs.setAttribute('data-active-tab', tabId);
+                    }
+                    
+                    // Initialize slider for active tab
+                    setTimeout(initSlider, 100);
+                });
+            });
+            
+            // Initialize slider
+            function initSlider() {
+                const activeTab = document.querySelector('.tab-content.active');
+                if (!activeTab) return;
+                
+                const tableWrapper = activeTab.querySelector('.stats-table-wrapper');
+                const scrollThumb = activeTab.querySelector('.table-scroll-slider-thumb');
+                const sliderTrack = activeTab.querySelector('.table-scroll-slider');
+                
+                if (!tableWrapper || !scrollThumb || !sliderTrack) return;
+                
+                // Calculate scroll percentage
+                const updateSlider = () => {
+                    const scrollWidth = tableWrapper.scrollWidth - tableWrapper.clientWidth;
+                    const scrollLeft = tableWrapper.scrollLeft;
+                    const scrollPercent = scrollWidth > 0 ? (scrollLeft / scrollWidth) * 100 : 0;
+                    
+                    const thumbWidth = Math.max(30, (tableWrapper.clientWidth / tableWrapper.scrollWidth) * 100);
+                    scrollThumb.style.width = `${thumbWidth}%`;
+                    scrollThumb.style.left = `${scrollPercent}%`;
+                };
+                
+                // Initialize slider position
+                updateSlider();
+                
+                // Update on scroll
+                tableWrapper.addEventListener('scroll', updateSlider);
+                
+                // Make slider draggable
+                let isDragging = false;
+                let startX;
+                let scrollLeftStart;
+                
+                scrollThumb.addEventListener('mousedown', (e) => {
+                    isDragging = true;
+                    startX = e.clientX;
+                    scrollLeftStart = tableWrapper.scrollLeft;
+                    scrollThumb.style.cursor = 'grabbing';
+                    e.preventDefault();
+                });
+                
+                sliderTrack.addEventListener('mousedown', (e) => {
+                    const rect = sliderTrack.getBoundingClientRect();
+                    const clickX = e.clientX - rect.left;
+                    const percent = clickX / rect.width;
+                    const scrollWidth = tableWrapper.scrollWidth - tableWrapper.clientWidth;
+                    tableWrapper.scrollLeft = percent * scrollWidth;
+                });
+                
+                document.addEventListener('mousemove', (e) => {
+                    if (!isDragging) return;
+                    
+                    const dx = e.clientX - startX;
+                    const sliderWidth = sliderTrack.clientWidth;
+                    const scrollWidth = tableWrapper.scrollWidth - tableWrapper.clientWidth;
+                    const scrollPercent = (dx / sliderWidth) * 100;
+                    
+                    tableWrapper.scrollLeft = scrollLeftStart + (scrollPercent / 100) * scrollWidth;
+                });
+                
+                document.addEventListener('mouseup', () => {
+                    isDragging = false;
+                    scrollThumb.style.cursor = 'grab';
+                });
+                
+                // Update on resize
+                window.addEventListener('resize', updateSlider);
+            }
+            
+            // Initialize with driver stats
+            const driverStatsContent = document.getElementById('driver-stats-content');
+            if (driverStatsContent) {
+                driverStatsContent.style.display = 'flex';
+            }
+            
+            const teamStatsContent = document.getElementById('team-stats-content');
+            if (teamStatsContent) {
+                teamStatsContent.style.display = 'none';
+            }
+            
+            // Initialize slider after a short delay
+            setTimeout(initSlider, 300);
+        });
+    </script>
+</body>
+</html>

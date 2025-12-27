@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EFC Racing - Championship</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/championship.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header Bar -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo">
+                        <div class="logo-text">EFC</div>
+                    </div>
+                </div>
+                
+                <!-- Countdown Timer -->
+                <div class="countdown-timer">
+                    <div class="timer-label">NEXT RACE</div>
+                    <div class="timer-display" id="timer-display">Loading...</div>
+                </div>
+                
+                <!-- Navigation -->
+                <nav class="main-nav">
+                    <ul>
+                        <li><a href="index.html"><i class="fas fa-home"></i> HOME</a></li>
+                        <li><a href="championship.html"class="active"><i class="fas fa-trophy"></i> CHAMPIONSHIP</a></li>
+                        <li><a href="results.html"><i class="fas fa-flag-checkered"></i> RESULTS</a></li>
+                        <li><a href="drivers.html"><i class="fas fa-user"></i> DRIVERS</a></li>
+                        <li><a href="teams.html" ><i class="fas fa-car"></i> TEAMS</a></li>
+                        <li><a href="stats.html"><i class="fas fa-chart-bar"></i> STATS</a></li>
+                        <li><a href="calendar.html"><i class="fas fa-calendar"></i> CALENDAR</a></li>
+                        <li><a href="news.html"><i class="fas fa-newspaper"></i> NEWS</a></li>
+                        <li><a href="hof.html"><i class="fas fa-award"></i> HOF</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="content">
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="container">
+                <h1 class="hero-title">CHAMPIONSHIP STANDINGS</h1>
+            </div>
+        </section>
+
+        <!-- Championship Dashboard -->
+        <section class="dashboard">
+            <div class="container">
+                <!-- Championship Tabs -->
+                <div class="championship-tabs">
+                    <button class="tab-button active" data-tab="drivers">
+                        <i class="fas fa-user"></i> DRIVERS CHAMPIONSHIP
+                    </button>
+                    <button class="tab-button" data-tab="constructors">
+                        <i class="fas fa-car"></i> CONSTRUCTORS CHAMPIONSHIP
+                    </button>
+                </div>
+
+                <!-- Search Bar -->
+                <div class="search-filter-bar">
+                    <div class="search-container">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" 
+                               id="search-input" 
+                               class="search-input" 
+                               placeholder="Search by driver or team...">
+                        <button id="clear-search" class="clear-search-btn" title="Clear search">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="filter-controls">
+                        <div class="results-count" id="results-count">
+                            Showing <span id="shown-count">0</span> of <span id="total-count">0</span> results
+                        </div>
+                    </div>
+                </div>
+
+                <!-- View Options -->
+                <div class="view-options">
+                    <div class="view-option-group">
+                        <span class="option-label">VIEW:</span>
+                        <button class="view-option active" data-view="current">CURRENT STANDINGS</button>
+                        <button class="view-option" data-view="progression">POINTS PROGRESSION</button>
+                    </div>
+                    <div class="season-info">
+                        <span class="season-label">SEASON 2</span>
+                        <span class="round-count" id="current-round">ROUND 0/10</span>
+                    </div>
+                </div>
+
+                <!-- No Results Message -->
+                <div class="no-results-message" id="no-results-message" style="display: none;">
+                    <div class="no-results-content">
+                        <i class="fas fa-search"></i>
+                        <h3>No Results Found</h3>
+                        <p>No drivers or teams match your search. Try a different name or check the spelling.</p>
+                    </div>
+                </div>
+
+                <!-- Drivers Championship Content -->
+                <div class="tab-content active" id="drivers-tab">
+                    <!-- Current Standings View -->
+                    <div class="view-content active" id="drivers-current">
+                        <div class="championship-table">
+                            <div class="table-header">
+                                <div class="header-pos">POS</div>
+                                <div class="header-driver">DRIVER</div>
+                                <div class="header-team">TEAM</div>
+                                <div class="header-points">PTS</div>
+                                <div class="header-wins">WINS</div>
+                                <div class="header-podiums">PODIUMS</div>
+                                <div class="header-difference">GAP</div>
+                            </div>
+                            <div class="table-body" id="drivers-standings-body">
+                                <!-- Filled by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Points Progression View -->
+                    <div class="view-content" id="drivers-progression">
+                        <div class="progression-container">
+                            <div class="progression-header">
+                                <div class="progression-rounds" id="drivers-rounds-header">
+                                    <!-- Rounds will be populated by JavaScript -->
+                                </div>
+                            </div>
+                            <div class="progression-body" id="drivers-progression-body">
+                                <!-- Filled by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Constructors Championship Content -->
+                <div class="tab-content" id="constructors-tab">
+                    <!-- Current Standings View -->
+                    <div class="view-content active" id="constructors-current">
+                        <div class="championship-table constructors-table">
+                            <div class="table-header">
+                                <div class="header-pos">POS</div>
+                                <div class="header-team">TEAM</div>
+                                <div class="header-points">PTS</div>
+                                <div class="header-wins">WINS</div>
+                                <div class="header-podiums">PODIUMS</div>
+                                <div class="header-drivers">DRIVERS</div>
+                                <div class="header-difference">GAP</div>
+                            </div>
+                            <div class="table-body" id="constructors-standings-body">
+                                <!-- Filled by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Points Progression View -->
+                    <div class="view-content" id="constructors-progression">
+                        <div class="progression-container">
+                            <div class="progression-header">
+                                <div class="progression-rounds" id="constructors-rounds-header">
+                                    <!-- Rounds will be populated by JavaScript -->
+                                </div>
+                            </div>
+                            <div class="progression-body" id="constructors-progression-body">
+                                <!-- Filled by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Championship Notes -->
+                <div class="championship-notes">
+                    <h3><i class="fas fa-info-circle"></i> CHAMPIONSHIP NOTES</h3>
+                    <div class="notes-content">
+                        <p><strong>Points System:</strong> P1 = 25, P2 = 18, P3 = 15, P4 = 12, P5 = 10, P6 = 8, P7 = 6, P8 = 4, P9 = 2, P10 = 1</p>
+                        <p><strong>Tie-breakers:</strong> 1. Number of wins, 2. Number of podiums, 3. Number of pole positions, 4. Best finish</p>
+                        <p id="championship-status">Season has not started yet. First race: <span id="next-race-info">TBD</span></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="footer-logo">EFC RACING</div>
+                    <p class="footer-tagline">Official Statistics Portal</p>
+                </div>
+                <div class="footer-section">
+                    <p>© 2026 European Formula Championship</p>
+                    <p>All rights reserved</p>
+                </div>
+                <div class="footer-section">
+                    <div class="footer-links">
+                        <a href="#" class="footer-link"><i class="fab fa-discord"></i> DISCORD</a>
+                        <a href="#" class="footer-link"><i class="fab fa-youtube"></i> YOUTUBE</a>
+                        <a href="https://docs.google.com/spreadsheets/d/1q5C96pUBR5SUsW3lTyF8LFbzkSlPYVa8w-hrW564Rxo/edit?usp=sharing" 
+                           class="footer-link" target="_blank">
+                           <i class="fas fa-file-spreadsheet"></i> DATA SHEET
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/data-loader.js"></script>
+    <script src="js/championship.js"></script>
+</body>
+</html>

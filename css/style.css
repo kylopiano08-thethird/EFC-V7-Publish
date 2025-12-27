@@ -1,0 +1,1572 @@
+/* ===== GOOGLE FONTS ===== */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Exo+2:wght@300;400;500;600;700&display=swap');
+
+/* ===== VARIABLES ===== */
+:root {
+    /* Colors */
+    --primary: #00f7ff;
+    --primary-dark: #00c2cb;
+    --secondary: #ff0055;
+    --secondary-dark: #cc0044;
+    --dark: #0a0a16;
+    --darker: #05050c;
+    --light: #ffffff;
+    --gray: #8a8aa3;
+    --gray-dark: #1a1a2e;
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, #00f7ff 0%, #0066ff 100%);
+    --gradient-secondary: linear-gradient(135deg, #ff0055 0%, #ff4400 100%);
+    --gradient-dark: linear-gradient(135deg, #0a0a16 0%, #1a1a2e 100%);
+    --gradient-card: linear-gradient(135deg, rgba(0, 247, 255, 0.1) 0%, rgba(0, 102, 255, 0.05) 100%);
+    --gradient-pulse: linear-gradient(135deg, rgba(0, 247, 255, 0.15) 0%, rgba(0, 102, 255, 0.1) 100%);
+    
+    /* Team Colors */
+    --mercedes-color: #00D2BE;
+    --ferrari-color: #FF2800;
+    --redbull-blue: #1E41FF;
+    --redbull-red: #C8102E;
+    --mclaren-orange: #FF8700;
+    --mclaren-blue: #00A3E0;
+    --alpine-blue: #0090FF;
+    --alpine-red: #FF0000;
+    --aston-green: #006F62;
+    --aston-yellow: #A3C6A0;
+    --haas-white: #FFFFFF;
+    --haas-red: #A00000;
+    --alfa-red: #A50000;
+    --alfa-white: #FFFFFF;
+    --williams-blue: #005EB8;
+    --williams-white: #FFFFFF;
+    --racingbulls-silver: #C0BFBF;
+    --racingbulls-red: #E30118;
+    --racingbulls-yellow: #FDD900;
+    
+    /* Shadows */
+    --shadow-glow: 0 0 20px rgba(0, 247, 255, 0.3);
+    --shadow-glow-strong: 0 0 30px rgba(0, 247, 255, 0.5);
+    --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.3);
+    
+    /* Typography */
+    --font-heading: 'Orbitron', sans-serif;
+    --font-body: 'Exo 2', sans-serif;
+    
+    /* Spacing */
+    --section-spacing: 4rem;
+    --card-spacing: 2rem;
+    --border-radius: 12px;
+}
+
+/* ===== RESET & BASE STYLES ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-body);
+    background: var(--darker);
+    color: var(--light);
+    line-height: 1.6;
+    overflow-x: hidden;
+    background-image: 
+        radial-gradient(circle at 10% 20%, rgba(0, 247, 255, 0.05) 0%, transparent 20%),
+        radial-gradient(circle at 90% 80%, rgba(255, 0, 85, 0.05) 0%, transparent 20%);
+}
+
+/* ===== TYPOGRAPHY ===== */
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--light) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+h1 {
+    font-size: 3.5rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+h2 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+h3 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+p {
+    margin-bottom: 1rem;
+    color: var(--gray);
+}
+
+/* ===== LAYOUT ===== */
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+/* ===== HEADER & NAVIGATION ===== */
+header {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background: rgba(10, 10, 22, 0.95);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(0, 247, 255, 0.2);
+    z-index: 1000;
+    padding: 1rem 0;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo-section {
+    flex: 1;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.logo-text {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    font-weight: 900;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Countdown Timer in Header */
+.countdown-timer {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.timer-label {
+    font-family: var(--font-heading);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--gray);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.25rem;
+}
+
+.timer-display {
+    font-family: var(--font-heading);
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--primary);
+    text-shadow: 0 0 10px rgba(0, 247, 255, 0.5);
+}
+
+/* Navigation */
+.main-nav {
+    flex: 2;
+}
+
+.main-nav ul {
+    display: flex;
+    list-style: none;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+.main-nav a {
+    color: var(--light);
+    text-decoration: none;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 0.5rem 0.8rem;
+    border-radius: var(--border-radius);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.main-nav a:hover {
+    color: var(--primary);
+    background: rgba(0, 247, 255, 0.1);
+}
+
+.main-nav a.active {
+    color: var(--primary);
+    background: rgba(0, 247, 255, 0.15);
+    box-shadow: var(--shadow-glow);
+}
+
+.main-nav a i {
+    font-size: 0.9rem;
+}
+
+/* ===== HERO SECTION ===== */
+.hero {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: linear-gradient(135deg, rgba(5, 5, 12, 0.9) 0%, rgba(26, 26, 46, 0.7) 100%);
+    position: relative;
+    overflow: hidden;
+    margin-top: 80px;
+    padding: 4rem 0;
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 20% 50%, rgba(0, 247, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 0, 85, 0.1) 0%, transparent 50%);
+    animation: pulse 8s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+.hero-title {
+    font-size: 4.5rem;
+    margin-bottom: 1rem;
+    animation: glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+    from { text-shadow: 0 0 20px rgba(0, 247, 255, 0.5); }
+    to { text-shadow: 0 0 30px rgba(0, 247, 255, 0.8), 0 0 40px rgba(0, 247, 255, 0.6); }
+}
+
+.hero-subtitle {
+    font-size: 1.5rem;
+    color: var(--primary);
+    font-family: var(--font-heading);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 3rem;
+}
+
+.hero-stats {
+    display: flex;
+    justify-content: center;
+    gap: 4rem;
+    margin-top: 3rem;
+}
+
+.hero-stat {
+    text-align: center;
+}
+
+.hero-stat .stat-value {
+    font-family: var(--font-heading);
+    font-size: 3.5rem;
+    font-weight: 900;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+}
+
+.hero-stat .stat-label {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--gray);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* ===== DASHBOARD SECTION ===== */
+.dashboard {
+    padding: var(--section-spacing) 0;
+    position: relative;
+}
+
+.dashboard::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--primary), transparent);
+}
+
+.section-title {
+    font-size: 2.5rem;
+    margin-bottom: 3rem;
+    text-align: center;
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+/* Stat Cards */
+.stat-card {
+    background: var(--gradient-card);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 247, 255, 0.2);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    position: relative;
+    min-height: 280px;
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 247, 255, 0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.stat-card:hover::before {
+    left: 100%;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-glow-strong);
+    border-color: var(--primary);
+}
+
+.stat-card.pulse {
+    background: var(--gradient-pulse);
+    border: 1px solid rgba(0, 247, 255, 0.3);
+    animation: pulse-border 2s infinite;
+}
+
+@keyframes pulse-border {
+    0%, 100% { border-color: rgba(0, 247, 255, 0.3); }
+    50% { border-color: rgba(0, 247, 255, 0.6); }
+}
+
+.card-header {
+    padding: 1.5rem 1.5rem 1rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid rgba(0, 247, 255, 0.1);
+}
+
+.card-header h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0;
+    color: var(--gray);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.card-header h3 i {
+    color: var(--primary);
+}
+
+.card-content {
+    padding: 1.5rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Race Cards */
+.race-name {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+    min-height: 1.8rem;
+}
+
+#prev-gp-name.not-started {
+    font-size: 1.3rem;
+    background: linear-gradient(135deg, #ffa500 0%, #ffcc00 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.race-details {
+    font-size: 0.95rem;
+    color: var(--gray);
+    margin: 1rem 0;
+    line-height: 1.4;
+}
+
+.race-details div {
+    margin-bottom: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+}
+
+.detail-label {
+    font-weight: 600;
+    color: var(--light);
+}
+
+.countdown {
+    font-family: var(--font-heading);
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--primary);
+    text-shadow: 0 0 10px rgba(0, 247, 255, 0.5);
+    margin-top: auto;
+    text-align: center;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(0, 247, 255, 0.1);
+}
+
+.race-result {
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--gray);
+    margin-top: auto;
+    text-align: center;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(0, 247, 255, 0.1);
+}
+
+.race-result.awaiting-start {
+    color: #ffa500;
+    font-weight: 700;
+}
+
+/* Driver of the Day */
+.driver-of-day {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.driver-of-day .driver-avatar {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid rgba(0, 247, 255, 0.3);
+}
+
+.driver-of-day .driver-avatar .fallback {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+.driver-of-day .driver-info {
+    flex: 1;
+}
+
+.driver-of-day .driver-name {
+    font-family: var(--font-heading);
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--light);
+    margin-bottom: 0.25rem;
+}
+
+.driver-of-day .driver-team {
+    display: inline-block;
+    padding: 0.2rem 0.8rem;
+    background: rgba(0, 247, 255, 0.1);
+    color: var(--primary);
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.driver-of-day .driver-rating {
+    font-size: 0.9rem;
+    color: var(--gray);
+}
+
+.driver-of-day .rating-label {
+    color: var(--light);
+    margin-right: 0.5rem;
+}
+
+.driver-of-day .rating-value {
+    color: var(--primary);
+    font-weight: 700;
+    font-family: var(--font-heading);
+}
+
+/* Constructor Info */
+.constructor-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.constructor-logo {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid rgba(0, 247, 255, 0.3);
+    flex-shrink: 0;
+}
+
+.constructor-logo .fallback {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.constructor-details {
+    flex: 1;
+}
+
+.constructor-name {
+    font-family: var(--font-heading);
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--light);
+    margin-bottom: 0.5rem;
+}
+
+.constructor-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.constructor-stat {
+    font-size: 0.9rem;
+    display: flex;
+    justify-content: space-between;
+}
+
+.constructor-stat .stat-label {
+    color: var(--light);
+    font-weight: 600;
+}
+
+.constructor-stat .stat-value {
+    color: var(--primary);
+    font-family: var(--font-heading);
+    font-weight: 700;
+}
+
+/* Standings Tables */
+.standings-table,
+.ratings-table {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.standings-header,
+.ratings-header {
+    display: flex;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(0, 247, 255, 0.1);
+    font-family: var(--font-heading);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--gray);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.header-pos {
+    width: 40px;
+    text-align: center;
+}
+
+.header-driver,
+.header-team {
+    flex: 1;
+    padding: 0 0.5rem;
+}
+
+.header-points,
+.header-rating {
+    width: 60px;
+    text-align: right;
+    padding-right: 0.5rem;
+}
+
+.standings-body,
+.ratings-body {
+    flex: 1;
+}
+
+.standings-row,
+.ratings-row {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(0, 247, 255, 0.05);
+}
+
+.standings-row:last-child,
+.ratings-row:last-child {
+    border-bottom: none;
+}
+
+.standings-row .pos,
+.ratings-row .pos {
+    width: 40px;
+    text-align: center;
+    font-family: var(--font-heading);
+    font-weight: 700;
+    color: var(--primary);
+    font-size: 1rem;
+}
+
+.standings-row .driver,
+.standings-row .team,
+.ratings-row .driver {
+    flex: 1;
+    font-weight: 600;
+    color: var(--light);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0 0.5rem;
+}
+
+.standings-row .points,
+.ratings-row .rating {
+    width: 60px;
+    text-align: right;
+    padding-right: 0.5rem;
+    font-family: var(--font-heading);
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.view-more {
+    display: inline-block;
+    margin-top: 1rem;
+    color: var(--primary);
+    text-decoration: none;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.view-more:hover {
+    color: var(--light);
+    transform: translateX(5px);
+}
+
+/* Calendar */
+.calendar-container {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: 1rem;
+}
+
+.calendar-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.calendar-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(0, 247, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.calendar-item:last-child {
+    border-bottom: none;
+}
+
+.calendar-item:hover {
+    background: rgba(0, 247, 255, 0.05);
+    transform: translateX(5px);
+}
+
+.calendar-item-round {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    color: var(--primary);
+    width: 40px;
+    text-align: center;
+    font-size: 1rem;
+}
+
+.calendar-item-content {
+    flex: 1;
+    padding: 0 0.5rem;
+}
+
+.calendar-item-name {
+    font-weight: 600;
+    color: var(--light);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.95rem;
+    margin-bottom: 0.25rem;
+}
+
+.calendar-item-date {
+    font-size: 0.8rem;
+    color: var(--gray);
+}
+
+.calendar-item-location {
+    font-size: 0.8rem;
+    color: var(--gray);
+    width: 80px;
+    text-align: right;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.calendar-empty {
+    text-align: center;
+    padding: 2rem 0;
+    color: var(--gray);
+    font-size: 0.9rem;
+}
+
+.calendar-empty i {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    color: var(--primary);
+    opacity: 0.5;
+}
+
+/* ===== LATEST CONTENT SECTION ===== */
+.latest-content {
+    padding: var(--section-spacing) 0;
+    background: rgba(10, 10, 22, 0.5);
+}
+
+.content-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+}
+
+.content-card {
+    background: var(--gradient-card);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 247, 255, 0.2);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.content-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-glow-strong);
+    border-color: var(--primary);
+}
+
+.content-card.large {
+    grid-column: 1;
+}
+
+.content-card .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+}
+
+.content-card .card-header h3 {
+    margin-bottom: 0;
+    font-size: 1.1rem;
+    color: var(--gray);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.content-card .card-header h3 i {
+    color: var(--primary);
+}
+
+.article-date,
+.poll-status {
+    font-family: var(--font-heading);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.poll-status {
+    color: #00ff00;
+    background: rgba(0, 255, 0, 0.1);
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+}
+
+.content-card .card-content {
+    padding: 1.5rem;
+}
+
+.article-title {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: var(--light);
+    font-family: var(--font-heading);
+    font-weight: 700;
+}
+
+.article-excerpt {
+    color: var(--gray);
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+.read-more {
+    display: inline-block;
+    color: var(--primary);
+    text-decoration: none;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.read-more:hover {
+    color: var(--light);
+    transform: translateX(5px);
+}
+
+/* Poll */
+.poll-question {
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+    color: var(--light);
+    font-family: var(--font-heading);
+    font-weight: 700;
+}
+
+.poll-options {
+    margin-bottom: 1.5rem;
+}
+
+.poll-option {
+    margin-bottom: 1rem;
+}
+
+.option-text {
+    font-size: 0.9rem;
+    color: var(--light);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.option-bar {
+    height: 6px;
+    background: rgba(0, 247, 255, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.option-fill {
+    height: 100%;
+    background: var(--gradient-primary);
+    border-radius: 3px;
+    transition: width 0.5s ease;
+}
+
+.option-percent {
+    text-align: right;
+    font-family: var(--font-heading);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.poll-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(0, 247, 255, 0.1);
+}
+
+.votes-count {
+    font-size: 0.9rem;
+    color: var(--gray);
+    font-family: var(--font-heading);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.vote-button {
+    background: var(--gradient-primary);
+    color: var(--light);
+    border: none;
+    padding: 0.6rem 1.5rem;
+    border-radius: 6px;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.vote-button:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-glow);
+}
+
+/* ===== FOOTER ===== */
+.footer {
+    background: var(--darker);
+    border-top: 1px solid rgba(0, 247, 255, 0.2);
+    padding: 3rem 0;
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.footer-section {
+    flex: 1;
+}
+
+.footer-logo {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    font-weight: 900;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+}
+
+.footer-tagline {
+    font-size: 0.9rem;
+    color: var(--gray);
+}
+
+.footer-section p {
+    color: var(--gray);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.footer-links {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: flex-end;
+}
+
+.footer-link {
+    color: var(--gray);
+    text-decoration: none;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.footer-link:hover {
+    color: var(--primary);
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 1200px) {
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .content-card.large {
+        grid-column: 1;
+    }
+}
+
+@media (max-width: 992px) {
+    .header-content {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem 0;
+    }
+    
+    .logo-section {
+        order: 1;
+    }
+    
+    .countdown-timer {
+        order: 2;
+    }
+    
+    .main-nav {
+        order: 3;
+        width: 100%;
+    }
+    
+    .main-nav ul {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .hero {
+        margin-top: 140px;
+        min-height: 70vh;
+    }
+    
+    .hero-title {
+        font-size: 3.5rem;
+    }
+    
+    .hero-stats {
+        gap: 2rem;
+    }
+    
+    .hero-stat .stat-value {
+        font-size: 3rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 0 1rem;
+    }
+    
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.2rem;
+    }
+    
+    .hero-stats {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .section-title {
+        font-size: 2rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .main-nav ul {
+        gap: 0.5rem;
+    }
+    
+    .main-nav a {
+        font-size: 0.7rem;
+        padding: 0.4rem 0.6rem;
+    }
+    
+    .footer-content {
+        flex-direction: column;
+        gap: 2rem;
+        text-align: center;
+    }
+    
+    .footer-links {
+        justify-content: center;
+    }
+    
+    .race-name {
+        font-size: 1.3rem;
+    }
+    
+    .countdown {
+        font-size: 1.2rem;
+    }
+    
+    .driver-of-day .driver-avatar {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .driver-of-day .driver-name {
+        font-size: 1.1rem;
+    }
+    
+    .constructor-logo {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .constructor-name {
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-title {
+        font-size: 2rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+    
+    .hero-stat .stat-value {
+        font-size: 2.5rem;
+    }
+    
+    .section-title {
+        font-size: 1.8rem;
+    }
+    
+    .timer-display {
+        font-size: 1rem;
+    }
+    
+    .card-header h3 {
+        font-size: 1rem;
+    }
+    
+    .article-title {
+        font-size: 1.3rem;
+    }
+    
+    .poll-question {
+        font-size: 1.1rem;
+    }
+    
+    .footer-link {
+        font-size: 0.8rem;
+    }
+}
+
+/* ===== LOADING STATES ===== */
+.loading {
+    position: relative;
+    color: transparent !important;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--primary);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--darker);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--gradient-primary);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-dark);
+}
+
+/* ===== TEAM COLOR CLASSES ===== */
+.team-mercedes .driver-avatar,
+.team-mercedes .constructor-logo {
+    border-color: var(--mercedes-color);
+    background: rgba(0, 210, 190, 0.1);
+}
+
+.team-ferrari .driver-avatar,
+.team-ferrari .constructor-logo {
+    border-color: var(--ferrari-color);
+    background: rgba(255, 40, 0, 0.1);
+}
+
+.team-redbull .driver-avatar,
+.team-redbull .constructor-logo {
+    border-color: var(--redbull-blue);
+    background: rgba(30, 65, 255, 0.1);
+}
+
+.team-mclaren .driver-avatar,
+.team-mclaren .constructor-logo {
+    border-color: var(--mclaren-orange);
+    background: rgba(255, 135, 0, 0.1);
+}
+
+.team-alpine .driver-avatar,
+.team-alpine .constructor-logo {
+    border-color: var(--alpine-blue);
+    background: rgba(0, 144, 255, 0.1);
+}
+
+.team-astonmartin .driver-avatar,
+.team-astonmartin .constructor-logo {
+    border-color: var(--aston-green);
+    background: rgba(0, 111, 98, 0.1);
+}
+
+.team-haas .driver-avatar,
+.team-haas .constructor-logo {
+    border-color: var(--haas-white);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.team-alfaromeo .driver-avatar,
+.team-alfaromeo .constructor-logo {
+    border-color: var(--alfa-red);
+    background: rgba(165, 0, 0, 0.1);
+}
+
+.team-williams .driver-avatar,
+.team-williams .constructor-logo {
+    border-color: var(--williams-blue);
+    background: rgba(0, 94, 184, 0.1);
+}
+
+.team-racingbulls .driver-avatar,
+.team-racingbulls .constructor-logo {
+    border-color: var(--racingbulls-silver);
+    background: rgba(192, 191, 191, 0.1);
+}
+
+.team-default .driver-avatar,
+.team-default .constructor-logo {
+    border-color: var(--primary);
+    background: rgba(0, 247, 255, 0.1);
+}
+
+/* Team colors for driver teams */
+.team-mercedes .driver-team { 
+    background: rgba(0, 210, 190, 0.2);
+    color: var(--mercedes-color);
+    border: 1px solid rgba(0, 210, 190, 0.3);
+}
+
+.team-ferrari .driver-team { 
+    background: rgba(255, 40, 0, 0.2);
+    color: var(--ferrari-color);
+    border: 1px solid rgba(255, 40, 0, 0.3);
+}
+
+.team-redbull .driver-team { 
+    background: rgba(30, 65, 255, 0.2);
+    color: var(--redbull-blue);
+    border: 1px solid rgba(30, 65, 255, 0.3);
+}
+
+.team-mclaren .driver-team { 
+    background: rgba(255, 135, 0, 0.2);
+    color: var(--mclaren-orange);
+    border: 1px solid rgba(255, 135, 0, 0.3);
+}
+
+.team-alpine .driver-team { 
+    background: rgba(0, 144, 255, 0.2);
+    color: var(--alpine-blue);
+    border: 1px solid rgba(0, 144, 255, 0.3);
+}
+
+.team-astonmartin .driver-team { 
+    background: rgba(0, 111, 98, 0.2);
+    color: var(--aston-green);
+    border: 1px solid rgba(0, 111, 98, 0.3);
+}
+
+.team-haas .driver-team { 
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--haas-white);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.team-alfaromeo .driver-team { 
+    background: rgba(165, 0, 0, 0.2);
+    color: var(--alfa-red);
+    border: 1px solid rgba(165, 0, 0, 0.3);
+}
+
+.team-williams .driver-team { 
+    background: rgba(0, 94, 184, 0.2);
+    color: var(--williams-blue);
+    border: 1px solid rgba(0, 94, 184, 0.3);
+}
+
+.team-racingbulls .driver-team { 
+    background: rgba(192, 191, 191, 0.25);
+    color: var(--racingbulls-silver);
+    border: 1px solid rgba(192, 191, 191, 0.4);
+}
+
+.team-default .driver-team { 
+    background: rgba(0, 247, 255, 0.2);
+    color: var(--primary);
+    border: 1px solid rgba(0, 247, 255, 0.3);
+}
+/* ===== EXPANDED DRIVER OF THE DAY STYLES ===== */
+.stat-card.driver-of-day-expanded {
+    grid-column: span 1; /* Will be adjusted by JS to fill space */
+    min-height: 320px;
+    display: flex;
+    flex-direction: column;
+}
+
+.driver-of-day-expanded-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    padding: 2rem 1rem;
+    text-align: center;
+    gap: 1.5rem;
+}
+
+.driver-avatar-large {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 4px solid rgba(255, 215, 0, 0.3);
+    background-color: rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
+    position: relative;
+}
+
+.driver-avatar-large::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, #FFD700, #FFA500, #FFD700);
+    z-index: -1;
+    animation: rotate-border 3s linear infinite;
+}
+
+.driver-avatar-large .fallback {
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: 2.5rem;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+}
+
+.driver-name-centered {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--accent-gold);
+    text-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+    letter-spacing: 1px;
+    text-align: center;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 215, 0, 0.1);
+    border-radius: var(--border-radius);
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+/* Make DOTD card take 2 columns on desktop */
+@media (min-width: 992px) {
+    .stat-card.driver-of-day-expanded {
+        grid-column: span 2;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 991px) {
+    .driver-avatar-large {
+        width: 120px;
+        height: 120px;
+    }
+    
+    .driver-name-centered {
+        font-size: 1.7rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .stat-card.driver-of-day-expanded {
+        grid-column: span 1;
+    }
+    
+    .driver-avatar-large {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .driver-name-centered {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .driver-avatar-large {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .driver-avatar-large .fallback {
+        font-size: 1.8rem;
+    }
+    
+    .driver-name-centered {
+        font-size: 1.3rem;
+    }
+}
+
+/* In your existing CSS, find the .main-nav rule and update it: */
+.main-nav {
+    margin-left: 60px; /* Increase this value */
+}
+
+/* And ensure the countdown timer has proper width */
+.countdown-timer {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 220px; /* Ensure it has enough width */
+    text-align: center;
+}
+
+/* Find and update your existing .countdown-timer rules */
+.countdown-timer {
+    position: static; /* Remove absolute positioning */
+    transform: none; /* Remove transform */
+    left: auto; /* Remove left positioning */
+    margin: 0 40px 0 0; /* Add right margin for spacing */
+    min-width: 200px;
+}
+
+/* Update header layout if needed */
+.header-content {
+    display: flex;
+    align-items: center;
+}
+
+.logo-section {
+    margin-right: 20px;
+}
+
+.main-nav {
+    margin-left: auto;
+}

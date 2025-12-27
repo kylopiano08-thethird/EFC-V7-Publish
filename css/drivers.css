@@ -1,0 +1,1023 @@
+/* ===== DRIVERS PAGE STYLES ===== */
+/* This file should NOT contain navbar/header styles */
+
+/* ===== GLOBAL VARIABLES & RESET ===== */
+:root {
+    --primary: #00f7ff;
+    --secondary: #ff0055;
+    --dark: #05050c;
+    --dark-alt: #1a1a2e;
+    --light: #ffffff;
+    --gray: #a0a0c0;
+    --gray-light: #c5c5e0;
+    --section-spacing: 4rem;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+/* Drivers Hero */
+.drivers-hero {
+    min-height: 40vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: linear-gradient(135deg, rgba(5, 5, 12, 0.9) 0%, rgba(26, 26, 46, 0.7) 100%);
+    position: relative;
+    overflow: hidden;
+    margin-top: 80px;
+    padding: 2rem 0;
+}
+
+.drivers-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 20% 50%, rgba(255, 0, 85, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(0, 247, 255, 0.1) 0%, transparent 50%);
+}
+
+.drivers-hero-title {
+    font-size: 4rem;
+    margin-bottom: 0.5rem;
+    animation: glow 2s ease-in-out infinite alternate;
+    color: var(--light);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    font-weight: 900;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+@keyframes glow {
+    from {
+        text-shadow: 0 0 20px rgba(0, 247, 255, 0.5), 0 0 30px rgba(0, 247, 255, 0.3), 0 0 40px rgba(0, 247, 255, 0.2);
+    }
+    to {
+        text-shadow: 0 0 30px rgba(0, 247, 255, 0.8), 0 0 40px rgba(0, 247, 255, 0.5), 0 0 50px rgba(0, 247, 255, 0.3);
+    }
+}
+
+.drivers-hero-subtitle {
+    font-size: 1.2rem;
+    color: var(--primary);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-bottom: 2rem;
+}
+
+.drivers-search {
+    max-width: 700px;
+    margin: 2rem auto 0;
+    position: relative;
+    z-index: 3;
+}
+
+.search-box {
+    position: relative;
+    min-width: 250px;
+}
+
+.search-box i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--primary);
+    font-size: 1.1rem;
+    z-index: 2;
+}
+
+.search-box input {
+    width: 100%;
+    background: rgba(255, 0, 85, 0.1);
+    border: 2px solid rgba(255, 0, 85, 0.3);
+    border-radius: 12px;
+    padding: 1rem 1rem 1rem 3rem;
+    color: var(--light);
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: var(--secondary);
+    background: rgba(255, 0, 85, 0.15);
+    box-shadow: 0 0 20px rgba(255, 0, 85, 0.2);
+}
+
+.search-box input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 500;
+}
+
+/* Drivers Grid Section */
+.drivers-grid-section {
+    padding: var(--section-spacing) 0;
+    background: rgba(5, 5, 12, 0.3);
+}
+
+/* Drivers Grid - 3 cards per row */
+.drivers-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    transition: all 0.3s ease;
+}
+
+/* Driver Card */
+.driver-card {
+    background: linear-gradient(135deg, rgba(10, 10, 25, 0.9) 0%, rgba(20, 20, 40, 0.8) 100%);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+    border: 2px solid rgba(255, 0, 85, 0.15);
+    display: flex;
+    flex-direction: column;
+    height: 500px;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.driver-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(255, 0, 85, 0.1);
+    border-color: rgba(255, 0, 85, 0.3);
+}
+
+/* Card Header */
+.driver-card-header {
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 140px;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.2) 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+}
+
+.driver-avatar-container {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: 3px solid rgba(255, 255, 255, 0.15);
+    flex-shrink: 0;
+}
+
+.driver-avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.driver-avatar-placeholder {
+    font-size: 2.5rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.driver-header-info {
+    flex: 1;
+    margin: 0 1.5rem;
+    min-width: 0;
+}
+
+.driver-position {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--light);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.driver-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--light);
+    margin-bottom: 0.25rem;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.driver-team {
+    font-size: 1rem;
+    color: var(--primary);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+}
+
+.driver-points-badge {
+    background: linear-gradient(135deg, #00f7ff 0%, #ff0055 100%);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+    font-weight: 800;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.driver-points-badge i {
+    color: gold;
+    font-size: 1.2rem;
+}
+
+/* Card Content */
+.driver-card-content {
+    flex: 1;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+.driver-info-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    height: 100%;
+}
+
+.driver-info-left {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.driver-number {
+    font-size: 5rem;
+    font-weight: 900;
+    color: rgba(255, 255, 255, 0.1);
+    line-height: 1;
+    margin-bottom: 1rem;
+}
+
+.driver-nationality {
+    font-size: 1.1rem;
+    color: var(--gray-light);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.driver-rating {
+    font-size: 1.2rem;
+    color: gold;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.driver-info-right {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.driver-stats-mini {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    width: 100%;
+}
+
+.driver-stat-mini {
+    text-align: center;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.driver-stat-label {
+    font-size: 0.8rem;
+    color: var(--gray);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.driver-stat-value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--light);
+    line-height: 1;
+}
+
+/* Driver Modal Overlay */
+.driver-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(5px);
+    z-index: 2000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.driver-modal-overlay.active {
+    display: flex;
+    opacity: 1;
+}
+
+.driver-modal {
+    background: linear-gradient(135deg, rgba(15, 15, 30, 0.95) 0%, rgba(25, 25, 45, 0.9) 100%);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 1200px;
+    max-height: 90vh;
+    overflow-y: auto;
+    border: 2px solid rgba(0, 247, 255, 0.3);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    position: relative;
+}
+
+.driver-modal-header {
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 2px solid rgba(0, 247, 255, 0.2);
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, transparent 100%);
+}
+
+.driver-modal-header h2 {
+    font-size: 2.5rem;
+    color: var(--light);
+    font-weight: 800;
+}
+
+.modal-close {
+    background: rgba(255, 0, 85, 0.2);
+    border: 2px solid rgba(255, 0, 85, 0.3);
+    color: var(--light);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+}
+
+.modal-close:hover {
+    background: rgba(255, 0, 85, 0.4);
+    transform: rotate(90deg);
+}
+
+.driver-modal-content {
+    padding: 2rem;
+}
+
+/* Modal Layout */
+.modal-layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 3rem;
+}
+
+.modal-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.modal-avatar-container {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 12px;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid rgba(0, 247, 255, 0.2);
+}
+
+.modal-avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.modal-info-card {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.info-item {
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.info-item:last-child {
+    margin-bottom: 0;
+}
+
+.info-label {
+    font-size: 0.9rem;
+    color: var(--gray);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+    min-width: 100px;
+}
+
+.info-value {
+    font-size: 1.1rem;
+    color: var(--light);
+    font-weight: 700;
+}
+
+.info-value.team {
+    color: var(--primary);
+}
+
+.info-value.rating {
+    color: gold;
+}
+
+.modal-main {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+/* Modal Stats Grid */
+.modal-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.modal-stat-item {
+    background: rgba(0, 247, 255, 0.05);
+    border: 1px solid rgba(0, 247, 255, 0.1);
+    border-radius: 10px;
+    padding: 1.25rem;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.modal-stat-item:hover {
+    background: rgba(0, 247, 255, 0.1);
+    transform: translateY(-3px);
+    border-color: rgba(0, 247, 255, 0.3);
+}
+
+.modal-stat-label {
+    font-size: 0.9rem;
+    color: var(--gray);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+}
+
+.modal-stat-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--light);
+    line-height: 1;
+}
+
+/* Performance Section */
+.performance-section {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid rgba(255, 0, 85, 0.1);
+}
+
+.performance-title {
+    font-size: 1.3rem;
+    color: var(--light);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid rgba(255, 0, 85, 0.2);
+}
+
+.performance-title i {
+    color: var(--secondary);
+}
+
+.performance-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.performance-item {
+    text-align: center;
+    padding: 1rem;
+    background: rgba(255, 0, 85, 0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 0, 85, 0.1);
+}
+
+.performance-label {
+    font-size: 0.85rem;
+    color: var(--gray);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.performance-value {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--light);
+    line-height: 1;
+}
+
+/* Description */
+.driver-description-box {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    padding: 1.5rem;
+    line-height: 1.6;
+    color: var(--gray-light);
+    font-size: 1rem;
+}
+
+/* Loading State */
+.drivers-loading {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 4rem;
+    color: var(--gray);
+}
+
+.drivers-loading i {
+    font-size: 2.5rem;
+    color: var(--primary);
+    margin-bottom: 1rem;
+    display: block;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.drivers-loading p {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+/* No Results State */
+.no-results {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 4rem;
+    color: var(--gray);
+}
+
+.no-results i {
+    font-size: 3rem;
+    color: var(--secondary);
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.no-results p {
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .drivers-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .modal-layout {
+        grid-template-columns: 250px 1fr;
+        gap: 2rem;
+    }
+    
+    .modal-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .performance-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 992px) {
+    .drivers-hero-title {
+        font-size: 3rem;
+    }
+    
+    .modal-layout {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+    
+    .modal-sidebar {
+        flex-direction: row;
+        align-items: center;
+    }
+    
+    .modal-avatar-container {
+        width: 200px;
+        height: 200px;
+    }
+}
+
+@media (max-width: 768px) {
+    .drivers-hero {
+        min-height: 35vh;
+        padding: 1.5rem 0;
+        margin-top: 120px;
+    }
+    
+    .drivers-hero-title {
+        font-size: 2.5rem;
+        letter-spacing: 2px;
+    }
+    
+    .drivers-hero-subtitle {
+        font-size: 1rem;
+        letter-spacing: 2px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .drivers-search {
+        margin-top: 1rem;
+    }
+    
+    .search-box input {
+        padding: 0.8rem 0.8rem 0.8rem 2.8rem;
+        font-size: 0.95rem;
+    }
+    
+    .search-box i {
+        left: 0.9rem;
+        font-size: 1rem;
+    }
+    
+    .drivers-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .driver-card {
+        height: 450px;
+    }
+    
+    .driver-card-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+    
+    .driver-header-info {
+        margin: 0;
+    }
+    
+    .driver-points-badge {
+        margin-top: 0.5rem;
+    }
+    
+    .driver-info-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .driver-number {
+        font-size: 4rem;
+    }
+    
+    .driver-modal-header h2 {
+        font-size: 2rem;
+    }
+    
+    .modal-stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .performance-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .modal-sidebar {
+        flex-direction: column;
+    }
+    
+    .modal-avatar-container {
+        width: 100%;
+        max-width: 300px;
+        margin: 0 auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .drivers-hero {
+        min-height: 30vh;
+        padding: 1rem 0;
+        margin-top: 140px;
+    }
+    
+    .drivers-hero-title {
+        font-size: 2rem;
+        letter-spacing: 1px;
+    }
+    
+    .drivers-hero-subtitle {
+        font-size: 0.9rem;
+        letter-spacing: 1px;
+    }
+    
+    .drivers-search {
+        margin-top: 1rem;
+    }
+    
+    .search-box input {
+        padding: 0.7rem 0.7rem 0.7rem 2.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .search-box i {
+        left: 0.8rem;
+        font-size: 0.9rem;
+    }
+    
+    .driver-card {
+        height: 420px;
+    }
+    
+    .driver-position {
+        font-size: 2rem;
+    }
+    
+    .driver-name {
+        font-size: 1.3rem;
+    }
+    
+    .driver-points-badge {
+        font-size: 1.3rem;
+        padding: 0.6rem 1.2rem;
+    }
+    
+    .driver-avatar-container {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .driver-avatar-placeholder {
+        font-size: 2rem;
+    }
+    
+    .driver-modal-header {
+        padding: 1.5rem;
+    }
+    
+    .driver-modal-header h2 {
+        font-size: 1.5rem;
+    }
+    
+    .driver-modal-content {
+        padding: 1.5rem;
+    }
+}
+/* Add this to the existing drivers.css file */
+/* Updated Driver Card Header */
+.driver-card-header {
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 140px;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.2) 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+}
+
+/* Remove the driver-position class since we're removing the championship number */
+.driver-position {
+    display: none;
+}
+
+/* Update driver name styling */
+.driver-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--light);
+    margin-bottom: 0.25rem;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Update team name styling */
+.driver-team {
+    font-size: 1rem;
+    color: var(--primary);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+}
+
+/* Update points badge - new positioning */
+.driver-points-badge {
+    background: linear-gradient(135deg, #00f7ff 0%, #ff0055 100%);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+    font-weight: 800;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    margin-top: 0.5rem; /* Add some spacing from team name */
+}
+
+/* Add value badge styling */
+.driver-value-badge {
+    background: linear-gradient(135deg, #ffaa00 0%, #ff5500 100%);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 800;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+    border: 2px solid rgba(255, 170, 0, 0.3);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 3px 10px rgba(255, 170, 0, 0.2);
+    margin-top: 0.5rem;
+}
+
+.driver-value-badge i {
+    color: gold;
+    font-size: 1rem;
+}
+
+/* Update card content layout to accommodate points badge */
+.driver-info-left {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-bottom: 0.5rem;
+}
+
+/* Add this for better header info layout */
+.driver-header-main {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    flex: 1;
+    margin: 0 1.5rem;
+    min-width: 0;
+}
+
+/* Update driver stats mini grid for better spacing */
+.driver-stats-mini {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    width: 100%;
+    margin-top: 1rem;
+}
+
+/* Add responsive adjustments */
+@media (max-width: 768px) {
+    .driver-card-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+    
+    .driver-header-main {
+        margin: 0;
+        align-items: center;
+    }
+    
+    .driver-points-badge {
+        margin-top: 1rem;
+    }
+    
+    .driver-value-badge {
+        margin-top: 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .driver-points-badge {
+        font-size: 1.3rem;
+        padding: 0.6rem 1.2rem;
+    }
+    
+    .driver-value-badge {
+        font-size: 1rem;
+        padding: 0.4rem 0.8rem;
+    }
+}
+/* Add this to the end of your drivers.css file */
+
+/* Socials Section Styles */
+.socials-content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.socials-content a {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.socials-content a:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Social platform specific colors - handled inline in JS */
+
+/* Modal info item for Discord */
+.info-item .fa-discord {
+    color: #7289da;
+}
+
+/* Responsive adjustments for socials */
+@media (max-width: 768px) {
+    .socials-content {
+        justify-content: center;
+    }
+    
+    .socials-content a {
+        padding: 0.5rem 0.8rem;
+        font-size: 0.9rem;
+    }
+}

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EFC Racing - Results</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/results.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header Bar -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo">
+                        <div class="logo-text">EFC</div>
+                    </div>
+                </div>
+                
+                <!-- Countdown Timer -->
+                <div class="countdown-timer">
+                    <div class="timer-label">NEXT RACE</div>
+                    <div class="timer-display" id="timer-display">Loading...</div>
+                </div>
+                
+                <!-- Navigation -->
+                <nav class="main-nav">
+                    <ul>
+                        <li><a href="index.html"><i class="fas fa-home"></i> HOME</a></li>
+                        <li><a href="championship.html"><i class="fas fa-trophy"></i> CHAMPIONSHIP</a></li>
+                        <li><a href="results.html" class="active"><i class="fas fa-flag-checkered"></i> RESULTS</a></li>
+                        <li><a href="drivers.html"><i class="fas fa-user"></i> DRIVERS</a></li>
+                        <li><a href="teams.html" ><i class="fas fa-car"></i> TEAMS</a></li>
+                        <li><a href="stats.html"><i class="fas fa-chart-bar"></i> STATS</a></li>
+                        <li><a href="calendar.html"><i class="fas fa-calendar"></i> CALENDAR</a></li>
+                        <li><a href="news.html"><i class="fas fa-newspaper"></i> NEWS</a></li>
+                        <li><a href="hof.html"><i class="fas fa-award"></i> HOF</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="content">
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="container">
+                <h1 class="hero-title">RACE & QUALIFYING RESULTS</h1>
+            </div>
+        </section>
+
+        <!-- Results Dashboard -->
+        <section class="dashboard">
+            <div class="container">
+                <!-- Results Tabs -->
+                <div class="results-tabs">
+                    <button class="tab-button active" data-tab="race">
+                        <i class="fas fa-flag-checkered"></i> RACE RESULTS
+                    </button>
+                    <button class="tab-button" data-tab="quali">
+                        <i class="fas fa-stopwatch"></i> QUALIFYING RESULTS
+                    </button>
+                </div>
+
+                <!-- Search and Filter Bar -->
+                <div class="search-filter-bar">
+                    <div class="search-container">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" 
+                               id="search-input" 
+                               class="search-input" 
+                               placeholder="Search by driver or team...">
+                        <button id="clear-search" class="clear-search-btn" title="Clear search">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="filter-controls">
+                        <button id="filter-drivers" class="filter-btn active" data-filter="all">
+                            <i class="fas fa-users"></i> All Drivers
+                        </button>
+                        <button id="sort-az" class="sort-btn" data-sort="name-asc">
+                            <i class="fas fa-sort-alpha-down"></i> A-Z
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Season Info -->
+                <div class="season-info">
+                    <div class="season-label">SEASON 2</div>
+                    <div class="round-count" id="current-round">ROUND 0/10</div>
+                    <div class="results-count" id="results-count">
+                        Showing <span id="shown-count">0</span> of <span id="total-count">0</span> drivers
+                    </div>
+                </div>
+
+                <!-- Race Results Content -->
+                <div class="tab-content active" id="race-tab">
+                    <div class="results-container">
+                        <div class="results-body" id="race-results-body">
+                            <!-- Filled by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Qualifying Results Content -->
+                <div class="tab-content" id="quali-tab">
+                    <div class="results-container">
+                        <div class="results-body" id="quali-results-body">
+                            <!-- Filled by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- No Results Message -->
+                <div class="no-results-message" id="no-results-message" style="display: none;">
+                    <div class="no-results-content">
+                        <i class="fas fa-search"></i>
+                        <h3>No Results Found</h3>
+                        <p>No drivers or teams match your search. Try a different name or check the spelling.</p>
+                    </div>
+                </div>
+
+                <!-- Results Notes -->
+                <div class="results-notes">
+                    <h3><i class="fas fa-info-circle"></i> RESULTS NOTES</h3>
+                    <div class="notes-content">
+                        <p><strong>Race Results Format:</strong> Gold = P1, Silver = P2, Bronze = P3, Purple glow = Fastest Lap</p>
+                        <p><strong>Qualifying Results Format:</strong> Gold = P1, Silver = P2, Bronze = P3</p>
+                        <p><strong>Abbreviations:</strong> DNF = Did Not Finish, DNS = Did Not Start, DSQ = Disqualified</p>
+                        <p><strong>Search:</strong> Search by driver name or team name. Use A-Z sort to alphabetize results.</p>
+                        <p id="season-status">Season has not started yet. First race: <span id="next-race-info">TBD</span></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="footer-logo">EFC RACING</div>
+                    <p class="footer-tagline">Official Statistics Portal</p>
+                </div>
+                <div class="footer-section">
+                    <p>© 2026 European Formula Championship</p>
+                    <p>All rights reserved</p>
+                </div>
+                <div class="footer-section">
+                    <div class="footer-links">
+                        <a href="#" class="footer-link"><i class="fab fa-discord"></i> DISCORD</a>
+                        <a href="#" class="footer-link"><i class="fab fa-youtube"></i> YOUTUBE</a>
+                        <a href="https://docs.google.com/spreadsheets/d/1q5C96pUBR5SUsW3lTyF8LFbzkSlPYVa8w-hrW564Rxo/edit?usp=sharing" 
+                           class="footer-link" target="_blank">
+                           <i class="fas fa-file-spreadsheet"></i> DATA SHEET
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/data-loader.js"></script>
+    <script src="js/results.js"></script>
+</body>
+</html>

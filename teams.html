@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EFC Racing - Teams</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/teams.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Team color styling applied via CSS variables */
+        .team-card {
+            background: linear-gradient(135deg, var(--team-primary-20, rgba(0, 247, 255, 0.2)) 0%, var(--team-secondary-10, rgba(255, 255, 255, 0.1)) 100%) !important;
+            border-color: var(--team-primary-60, rgba(0, 247, 255, 0.6)) !important;
+            box-shadow: 0 10px 20px var(--team-primary-20, rgba(0, 247, 255, 0.2)) !important;
+        }
+        
+        .team-card:hover {
+            border-color: var(--team-primary-40, rgba(0, 247, 255, 0.4)) !important;
+            box-shadow: 0 15px 30px var(--team-primary-30, rgba(0, 247, 255, 0.3)) !important;
+        }
+        
+        .team-card-header {
+            background: linear-gradient(135deg, var(--team-primary-30, rgba(0, 247, 255, 0.3)) 0%, var(--team-secondary-15, rgba(255, 255, 255, 0.15)) 100%) !important;
+            border-bottom-color: var(--team-primary-30, rgba(0, 247, 255, 0.3)) !important;
+        }
+        
+        .team-logo-container {
+            border-color: var(--team-primary-60, rgba(0, 247, 255, 0.6)) !important;
+            background: var(--team-primary-20, rgba(0, 247, 255, 0.2)) !important;
+        }
+        
+        .team-logo-placeholder {
+            color: var(--team-primary, #00f7ff) !important;
+        }
+        
+        .team-position {
+            color: var(--team-primary, #00f7ff) !important;
+            text-shadow: 0 2px 4px var(--team-primary-40, rgba(0, 247, 255, 0.4)) !important;
+        }
+        
+        .team-name {
+            color: var(--team-secondary, #ffffff) !important;
+        }
+        
+        .team-points-badge {
+            background: linear-gradient(135deg, var(--team-primary, #00f7ff) 0%, var(--team-secondary, #ffffff) 100%) !important;
+            border-color: var(--team-secondary-50, rgba(255, 255, 255, 0.5)) !important;
+            box-shadow: 0 5px 15px var(--team-primary-30, rgba(0, 247, 255, 0.3)) !important;
+        }
+        
+        .team-points-badge i {
+            color: var(--team-secondary, #ffffff) !important;
+        }
+        
+        .team-car-container {
+            background: linear-gradient(135deg, var(--team-primary-15, rgba(0, 247, 255, 0.15)) 0%, var(--team-secondary-05, rgba(255, 255, 255, 0.05)) 100%) !important;
+        }
+        
+        .team-car-image {
+            filter: drop-shadow(0 10px 20px var(--team-primary-20, rgba(0, 247, 255, 0.2))) 
+                    drop-shadow(0 5px 10px var(--team-secondary-15, rgba(255, 255, 255, 0.15))) !important;
+        }
+        
+        .team-car-placeholder {
+            background: linear-gradient(135deg, var(--team-primary-10, rgba(0, 247, 255, 0.1)) 0%, var(--team-secondary-05, rgba(255, 255, 255, 0.05)) 100%) !important;
+        }
+        
+        .team-car-placeholder i {
+            color: var(--team-primary-30, rgba(0, 247, 255, 0.3)) !important;
+        }
+        
+        /* Expanded content styling */
+        .team-card.expanded .team-expanded-content {
+            border-top-color: var(--team-primary-30, rgba(0, 247, 255, 0.3)) !important;
+            background: linear-gradient(135deg, var(--team-primary-05, rgba(0, 247, 255, 0.05)) 0%, var(--team-secondary-03, rgba(255, 255, 255, 0.03)) 100%) !important;
+        }
+        
+        .section-title {
+            border-bottom-color: var(--team-primary-20, rgba(0, 247, 255, 0.2)) !important;
+        }
+        
+        .section-title i {
+            color: var(--team-primary, #00f7ff) !important;
+        }
+        
+        .stat-item {
+            background: var(--team-primary-08, rgba(0, 247, 255, 0.08)) !important;
+            border-color: var(--team-primary-15, rgba(0, 247, 255, 0.15)) !important;
+        }
+        
+        .stat-item:hover {
+            background: var(--team-primary-15, rgba(0, 247, 255, 0.15)) !important;
+            border-color: var(--team-primary-40, rgba(0, 247, 255, 0.4)) !important;
+        }
+        
+        .stat-label {
+            color: var(--team-primary-80, rgba(0, 247, 255, 0.8)) !important;
+        }
+        
+        .stat-value {
+            color: var(--team-primary, #00f7ff) !important;
+        }
+        
+        .team-description-box {
+            background: var(--team-primary-05, rgba(0, 247, 255, 0.05)) !important;
+            border-color: var(--team-primary-15, rgba(0, 247, 255, 0.15)) !important;
+            color: var(--team-primary-90, rgba(0, 247, 255, 0.9)) !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Bar -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo">
+                        <div class="logo-text">EFC</div>
+                    </div>
+                </div>
+                
+                <!-- Countdown Timer -->
+                <div class="countdown-timer">
+                    <div class="timer-label">NEXT RACE</div>
+                    <div class="timer-display" id="timer-display">Loading...</div>
+                </div>
+                
+                <!-- Navigation -->
+                <nav class="main-nav">
+                    <ul>
+                        <li><a href="index.html"><i class="fas fa-home"></i> HOME</a></li>
+                        <li><a href="championship.html"><i class="fas fa-trophy"></i> CHAMPIONSHIP</a></li>
+                        <li><a href="results.html"><i class="fas fa-flag-checkered"></i> RESULTS</a></li>
+                        <li><a href="drivers.html"><i class="fas fa-user"></i> DRIVERS</a></li>
+                        <li><a href="teams.html" class="active"><i class="fas fa-car"></i> TEAMS</a></li>
+                        <li><a href="stats.html"><i class="fas fa-chart-bar"></i> STATS</a></li>
+                        <li><a href="calendar.html"><i class="fas fa-calendar"></i> CALENDAR</a></li>
+                        <li><a href="news.html"><i class="fas fa-newspaper"></i> NEWS</a></li>
+                        <li><a href="hof.html"><i class="fas fa-award"></i> HOF</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="content">
+        <!-- Hero Section -->
+        <section class="teams-hero">
+            <div class="container">
+                <h1 class="teams-hero-title">TEAMS & CONSTRUCTORS</h1>
+                <p class="teams-hero-subtitle">SEASON 2 CONSTRUCTORS CHAMPIONSHIP</p>
+                <div class="teams-search">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="teams-search-input" placeholder="Search teams by name, driver, or location...">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Teams Grid -->
+        <section class="teams-grid-section">
+            <div class="container">
+                <div class="teams-grid" id="teams-grid">
+                    <!-- Team cards will be dynamically loaded here -->
+                    <div class="teams-loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Loading teams data...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="footer-logo">EFC RACING</div>
+                    <p class="footer-tagline">Official Statistics Portal</p>
+                </div>
+                <div class="footer-section">
+                    <p>© 2026 European Formula Championship</p>
+                    <p>All rights reserved</p>
+                </div>
+                <div class="footer-section">
+                    <div class="footer-links">
+                        <a href="#" class="footer-link"><i class="fab fa-discord"></i> DISCORD</a>
+                        <a href="#" class="footer-link"><i class="fab fa-youtube"></i> YOUTUBE</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/data-loader.js"></script>
+    <script src="js/teams.js"></script>
+</body>
+</html>

@@ -1,0 +1,1488 @@
+/* ===== CALENDAR PAGE SPECIFIC STYLES ===== */
+
+/* Calendar Hero */
+.calendar-hero {
+    min-height: 40vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: linear-gradient(135deg, rgba(5, 5, 12, 0.9) 0%, rgba(26, 26, 46, 0.7) 100%);
+    position: relative;
+    overflow: hidden;
+    margin-top: 80px;
+    padding: 2rem 0;
+}
+
+.calendar-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 20% 50%, rgba(0, 247, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 0, 85, 0.1) 0%, transparent 50%);
+}
+
+.calendar-hero-title {
+    font-size: 4rem;
+    margin-bottom: 0.5rem;
+    animation: glow 2s ease-in-out infinite alternate;
+}
+
+.calendar-hero-subtitle {
+    font-size: 1.2rem;
+    color: var(--primary);
+    font-family: var(--font-heading);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+}
+
+/* Track Spotlight Section */
+.track-spotlight {
+    padding: var(--section-spacing) 0;
+    position: relative;
+}
+
+.track-spotlight::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--primary), transparent);
+}
+
+.track-spotlight-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+/* Main Track Display */
+.track-display-main {
+    background: var(--gradient-card);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 247, 255, 0.2);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+}
+
+.track-display-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.track-image-container {
+    position: relative;
+    height: 400px;
+    overflow: hidden;
+    border-bottom: 1px solid rgba(0, 247, 255, 0.2);
+}
+
+.track-image-wrapper {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.track-image-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    color: var(--gray);
+    text-align: center;
+}
+
+.track-image-placeholder i {
+    font-size: 4rem;
+    color: var(--primary);
+    opacity: 0.5;
+}
+
+.track-image-placeholder span {
+    font-size: 1.1rem;
+    max-width: 300px;
+}
+
+.track-main-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.5);
+    transition: transform 0.5s ease;
+}
+
+.track-image-container:hover .track-main-image {
+    transform: scale(1.02);
+}
+
+.track-image-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.track-image-info {
+    flex: 1;
+}
+
+.track-current-name {
+    font-size: 2.2rem;
+    color: var(--light);
+    margin-bottom: 0.5rem;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.track-current-location {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--primary);
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.track-image-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.track-action-btn {
+    background: rgba(0, 247, 255, 0.2);
+    color: var(--light);
+    border: 1px solid rgba(0, 247, 255, 0.3);
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.track-action-btn:hover {
+    background: rgba(0, 247, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.track-details-panel {
+    padding: 2rem;
+}
+
+.track-details-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(0, 247, 255, 0.1);
+}
+
+.track-details-header h3 {
+    font-size: 1.3rem;
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.track-race-status {
+    font-family: var(--font-heading);
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 0.3rem 1rem;
+    border-radius: 20px;
+    background: rgba(0, 247, 255, 0.1);
+    color: var(--primary);
+}
+
+.track-details-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.track-stat {
+    text-align: center;
+    padding: 1.5rem;
+    background: rgba(0, 247, 255, 0.05);
+    border-radius: var(--border-radius);
+    border: 1px solid rgba(0, 247, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.track-stat:hover {
+    background: rgba(0, 247, 255, 0.1);
+    border-color: rgba(0, 247, 255, 0.3);
+    transform: translateY(-3px);
+}
+
+.track-stat-label {
+    font-size: 0.9rem;
+    color: var(--gray);
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.track-stat-label i {
+    color: var(--primary);
+}
+
+.track-stat-value {
+    font-family: var(--font-heading);
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--light);
+    line-height: 1;
+}
+
+.track-description-container {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: rgba(0, 247, 255, 0.05);
+    border-radius: var(--border-radius);
+    border: 1px solid rgba(0, 247, 255, 0.1);
+}
+
+.track-description-container h4 {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.track-description {
+    line-height: 1.6;
+    color: var(--gray);
+    font-size: 0.95rem;
+}
+
+.track-technical-specs {
+    padding: 1.5rem;
+    background: rgba(0, 247, 255, 0.05);
+    border-radius: var(--border-radius);
+    border: 1px solid rgba(0, 247, 255, 0.1);
+}
+
+.track-technical-specs h4 {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.specs-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.spec-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+}
+
+.spec-label {
+    font-size: 0.9rem;
+    color: var(--gray);
+    font-weight: 600;
+}
+
+.spec-value {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    color: var(--light);
+}
+
+/* Race Calendar Sidebar */
+.track-calendar-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.race-calendar-card {
+    background: var(--gradient-card);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 247, 255, 0.2);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+}
+
+.race-calendar-header {
+    padding: 1.5rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid rgba(0, 247, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.race-calendar-header h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.race-next-badge {
+    font-family: var(--font-heading);
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #ff0055 0%, #ff4400 100%);
+    color: var(--light);
+}
+
+.race-next-content {
+    padding: 1.5rem;
+}
+
+.race-next-name {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--light);
+    margin-bottom: 1rem;
+    line-height: 1.2;
+}
+
+.race-next-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.race-next-detail {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--gray);
+    font-size: 0.95rem;
+}
+
+.race-next-detail i {
+    color: var(--primary);
+    width: 20px;
+}
+
+.race-countdown {
+    text-align: center;
+    padding: 1rem;
+    background: rgba(0, 247, 255, 0.05);
+    border-radius: var(--border-radius);
+    border: 1px solid rgba(0, 247, 255, 0.1);
+}
+
+.countdown-value {
+    font-family: var(--font-heading);
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--primary);
+    margin-bottom: 0.25rem;
+}
+
+.countdown-label {
+    font-size: 0.8rem;
+    color: var(--gray);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Season Progress Card */
+.season-progress-card {
+    background: var(--gradient-card);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 247, 255, 0.2);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+}
+
+.season-progress-header {
+    padding: 1.5rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid rgba(0, 247, 255, 0.1);
+}
+
+.season-progress-header h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.season-progress-content {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.progress-visual {
+    position: relative;
+    width: 150px;
+    height: 150px;
+}
+
+.progress-circle {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.circle-background {
+    width: 100%;
+    height: 100%;
+    border: 8px solid rgba(0, 247, 255, 0.1);
+    border-radius: 50%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.circle-progress {
+    width: 100%;
+    height: 100%;
+    border: 8px solid transparent;
+    border-top: 8px solid var(--primary);
+    border-right: 8px solid var(--primary);
+    border-radius: 50%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: rotate(45deg);
+    transition: transform 1s ease;
+}
+
+.circle-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.progress-percent {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--light);
+    display: block;
+    line-height: 1;
+}
+
+.progress-label {
+    font-size: 0.8rem;
+    color: var(--gray);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: block;
+    margin-top: 0.25rem;
+}
+
+.progress-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+}
+
+.progress-stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background: rgba(0, 247, 255, 0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(0, 247, 255, 0.1);
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: var(--gray);
+    font-weight: 600;
+}
+
+.stat-value {
+    font-family: var(--font-heading);
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+/* Quick Calendar Card */
+.quick-calendar-card {
+    background: var(--gradient-card);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 247, 255, 0.2);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    flex: 1;
+}
+
+.quick-calendar-header {
+    padding: 1.5rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid rgba(0, 247, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.quick-calendar-header h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.view-full-btn {
+    background: transparent;
+    color: var(--primary);
+    border: 1px solid rgba(0, 247, 255, 0.3);
+    padding: 0.3rem 0.8rem;
+    border-radius: 6px;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.view-full-btn:hover {
+    background: rgba(0, 247, 255, 0.1);
+    transform: translateY(-1px);
+}
+
+.quick-calendar-list {
+    padding: 0.5rem;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.quick-calendar-loading {
+    padding: 2rem;
+    text-align: center;
+    color: var(--gray);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.quick-calendar-loading i {
+    font-size: 1.5rem;
+    color: var(--primary);
+}
+
+.quick-calendar-item {
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    background: rgba(0, 247, 255, 0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(0, 247, 255, 0.1);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.quick-calendar-item:hover {
+    background: rgba(0, 247, 255, 0.1);
+    border-color: rgba(0, 247, 255, 0.3);
+    transform: translateX(5px);
+}
+
+.quick-calendar-item.selected {
+    background: rgba(0, 247, 255, 0.15);
+    border-color: var(--primary);
+}
+
+.quick-calendar-round {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    color: var(--primary);
+    font-size: 0.9rem;
+    min-width: 40px;
+}
+
+.quick-calendar-content {
+    flex: 1;
+}
+
+.quick-calendar-name {
+    font-weight: 600;
+    color: var(--light);
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+.quick-calendar-date {
+    font-size: 0.8rem;
+    color: var(--gray);
+}
+
+/* Full Track Calendar Section */
+.full-track-calendar {
+    padding: var(--section-spacing) 0;
+    background: rgba(10, 10, 22, 0.5);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.section-header h2 {
+    font-size: 2.2rem;
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.section-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.search-box {
+    position: relative;
+    min-width: 250px;
+}
+
+.search-box i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gray);
+}
+
+.search-box input {
+    width: 100%;
+    background: rgba(0, 247, 255, 0.1);
+    border: 1px solid rgba(0, 247, 255, 0.2);
+    border-radius: 20px;
+    padding: 0.5rem 1rem 0.5rem 2.5rem;
+    color: var(--light);
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: rgba(0, 247, 255, 0.15);
+}
+
+.view-toggle {
+    display: flex;
+    gap: 0.25rem;
+    background: rgba(0, 247, 255, 0.1);
+    border-radius: 8px;
+    padding: 0.25rem;
+}
+
+.view-toggle-btn {
+    background: transparent;
+    color: var(--gray);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.view-toggle-btn:hover {
+    color: var(--light);
+}
+
+.view-toggle-btn.active {
+    background: var(--gradient-primary);
+    color: var(--light);
+}
+
+/* Track Filters */
+.track-filters {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.filter-group {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    background: rgba(0, 247, 255, 0.1);
+    color: var(--gray);
+    border: 1px solid rgba(0, 247, 255, 0.2);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.filter-btn:hover {
+    background: rgba(0, 247, 255, 0.2);
+    color: var(--light);
+}
+
+.filter-btn.active {
+    background: var(--gradient-primary);
+    color: var(--light);
+    border-color: var(--primary);
+    box-shadow: var(--shadow-glow);
+}
+
+.sort-controls select {
+    background: rgba(0, 247, 255, 0.1);
+    color: var(--light);
+    border: 1px solid rgba(0, 247, 255, 0.2);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.sort-controls select:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+/* Track Grid View */
+.track-grid-view {
+    margin-bottom: 3rem;
+}
+
+.track-grid-view.active {
+    display: block;
+}
+
+.track-list-view {
+    display: none;
+}
+
+.track-list-view.active {
+    display: block;
+}
+
+.track-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.track-grid-loading {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3rem;
+    color: var(--gray);
+}
+
+.track-grid-loading i {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: var(--primary);
+}
+
+.track-card {
+    background: var(--gradient-card);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 247, 255, 0.2);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+}
+
+.track-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-glow-strong);
+    border-color: var(--primary);
+}
+
+.track-card.featured {
+    border: 2px solid var(--primary);
+    box-shadow: var(--shadow-glow);
+}
+
+.track-card.next-race {
+    border: 2px solid #00ff00;
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+}
+
+.track-card.completed {
+    border-left: 4px solid var(--primary);
+}
+
+.track-card.upcoming {
+    border-left: 4px solid var(--secondary);
+}
+
+.track-image-card {
+    height: 200px;
+    position: relative;
+    overflow: hidden;
+}
+
+.track-card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.track-card:hover .track-card-image {
+    transform: scale(1.05);
+}
+
+.track-image-overlay-card {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom, transparent 50%, rgba(0, 0, 0, 0.8));
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1rem;
+}
+
+.track-round-badge {
+    align-self: flex-start;
+    background: rgba(0, 0, 0, 0.7);
+    color: var(--primary);
+    padding: 0.3rem 0.8rem;
+    border-radius: 12px;
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 0.9rem;
+    backdrop-filter: blur(5px);
+}
+
+.track-status-badge {
+    align-self: flex-end;
+    padding: 0.3rem 0.8rem;
+    border-radius: 12px;
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    backdrop-filter: blur(5px);
+}
+
+.track-status-badge.completed {
+    background: rgba(0, 247, 255, 0.2);
+    color: var(--primary);
+}
+
+.track-status-badge.upcoming {
+    background: rgba(255, 0, 85, 0.2);
+    color: var(--secondary);
+}
+
+.track-status-badge.next {
+    background: rgba(0, 255, 0, 0.2);
+    color: #00ff00;
+}
+
+.track-name-overlay {
+    color: var(--light);
+    font-family: var(--font-heading);
+    font-size: 1.3rem;
+    font-weight: 700;
+    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+.track-card-content {
+    padding: 1.5rem;
+}
+
+.track-card-name {
+    font-family: var(--font-heading);
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--light);
+    margin-bottom: 0.5rem;
+}
+
+.track-card-location {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--gray);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.track-card-location i {
+    color: var(--secondary);
+}
+
+.track-card-specs {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.track-card-spec {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    background: rgba(0, 247, 255, 0.05);
+    border-radius: 6px;
+    border: 1px solid rgba(0, 247, 255, 0.1);
+}
+
+.track-card-spec-label {
+    font-size: 0.8rem;
+    color: var(--gray);
+    font-weight: 600;
+}
+
+.track-card-spec-value {
+    font-family: var(--font-heading);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--light);
+}
+
+.track-card-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.track-card-btn {
+    flex: 1;
+    background: rgba(0, 247, 255, 0.1);
+    color: var(--light);
+    border: 1px solid rgba(0, 247, 255, 0.2);
+    padding: 0.5rem;
+    border-radius: 6px;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.track-card-btn:hover {
+    background: rgba(0, 247, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.track-card-btn.primary {
+    background: var(--gradient-primary);
+    border-color: var(--primary);
+}
+
+.track-card-btn.primary:hover {
+    box-shadow: var(--shadow-glow);
+}
+
+/* Track List View */
+.track-list {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--border-radius);
+    border: 1px solid rgba(0, 247, 255, 0.1);
+    overflow: hidden;
+}
+
+.track-list-header {
+    display: grid;
+    grid-template-columns: 50px 2fr 1fr 1fr 1fr 1fr 100px;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-bottom: 1px solid rgba(0, 247, 255, 0.1);
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--gray);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.track-list-item {
+    display: grid;
+    grid-template-columns: 50px 2fr 1fr 1fr 1fr 1fr 100px;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    align-items: center;
+    border-bottom: 1px solid rgba(0, 247, 255, 0.05);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.track-list-item:hover {
+    background: rgba(0, 247, 255, 0.05);
+}
+
+.track-list-item.selected {
+    background: rgba(0, 247, 255, 0.1);
+    border-left: 3px solid var(--primary);
+}
+
+.track-list-round {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    color: var(--primary);
+    font-size: 1rem;
+    text-align: center;
+}
+
+.track-list-name {
+    font-weight: 600;
+    color: var(--light);
+}
+
+.track-list-location {
+    color: var(--gray);
+    font-size: 0.9rem;
+}
+
+.track-list-length {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    color: var(--light);
+}
+
+.track-list-date {
+    color: var(--gray);
+    font-size: 0.9rem;
+}
+
+.track-list-status {
+    font-family: var(--font-heading);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 0.2rem 0.5rem;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.track-list-status.completed {
+    background: rgba(0, 247, 255, 0.1);
+    color: var(--primary);
+}
+
+.track-list-status.upcoming {
+    background: rgba(255, 0, 85, 0.1);
+    color: var(--secondary);
+}
+
+.track-list-status.next {
+    background: rgba(0, 255, 0, 0.1);
+    color: #00ff00;
+}
+
+.track-list-actions {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.track-list-btn {
+    background: transparent;
+    color: var(--gray);
+    border: none;
+    padding: 0.3rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.track-list-btn:hover {
+    color: var(--primary);
+    background: rgba(0, 247, 255, 0.1);
+}
+
+/* Track Stats Footer */
+.track-stats-footer {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    padding: 2rem;
+    background: rgba(0, 247, 255, 0.05);
+    border-radius: var(--border-radius);
+    border: 1px solid rgba(0, 247, 255, 0.1);
+    margin-top: 2rem;
+}
+
+.track-stat-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    background: var(--gradient-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.stat-icon i {
+    font-size: 1.5rem;
+    color: var(--light);
+}
+
+.stat-content {
+    flex: 1;
+}
+
+.stat-value {
+    font-family: var(--font-heading);
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--light);
+    line-height: 1;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: var(--gray);
+    font-weight: 600;
+}
+
+/* Track Gallery Modal */
+.track-gallery-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2000;
+}
+
+.track-gallery-modal.active {
+    display: block;
+}
+
+.modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(10px);
+}
+
+.modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 1200px;
+    height: 90vh;
+    background: var(--darker);
+    border-radius: var(--border-radius);
+    border: 1px solid rgba(0, 247, 255, 0.2);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.modal-header {
+    padding: 1.5rem 2rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-bottom: 1px solid rgba(0, 247, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    font-size: 1.5rem;
+    margin-bottom: 0;
+    color: var(--light);
+}
+
+.modal-close {
+    background: transparent;
+    color: var(--gray);
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.modal-close:hover {
+    color: var(--primary);
+    background: rgba(0, 247, 255, 0.1);
+}
+
+.modal-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 2rem;
+}
+
+.gallery-main-image {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.gallery-main-image img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.gallery-thumbnails {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding: 0.5rem 0;
+}
+
+.gallery-thumbnail {
+    width: 100px;
+    height: 60px;
+    border-radius: 6px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.gallery-thumbnail:hover {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+}
+
+.gallery-thumbnail.active {
+    border-color: var(--primary);
+    box-shadow: var(--shadow-glow);
+}
+
+.gallery-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .track-spotlight-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .track-details-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .track-stats-footer {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 992px) {
+    .calendar-hero-title {
+        font-size: 3rem;
+    }
+    
+    .track-image-container {
+        height: 300px;
+    }
+    
+    .track-current-name {
+        font-size: 1.8rem;
+    }
+    
+    .track-grid {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    }
+    
+    .section-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .section-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .search-box {
+        width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .calendar-hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .calendar-hero-subtitle {
+        font-size: 1rem;
+        letter-spacing: 2px;
+    }
+    
+    .track-details-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .specs-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .track-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .track-filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .filter-group {
+        justify-content: center;
+    }
+    
+    .track-list-header,
+    .track-list-item {
+        grid-template-columns: repeat(4, 1fr);
+        display: none; /* Hide list view on mobile */
+    }
+    
+    .track-list-view {
+        display: none !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .calendar-hero-title {
+        font-size: 2rem;
+    }
+    
+    .track-current-name {
+        font-size: 1.5rem;
+    }
+    
+    .track-stat-value {
+        font-size: 1.5rem;
+    }
+    
+    .progress-percent {
+        font-size: 2rem;
+    }
+    
+    .track-stats-footer {
+        grid-template-columns: 1fr;
+    }
+    
+    .modal-content {
+        width: 95%;
+        height: 95vh;
+    }
+}
