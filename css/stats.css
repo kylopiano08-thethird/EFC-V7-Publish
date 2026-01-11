@@ -69,7 +69,6 @@ header {
 .header-content {
     max-width: 1400px;
     margin: 0 auto;
-    padding: 0 2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -1386,32 +1385,6 @@ body {
 }
 
 /* Timer fix - Add this to your CSS */
-.timer-display {
-    white-space: nowrap !important; /* Prevent line wrapping */
-    min-width: 220px !important; /* Ensure enough width for the timer */
-    display: inline-block !important; /* Keep it as a single line element */
-    text-align: center !important;
-    letter-spacing: 1px !important; /* Better spacing */
-    font-size: 1.1em !important; /* Slightly larger font */
-}
-
-.countdown-timer {
-    min-width: 250px !important; /* Make sure container is wide enough */
-    flex-shrink: 0 !important; /* Don't let it shrink */
-}
-
-/* Force header to have enough space for timer */
-.header-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: nowrap; /* Prevent wrapping */
-}
-
-.countdown-timer {
-    margin: 0 20px;
-    flex-shrink: 0;
-}
 
 /* Make DNFS red - add this to your CSS */
 .dnfs-value {

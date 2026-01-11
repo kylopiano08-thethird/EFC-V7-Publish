@@ -742,3 +742,33 @@
     font-family: 'Montserrat', 'Arial', sans-serif;
     font-weight: 700;
 }
+/* Results Tabs */
+.results-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+    border-bottom: 2px solid rgba(0, 247, 255, 0.2);
+    padding-bottom: 0;
+    margin-top: 0;
+    position: relative;
+}
+
+.results-tabs::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 33.33%; /* Changed from 50% to 33.33% for 3 tabs */
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    transition: transform 0.3s ease;
+    z-index: 2;
+}
+
+.results-tabs[data-active-tab="quali"]::after {
+    transform: translateX(100%);
+}
+
+.results-tabs[data-active-tab="sprint"]::after {
+    transform: translateX(200%);
+}

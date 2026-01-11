@@ -19,6 +19,7 @@ class ResultsManager {
             // Tables
             raceResultsBody: document.getElementById('race-results-body'),
             qualiResultsBody: document.getElementById('quali-results-body'),
+            sprintResultsBody: document.getElementById('sprint-results-body'),
             
             // Search elements
             searchInput: document.getElementById('search-input'),
@@ -35,19 +36,23 @@ class ResultsManager {
         this.driversData = [];
         this.raceResults = {};
         this.qualiResults = {};
+        this.sprintResults = {};
         this.teamMasterMap = {};
         this.totalRaces = 0;
+        this.totalSprints = 0;
         this.completedRaces = 0;
+        this.completedSprints = 0;
         
         // Search state
         this.searchQuery = '';
         this.currentSort = 'championship'; // Only championship sorting
         this.filteredResults = {
             race: [],
-            quali: []
+            quali: [],
+            sprint: []
         };
         
-        // Store championship positions for sorting
+        // Store championship positions for sorting (from race results only)
         this.championshipPositions = {};
     }
 
@@ -69,7 +74,7 @@ class ResultsManager {
             // Process data
             this.processResultsData();
             
-            // Calculate championship positions
+            // Calculate championship positions (race only)
             this.calculateChampionshipPositions();
             
             // Update UI - set default sort button state
@@ -107,7 +112,7 @@ class ResultsManager {
     }
 
     /**
-     * Calculate championship positions from race results
+     * Calculate championship positions from race results only
      * This mimics the logic from the championship page
      */
     calculateChampionshipPositions() {
@@ -116,7 +121,7 @@ class ResultsManager {
         // Clear existing positions
         this.championshipPositions = {};
         
-        // Calculate points for each driver
+        // Calculate points for each driver from RACES ONLY
         const driverPoints = {};
         
         raceResults.forEach(driverResult => {
@@ -135,7 +140,7 @@ class ResultsManager {
                     
                     if (positionMatch) {
                         const position = parseInt(positionMatch[1]);
-                        const points = this.calculatePointsFromPosition(position);
+                        const points = this.calculateRacePointsFromPosition(position);
                         totalPoints += points;
                         
                         // Add point for fastest lap if present
@@ -178,10 +183,9 @@ class ResultsManager {
     }
 
     /**
-     * Calculate points from finishing position
-     * Same as championship page
+     * Calculate race points from finishing position
      */
-    calculatePointsFromPosition(position) {
+    calculateRacePointsFromPosition(position) {
         const pointsSystem = {
             'P1': 25, 'P2': 18, 'P3': 15, 'P4': 12, 'P5': 10,
             'P6': 8, 'P7': 6, 'P8': 4, 'P9': 2, 'P10': 1
@@ -189,6 +193,15 @@ class ResultsManager {
         
         const positionKey = `P${position}`;
         return pointsSystem[positionKey] || 0;
+    }
+
+    /**
+     * Calculate sprint points from finishing position (HALF POINTS)
+     */
+    calculateSprintPointsFromPosition(position) {
+        const racePoints = this.calculateRacePointsFromPosition(position);
+        // SPRINTS ARE HALF POINTS - rounding down
+        return Math.floor(racePoints / 2);
     }
 
     /**
@@ -215,8 +228,13 @@ class ResultsManager {
         const calendar = dataCache.raceCalendar || [];
         this.totalRaces = calendar.length;
         
-        // Get completed races
+        // Get sprint calendar
+        const sprintCalendar = dataCache.sprintCalendar || [];
+        this.totalSprints = sprintCalendar.length;
+        
+        // Get completed races and sprints
         this.completedRaces = this.dataLoader.getCompletedRacesCount();
+        this.completedSprints = dataCache.sprintResults?.completedSprints?.length || 0;
         
         // Get driver master
         const driverMaster = dataCache.driverMaster || [];
@@ -224,6 +242,7 @@ class ResultsManager {
         // Get results
         this.raceResults = dataCache.raceResults || {};
         this.qualiResults = dataCache.qualifyingResults || {};
+        this.sprintResults = dataCache.sprintResults || {};
         
         // Process drivers data
         this.driversData = driverMaster.map(driver => {
@@ -237,7 +256,7 @@ class ResultsManager {
                 teamDisplayName = this.dataLoader.getTeamNameFromCode(teamCode) || teamCode;
             }
             
-            // Get championship position
+            // Get championship position (from race results only)
             const championshipPosition = this.championshipPositions[driver.username] || 999;
             
             return {
@@ -255,6 +274,7 @@ class ResultsManager {
         // Initialize filtered results with all data
         this.filteredResults.race = this.raceResults.results || [];
         this.filteredResults.quali = this.qualiResults.results || [];
+        this.filteredResults.sprint = this.sprintResults.results || [];
     }
 
     /**
@@ -264,7 +284,7 @@ class ResultsManager {
         const calendar = this.dataLoader.dataCache.raceCalendar || [];
         
         if (this.elements.currentRound) {
-            this.elements.currentRound.textContent = `ROUND ${this.completedRaces}/${this.totalRaces}`;
+            this.elements.currentRound.textContent = `ROUND ${this.completedRaces}/${this.totalRaces} | SPRINTS ${this.completedSprints}/${this.totalSprints}`;
         }
         
         // Update next race info
@@ -306,6 +326,7 @@ class ResultsManager {
         this.updateResultsCount();
         this.updateRaceResults();
         this.updateQualiResults();
+        this.updateSprintResults();
     }
 
     /**
@@ -318,6 +339,7 @@ class ResultsManager {
             // No search, show all results
             this.filteredResults.race = this.raceResults.results || [];
             this.filteredResults.quali = this.qualiResults.results || [];
+            this.filteredResults.sprint = this.sprintResults.results || [];
         } else {
             // Filter results based on search query
             this.filteredResults.race = (this.raceResults.results || []).filter(result => {
@@ -335,6 +357,14 @@ class ResultsManager {
                 
                 return driverName.includes(searchQuery) || teamName.includes(searchQuery);
             });
+            
+            this.filteredResults.sprint = (this.sprintResults.results || []).filter(result => {
+                const driverInfo = this.driversData.find(d => d.name === result.driver) || {};
+                const driverName = result.driver.toLowerCase();
+                const teamName = driverInfo.teamDisplayName.toLowerCase();
+                
+                return driverName.includes(searchQuery) || teamName.includes(searchQuery);
+            });
         }
         
         // Apply sorting (always championship sort)
@@ -345,7 +375,7 @@ class ResultsManager {
      * Apply sorting to filtered results - ALWAYS CHAMPIONSHIP SORT
      */
     applySorting() {
-        // Always sort by championship position
+        // Always sort by championship position (race results only)
         const sortFunction = (a, b) => {
             const driverA = this.driversData.find(d => d.name === a.driver) || {};
             const driverB = this.driversData.find(d => d.name === b.driver) || {};
@@ -358,6 +388,7 @@ class ResultsManager {
         
         this.filteredResults.race.sort(sortFunction);
         this.filteredResults.quali.sort(sortFunction);
+        this.filteredResults.sprint.sort(sortFunction);
     }
 
     /**
@@ -368,9 +399,19 @@ class ResultsManager {
         const tabId = activeTab ? activeTab.getAttribute('data-tab') : 'race';
         
         const filteredData = this.filteredResults[tabId];
-        const totalData = tabId === 'race' ? 
-            (this.raceResults.results || []).length : 
-            (this.qualiResults.results || []).length;
+        let totalData = 0;
+        
+        switch(tabId) {
+            case 'race':
+                totalData = (this.raceResults.results || []).length;
+                break;
+            case 'quali':
+                totalData = (this.qualiResults.results || []).length;
+                break;
+            case 'sprint':
+                totalData = (this.sprintResults.results || []).length;
+                break;
+        }
         
         if (this.elements.shownCount) {
             this.elements.shownCount.textContent = filteredData.length;
@@ -602,6 +643,111 @@ class ResultsManager {
             
             rowHTML += `</div>`;
             this.elements.qualiResultsBody.innerHTML += rowHTML;
+        });
+    }
+
+    /**
+     * Update sprint results
+     */
+    updateSprintResults() {
+        if (!this.elements.sprintResultsBody) return;
+        
+        const results = this.filteredResults.sprint;
+        const completedSprints = this.completedSprints;
+        
+        // Clear previous content
+        this.elements.sprintResultsBody.innerHTML = '';
+        
+        if (results.length === 0) {
+            return; // Let no results message handle this
+        }
+        
+        // Create header row
+        let headerHTML = `<div class="results-header-row">`;
+        headerHTML += `<div class="results-name-header">DRIVER</div>`;
+        headerHTML += `<div class="results-total-header">TEAM</div>`;
+        
+        for (let i = 1; i <= this.totalSprints; i++) {
+            headerHTML += `<div class="round-header-cell">S${i}</div>`;
+        }
+        
+        headerHTML += `</div>`;
+        
+        this.elements.sprintResultsBody.innerHTML = headerHTML;
+        
+        // Create results rows
+        results.forEach(driverResult => {
+            const driverName = driverResult.driver;
+            const driverInfo = this.driversData.find(d => d.name === driverName) || {};
+            const driverRounds = driverResult.results || {};
+            
+            // Check if this row should be highlighted (matches search)
+            const shouldHighlight = this.searchQuery !== '' && 
+                (driverName.toLowerCase().includes(this.searchQuery.toLowerCase()) || 
+                 driverInfo.teamDisplayName.toLowerCase().includes(this.searchQuery.toLowerCase()));
+            
+            let rowHTML = `<div class="results-data-row ${shouldHighlight ? 'highlight' : ''}">`;
+            
+            // Driver name column
+            rowHTML += `
+                <div class="results-driver-cell">
+                    <div class="results-driver-number">${driverInfo.number || ''}</div>
+                    <div class="results-driver-name" style="color: ${driverInfo.teamColor}">
+                        ${driverName}
+                    </div>
+                </div>
+            `;
+            
+            // Team column
+            rowHTML += `<div class="results-team-cell">
+                <div class="team-color-small" style="background: ${driverInfo.teamColor}"></div>
+                <div>${driverInfo.teamDisplayName}</div>
+            </div>`;
+            
+            // Sprint columns (note: sprint results use "Sprint X" keys, not "Round X")
+            for (let i = 1; i <= this.totalSprints; i++) {
+                const sprintKey = `Sprint ${i}`;
+                const result = driverRounds[sprintKey] || '';
+                
+                if (i <= completedSprints && result.trim() !== '') {
+                    // Parse position
+                    const positionMatch = result.match(/P(\d+)/i);
+                    
+                    let positionClass = 'position-regular';
+                    let displayText = result;
+                    
+                    // Determine position class
+                    if (positionMatch) {
+                        const position = parseInt(positionMatch[1]);
+                        if (position === 1) positionClass = 'position-gold';
+                        else if (position === 2) positionClass = 'position-silver';
+                        else if (position === 3) positionClass = 'position-bronze';
+                        
+                        displayText = `P${position}`;
+                    } else if (result.includes('DNF')) {
+                        positionClass = 'result-dnf';
+                        displayText = 'DNF';
+                    } else if (result.includes('DNS')) {
+                        positionClass = 'result-dns';
+                        displayText = 'DNS';
+                    } else if (result.includes('DSQ')) {
+                        positionClass = 'result-dsq';
+                        displayText = 'DSQ';
+                    }
+                    
+                    // NO FASTEST LAP IN SPRINTS (sprints don't have fastest lap points)
+                    rowHTML += `<div class="results-round-cell">
+                        <div class="${positionClass}">
+                            ${displayText}
+                        </div>
+                    </div>`;
+                } else {
+                    rowHTML += `<div class="results-round-cell">-</div>`;
+                }
+            }
+            
+            rowHTML += `</div>`;
+            this.elements.sprintResultsBody.innerHTML += rowHTML;
         });
     }
 
@@ -861,7 +1007,9 @@ class ResultsManager {
         ];
         
         this.totalRaces = 10;
+        this.totalSprints = 5;
         this.completedRaces = 5;
+        this.completedSprints = 3;
         
         // Generate mock results
         this.generateMockResults();
@@ -962,9 +1110,41 @@ class ResultsManager {
             ]
         };
         
+        // Mock sprint results (NO fastest lap in sprints)
+        this.sprintResults = {
+            results: [
+                { driver: 'Driver 1', results: { 
+                    'Sprint 1': 'P1', 
+                    'Sprint 2': 'P2', 
+                    'Sprint 3': 'P3'
+                }},
+                { driver: 'Driver 2', results: { 
+                    'Sprint 1': 'P2', 
+                    'Sprint 2': 'P1', 
+                    'Sprint 3': 'DNF'
+                }},
+                { driver: 'Driver 3', results: { 
+                    'Sprint 1': 'P3', 
+                    'Sprint 2': 'P3', 
+                    'Sprint 3': 'P1'
+                }},
+                { driver: 'Driver 4', results: { 
+                    'Sprint 1': 'P4', 
+                    'Sprint 2': 'P5', 
+                    'Sprint 3': 'P2'
+                }},
+                { driver: 'Driver 5', results: { 
+                    'Sprint 1': 'P5', 
+                    'Sprint 2': 'P4', 
+                    'Sprint 3': 'P4'
+                }}
+            ]
+        };
+        
         // Initialize filtered results
         this.filteredResults.race = this.raceResults.results;
         this.filteredResults.quali = this.qualiResults.results;
+        this.filteredResults.sprint = this.sprintResults.results;
     }
 
     /**

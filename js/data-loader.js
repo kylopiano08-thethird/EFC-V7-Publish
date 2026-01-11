@@ -1,6 +1,6 @@
 /**
  * EFC Data Loader - Loads and processes CSV data from Google Sheets
- * Updated with exact sheet structure from documentation and calendar functionality
+ * Updated with Sprint Results and Sprint Calendar support
  */
 
 class EFCDataLoader {
@@ -22,7 +22,9 @@ class EFCDataLoader {
             teamStats: 'TeamStats',
             pointsTable: 'PointsTable',
             hof: 'HOF',
-            media: 'Media'
+            media: 'Media',
+            sprintResults: 'SprintResults',    // Added
+            sprintCalendar: 'SprintCalendar'   // Added
         };
         
         // Team abbreviations mapping
@@ -59,7 +61,7 @@ class EFCDataLoader {
         console.log('Loading homepage data...');
 
         try {
-            // Load all required sheets in parallel
+            // Load all required sheets in parallel - ADDED SPRINT SHEETS
             const [
                 driverMasterData,
                 teamMasterData,
@@ -68,7 +70,9 @@ class EFCDataLoader {
                 raceResultsData,
                 qualifyingResultsData,
                 circuitMasterData,
-                mediaData
+                mediaData,
+                sprintResultsData,
+                sprintCalendarData
             ] = await Promise.all([
                 this.fetchCSV(this.sheetNames.driverMaster),
                 this.fetchCSV(this.sheetNames.teamMaster),
@@ -77,7 +81,9 @@ class EFCDataLoader {
                 this.fetchCSV(this.sheetNames.raceResults),
                 this.fetchCSV(this.sheetNames.qualifyingResults),
                 this.fetchCSV(this.sheetNames.circuitMaster),
-                this.fetchCSV(this.sheetNames.media)
+                this.fetchCSV(this.sheetNames.media),
+                this.fetchCSV(this.sheetNames.sprintResults),    // Added
+                this.fetchCSV(this.sheetNames.sprintCalendar)    // Added
             ]);
 
             // Process each sheet with its specific structure
@@ -89,15 +95,19 @@ class EFCDataLoader {
                 raceResults: this.processRaceResults(raceResultsData),
                 qualifyingResults: this.processQualifyingResults(qualifyingResultsData),
                 circuitMaster: this.processCircuitMaster(circuitMasterData),
-                media: this.processMedia(mediaData)
+                media: this.processMedia(mediaData),
+                sprintResults: this.processSprintResults(sprintResultsData),     // Added
+                sprintCalendar: this.processSprintCalendar(sprintCalendarData)   // Added
             };
 
             console.log('Data loaded successfully:', {
                 drivers: this.dataCache.driverMaster.length,
                 teams: this.dataCache.teamMaster.length,
                 races: this.dataCache.raceCalendar.length,
+                sprints: this.dataCache.sprintCalendar.length,  // Added
                 driverStats: this.dataCache.driverStats.length,
-                completedRaces: this.getCompletedRacesCount()
+                completedRaces: this.getCompletedRacesCount(),
+                completedSprints: this.dataCache.sprintResults?.completedSprints?.length || 0  // Added
             });
             
             return this.dataCache;
@@ -113,11 +123,130 @@ class EFCDataLoader {
                 raceResults: { headers: [], results: [], completedRaces: [] },
                 qualifyingResults: { headers: [], results: [] },
                 circuitMaster: [],
-                media: {}
+                media: {},
+                sprintResults: { headers: [], results: [], completedSprints: [] },  // Added
+                sprintCalendar: []  // Added
             };
         } finally {
             this.isLoading = false;
         }
+    }
+
+    /**
+     * Process SprintResults data - Same structure as RaceResults
+     */
+    processSprintResults(csvText) {
+        if (!csvText) return { 
+            headers: [], 
+            results: [], 
+            completedSprints: [],
+            sprintWinners: {} 
+        };
+        
+        const lines = csvText.split('\n').filter(line => line.trim() !== '');
+        if (lines.length < 4) return { 
+            headers: [], 
+            results: [], 
+            completedSprints: [],
+            sprintWinners: {} 
+        };
+        
+        // Row 1: "x" markers for completed sprints
+        const completionLine = this.parseCSVLine(lines[0]);
+        const completedSprints = [];
+        
+        // Check each sprint column (starting from column B)
+        for (let i = 1; i < completionLine.length; i++) {
+            if (completionLine[i] && completionLine[i].trim().toLowerCase() === 'x') {
+                completedSprints.push(i - 1); // Store index (0-based for Sprint 1)
+            }
+        }
+        
+        // Row 2: Sprint names
+        const sprintNamesLine = this.parseCSVLine(lines[1]);
+        const sprintNames = sprintNamesLine.slice(1);
+        
+        // Row 3: Sprint labels
+        const sprintLabelsLine = this.parseCSVLine(lines[2]);
+        const sprintLabels = sprintLabelsLine.slice(1);
+        
+        // Process driver results (Rows 4-23)
+        const results = [];
+        const sprintWinners = {};
+        
+        for (let i = 3; i < lines.length; i++) {
+            const values = this.parseCSVLine(lines[i]);
+            if (values.length < 1) continue;
+            
+            const driverResult = {
+                driver: values[0] || '',
+                results: {}
+            };
+            
+            // Map each sprint result (columns B-K = Sprints 1-10)
+            for (let sprint = 1; sprint <= Math.min(10, values.length - 1); sprint++) {
+                const result = values[sprint] || '';
+                driverResult.results[`Sprint ${sprint}`] = result;
+                
+                // Check if this is a winner (P1) for completed sprints
+                if (completedSprints.includes(sprint - 1) && result.includes('P1')) {
+                    if (!sprintWinners[`Sprint ${sprint}`]) {
+                        sprintWinners[`Sprint ${sprint}`] = {
+                            driver: values[0],
+                            hasFastestLap: result.includes('Fastest Lap')
+                        };
+                    }
+                }
+            }
+            
+            if (driverResult.driver) {
+                results.push(driverResult);
+            }
+        }
+        
+        return {
+            headers: {
+                sprintNames: sprintNames,
+                sprintLabels: sprintLabels
+            },
+            results: results,
+            completedSprints: completedSprints,
+            sprintWinners: sprintWinners
+        };
+    }
+
+    /**
+     * Process SprintCalendar data - Same structure as RaceCalendar
+     */
+    processSprintCalendar(csvText) {
+        if (!csvText) return [];
+        
+        const lines = csvText.split('\n').filter(line => line.trim() !== '');
+        if (lines.length < 3) return [];
+        
+        const sprints = [];
+        
+        // Row 1: Sprint names
+        const sprintNames = this.parseCSVLine(lines[0]);
+        const dates = this.parseCSVLine(lines[1]);
+        const sprintLabels = this.parseCSVLine(lines[2]);
+        
+        // Start from Column B (index 1)
+        for (let i = 1; i < sprintNames.length; i++) {
+            if (!sprintNames[i] || sprintNames[i].trim() === '') continue;
+            
+            const sprint = {
+                name: sprintNames[i].trim(),
+                sprintNumber: (sprintLabels[i] || `Sprint ${i}`).trim(),
+                date: (dates[i] || '').trim(),
+                time: '',
+                laps: ''
+            };
+            
+            sprints.push(sprint);
+        }
+        
+        return sprints;
     }
 
     /**
@@ -163,17 +292,6 @@ class EFCDataLoader {
             console.error('Error loading calendar data:', error);
             return this.getMockCalendarData();
         }
-    }
-
-    /**
-     * Get processed calendar data
-     */
-    getCalendarData() {
-        if (!this.dataCache.calendarData) {
-            console.warn('Calendar data not loaded yet');
-            return this.getMockCalendarData();
-        }
-        return this.dataCache.calendarData;
     }
 
     /**
