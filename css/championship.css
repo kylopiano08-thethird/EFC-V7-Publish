@@ -1,3 +1,4 @@
+
 /* Championship Page Specific Styles */
 
 /* Move content closer to top */
@@ -184,6 +185,55 @@
 
 .clear-search-btn.show {
     display: block;
+}
+
+/* Graph Controls */
+.graph-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.graph-select {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(0, 247, 255, 0.3);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    outline: none;
+}
+
+.graph-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(0, 247, 255, 0.1);
+}
+
+.graph-btn {
+    background: rgba(0, 247, 255, 0.1);
+    border: 1px solid rgba(0, 247, 255, 0.3);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.3s ease;
+}
+
+.graph-btn:hover {
+    background: rgba(0, 247, 255, 0.2);
+    border-color: var(--primary);
+    transform: translateY(-1px);
 }
 
 .results-count {
@@ -406,6 +456,105 @@
 
 .view-content.active {
     display: block;
+}
+
+/* Graph Container Styles */
+.graph-container {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.graph-wrapper {
+    position: relative;
+    height: 500px;
+    width: 100%;
+}
+
+.graph-wrapper canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.graph-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    min-width: 180px;
+    flex: 1;
+    max-width: 200px;
+}
+
+.legend-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+.legend-item.hidden {
+    opacity: 0.3;
+}
+
+.legend-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.legend-name {
+    font-weight: 600;
+    font-size: 14px;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.legend-team {
+    font-size: 11px;
+    opacity: 0.7;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.legend-toggle {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+}
+
+.legend-toggle:hover {
+    color: var(--primary);
+    background: rgba(0, 247, 255, 0.1);
 }
 
 /* Animations */
@@ -917,6 +1066,14 @@
     .round-points {
         font-size: 13px;
     }
+    
+    .graph-wrapper {
+        height: 400px;
+    }
+    
+    .legend-item {
+        min-width: 160px;
+    }
 }
 
 @media (max-width: 992px) {
@@ -931,6 +1088,11 @@
     
     .filter-controls {
         justify-content: flex-start;
+    }
+    
+    .graph-controls {
+        width: 100%;
+        justify-content: center;
     }
 }
 
@@ -988,5 +1150,19 @@
     
     .round-points {
         font-size: 12px;
+    }
+    
+    .graph-wrapper {
+        height: 300px;
+    }
+    
+    .graph-legend {
+        flex-direction: column;
+        max-height: 300px;
+    }
+    
+    .legend-item {
+        min-width: 100%;
+        max-width: 100%;
     }
 }

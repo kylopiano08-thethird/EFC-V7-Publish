@@ -1,6 +1,10 @@
+
 /**
  * Championship Page Script
  * FIXED VERSION - Properly references global data loader
+ * ADDED GRAPH VIEW FUNCTIONALITY
+ * FIXED: Points progression calculation
+ * FIXED: Sprint points integration (just add to race points)
  */
 
 class ChampionshipManager {
@@ -26,6 +30,12 @@ class ChampionshipManager {
             noResultsMessage: document.getElementById('no-results-message'),
             resultsCount: document.getElementById('results-count'),
             
+            // Graph controls
+            graphControls: document.getElementById('graph-controls'),
+            graphTypeSelect: document.getElementById('graph-type-select'),
+            toggleAllDriversBtn: document.getElementById('toggle-all-drivers'),
+            resetGraphBtn: document.getElementById('reset-graph'),
+            
             // Tables
             driversStandingsBody: document.getElementById('drivers-standings-body'),
             constructorsStandingsBody: document.getElementById('constructors-standings-body'),
@@ -33,6 +43,12 @@ class ChampionshipManager {
             constructorsProgressionBody: document.getElementById('constructors-progression-body'),
             driversRoundsHeader: document.getElementById('drivers-rounds-header'),
             constructorsRoundsHeader: document.getElementById('constructors-rounds-header'),
+            
+            // Graph containers
+            driversChartCanvas: document.getElementById('drivers-chart'),
+            constructorsChartCanvas: document.getElementById('constructors-chart'),
+            driversLegend: document.getElementById('drivers-legend'),
+            constructorsLegend: document.getElementById('constructors-legend'),
             
             // Tabs and views
             tabButtons: document.querySelectorAll('.tab-button'),
@@ -47,12 +63,17 @@ class ChampionshipManager {
         this.constructorsData = [];
         this.filteredConstructorsData = [];
         this.raceResults = {};
-        this.driverRoundPoints = {};
+        this.sprintResults = {};
+        this.driverRoundPoints = {}; // Combined race + sprint points per round
         this.driverRoundFastestLaps = {};
         this.constructorRoundPoints = {};
         this.completedRaces = 0;
         this.totalRaces = 0;
         this.teamMasterMap = {};
+        
+        // Store cumulative points for progression
+        this.driverCumulativePoints = {};
+        this.constructorCumulativePoints = {};
         
         // Search state
         this.searchQuery = '';
@@ -60,6 +81,36 @@ class ChampionshipManager {
         // Current active tab and view
         this.activeTab = 'drivers';
         this.activeView = 'current';
+        
+        // Chart instances
+        this.driversChart = null;
+        this.constructorsChart = null;
+        
+        // Graph settings
+        this.graphSettings = {
+            drivers: {
+                type: 'line',
+                hiddenData: new Set(), // Track hidden drivers/teams
+                showAll: true
+            },
+            constructors: {
+                type: 'line',
+                hiddenData: new Set(),
+                showAll: true
+            }
+        };
+        
+        // Color palette for graphs (extended for many drivers)
+        this.colorPalette = [
+            '#00f7ff', '#9b30ff', '#ff0080', '#ff8000', '#00ff80',
+            '#ffff00', '#0080ff', '#ff4000', '#00ccff', '#cc00ff',
+            '#ffcc00', '#00ffcc', '#ccff00', '#ff00cc', '#00cc80',
+            '#ff8040', '#4080ff', '#ff4080', '#80ff00', '#0080cc'
+        ];
+        
+        // Track driver/constructor colors
+        this.driverColors = {};
+        this.constructorColors = {};
     }
 
     /**
@@ -96,13 +147,19 @@ class ChampionshipManager {
             // Process data
             this.processChampionshipData();
             
-            // Parse race results for progression
-            this.parseRaceResults();
+            // Parse race and sprint results for progression
+            this.parseRaceResultsImproved();
+            
+            // Calculate cumulative points for progression and graphs
+            this.calculateCumulativePoints();
             
             // Update UI
             this.updateChampionshipStats();
             this.updateAllStandings();
             this.updateProgressionViews();
+            
+            // Initialize graphs
+            this.initializeGraphs();
             
             // Start countdown timer
             this.startCountdownTimer();
@@ -163,6 +220,9 @@ class ChampionshipManager {
         // Get completed races
         this.completedRaces = this.dataLoader.getCompletedRacesCount();
         
+        // Get sprint results data (just for reference)
+        this.sprintResults = dataCache.sprintResults || {};
+        
         // Get driver stats
         const driverStats = dataCache.driverStats || [];
         const driverMaster = dataCache.driverMaster || [];
@@ -221,16 +281,21 @@ class ChampionshipManager {
     }
 
     /**
-     * Parse race results to get round-by-round points - FIXED: Proper constructor points
+     * Parse race results to get round-by-round points - IMPROVED VERSION with sprint points
      */
-    parseRaceResults() {
-        const raceResults = this.raceResults;
+    parseRaceResultsImproved() {
+        const dataCache = this.dataLoader.dataCache;
+        const raceResults = dataCache.raceResults || {};
         const results = raceResults.results || [];
         
-        console.log('Parsing race results for', results.length, 'drivers');
+        // Get sprint results to add sprint points to race points
+        const sprintResultsData = dataCache.sprintResults || {};
+        const sprintResults = sprintResultsData.results || [];
+        
+        console.log('Parsing race and sprint results for progression:', results);
         
         // Initialize data structures
-        this.driverRoundPoints = {};
+        this.driverRoundPoints = {}; // Will contain race + sprint points per round
         this.driverRoundFastestLaps = {};
         this.constructorRoundPoints = {};
         
@@ -238,20 +303,29 @@ class ChampionshipManager {
         this.constructorsData.forEach(constructor => {
             if (constructor && constructor.displayName) {
                 this.constructorRoundPoints[constructor.displayName] = {};
+                // Initialize all rounds to 0
                 for (let i = 1; i <= this.totalRaces; i++) {
                     this.constructorRoundPoints[constructor.displayName][`Round ${i}`] = 0;
                 }
             }
         });
         
-        console.log('Initialized constructor points for:', Object.keys(this.constructorRoundPoints));
+        // Also initialize by team code for fallback
+        this.constructorsData.forEach(constructor => {
+            if (constructor && constructor.teamCode) {
+                if (!this.constructorRoundPoints[constructor.teamCode]) {
+                    this.constructorRoundPoints[constructor.teamCode] = {};
+                    for (let i = 1; i <= this.totalRaces; i++) {
+                        this.constructorRoundPoints[constructor.teamCode][`Round ${i}`] = 0;
+                    }
+                }
+            }
+        });
         
-        // Parse each driver's results
+        // First parse race results
         results.forEach(driverResult => {
             const driverName = driverResult.driver;
             const driverRounds = driverResult.results || {};
-            
-            console.log(`Processing driver: ${driverName}`);
             
             // Get driver info to find their team
             const driverInfo = this.driversData.find(d => d.name === driverName);
@@ -260,13 +334,10 @@ class ChampionshipManager {
                 return;
             }
             
-            const teamName = driverInfo.teamDisplayName;
-            console.log(`Driver ${driverName} is in team: ${teamName}`);
+            const teamDisplayName = driverInfo.teamDisplayName;
+            const teamCode = driverInfo.teamCode;
             
-            if (!teamName || teamName === 'No Team') {
-                console.log(`Driver ${driverName} has no valid team`);
-                return;
-            }
+            console.log(`Processing driver: ${driverName}, Team: ${teamDisplayName} (${teamCode})`);
             
             // Initialize driver structures
             if (!this.driverRoundPoints[driverName]) {
@@ -275,12 +346,20 @@ class ChampionshipManager {
             }
             
             // Process each round
-            Object.keys(driverRounds).forEach(roundKey => {
-                const roundResult = driverRounds[roundKey];
-                if (!roundResult || roundResult.trim() === '') return;
+            Object.entries(driverRounds).forEach(([roundKey, roundResult]) => {
+                if (!roundResult || roundResult.trim() === '' || roundResult === 'DNS' || roundResult === 'DNF') {
+                    return;
+                }
                 
-                // Calculate points for this round
-                let points = 0;
+                // Extract round number from key (e.g., "Round 1" -> 1)
+                const roundMatch = roundKey.match(/Round\s*(\d+)/i);
+                if (!roundMatch) return;
+                
+                const roundNum = parseInt(roundMatch[1]);
+                if (roundNum > this.totalRaces) return;
+                
+                // Calculate race points for this round
+                let racePoints = 0;
                 let hasFastestLap = false;
                 
                 // Check for fastest lap
@@ -288,56 +367,251 @@ class ChampionshipManager {
                     hasFastestLap = true;
                 }
                 
-                // Extract position and calculate points
+                // Extract position
                 const positionMatch = roundResult.match(/P(\d+)/i);
                 if (positionMatch) {
                     const position = parseInt(positionMatch[1]);
-                    points = this.calculatePointsFromPosition(position);
+                    racePoints = this.calculatePointsFromPosition(position);
                     
                     // Add fastest lap point
-                    if (hasFastestLap) {
-                        points += 1;
+                    if (hasFastestLap && racePoints > 0) {
+                        racePoints += 1;
                     }
                 }
                 
-                console.log(`${driverName} in ${roundKey}: ${points} points (${roundResult})`);
+                // Also check for DNF with position (e.g., "P5 DNF")
+                if (roundResult.includes('DNF') && positionMatch) {
+                    const position = parseInt(positionMatch[1]);
+                    // Check if position qualifies for points before DNF
+                    racePoints = this.calculatePointsFromPosition(position);
+                }
                 
-                // Store driver points
-                this.driverRoundPoints[driverName][roundKey] = points;
+                // Store race points (we'll add sprint points below)
+                this.driverRoundPoints[driverName][roundKey] = racePoints;
                 this.driverRoundFastestLaps[driverName][roundKey] = hasFastestLap;
                 
-                // Add to constructor points - FIXED: Find correct constructor name
-                let constructorName = teamName;
+                console.log(`${driverName} - ${roundKey}: ${roundResult} = ${racePoints} race points`);
                 
-                // Try to find the constructor by display name
-                if (!this.constructorRoundPoints[constructorName]) {
-                    // Try alternative names
-                    const constructor = this.constructorsData.find(c => 
-                        c.displayName === constructorName || 
-                        c.displayName.includes(constructorName) ||
-                        constructorName.includes(c.displayName)
-                    );
-                    
-                    if (constructor) {
-                        constructorName = constructor.displayName;
-                    }
-                }
-                
-                // Initialize constructor round if needed
-                if (this.constructorRoundPoints[constructorName]) {
-                    if (!this.constructorRoundPoints[constructorName][roundKey]) {
-                        this.constructorRoundPoints[constructorName][roundKey] = 0;
-                    }
-                    this.constructorRoundPoints[constructorName][roundKey] += points;
-                    
-                    console.log(`Added ${points} points to ${constructorName} in ${roundKey}. Total: ${this.constructorRoundPoints[constructorName][roundKey]}`);
-                } else {
-                    console.log(`Constructor ${constructorName} not found in constructorRoundPoints`);
-                }
+                // Add race points to constructor points
+                this.addToConstructorPoints(teamDisplayName, teamCode, roundKey, racePoints);
             });
         });
         
-        console.log('Constructor round points after parsing:', this.constructorRoundPoints);
+        // Now parse sprint results and add them to the corresponding round
+        sprintResults.forEach(driverResult => {
+            const driverName = driverResult.driver;
+            const driverSprints = driverResult.results || {};
+            
+            // Get driver info to find their team
+            const driverInfo = this.driversData.find(d => d.name === driverName);
+            if (!driverInfo) {
+                console.log(`Driver ${driverName} not found in driversData for sprint results`);
+                return;
+            }
+            
+            const teamDisplayName = driverInfo.teamDisplayName;
+            const teamCode = driverInfo.teamCode;
+            
+            console.log(`Processing sprint results for driver: ${driverName}`);
+            
+            // Process each sprint
+            Object.entries(driverSprints).forEach(([sprintKey, sprintResult]) => {
+                if (!sprintResult || sprintResult.trim() === '' || sprintResult === 'DNS' || sprintResult === 'DNF') {
+                    return;
+                }
+                
+                // Extract sprint number from key (e.g., "Sprint 1" -> 1)
+                const sprintMatch = sprintKey.match(/Sprint\s*(\d+)/i);
+                if (!sprintMatch) return;
+                
+                const sprintNum = parseInt(sprintMatch[1]);
+                
+                // Calculate sprint points
+                let sprintPoints = 0;
+                let hasFastestLap = false;
+                
+                // Check for fastest lap
+                if (sprintResult.includes('Fastest Lap') || sprintResult.includes('FL')) {
+                    hasFastestLap = true;
+                }
+                
+                // Extract position
+                const positionMatch = sprintResult.match(/P(\d+)/i);
+                if (positionMatch) {
+                    const position = parseInt(positionMatch[1]);
+                    sprintPoints = this.calculateSprintPointsFromPosition(position);
+                    
+                    // Add fastest lap point (if applicable for sprints)
+                    if (hasFastestLap && sprintPoints > 0) {
+                        sprintPoints += 1;
+                    }
+                }
+                
+                // Also check for DNF with position
+                if (sprintResult.includes('DNF') && positionMatch) {
+                    const position = parseInt(positionMatch[1]);
+                    sprintPoints = this.calculateSprintPointsFromPosition(position);
+                }
+                
+                // Add sprint points to the corresponding round
+                // Sprint 1 points get added to Round 1 total, etc.
+                const roundKey = `Round ${sprintNum}`;
+                
+                if (this.driverRoundPoints[driverName] && this.driverRoundPoints[driverName][roundKey] !== undefined) {
+                    this.driverRoundPoints[driverName][roundKey] += sprintPoints;
+                    console.log(`${driverName} - ${sprintKey}: ${sprintResult} = ${sprintPoints} sprint points added to ${roundKey}`);
+                } else if (sprintNum <= this.totalRaces) {
+                    // Initialize if not exists
+                    if (!this.driverRoundPoints[driverName]) {
+                        this.driverRoundPoints[driverName] = {};
+                    }
+                    this.driverRoundPoints[driverName][roundKey] = sprintPoints;
+                    console.log(`${driverName} - ${sprintKey}: ${sprintResult} = ${sprintPoints} sprint points (new entry for ${roundKey})`);
+                }
+                
+                // Add sprint points to constructor points
+                this.addToConstructorPoints(teamDisplayName, teamCode, roundKey, sprintPoints);
+            });
+        });
+        
+        // Debug: Log parsed data
+        console.log('Parsed driver total points (race + sprint):', this.driverRoundPoints);
+        console.log('Parsed constructor total points (race + sprint):', this.constructorRoundPoints);
+        
+        // Calculate total points from round points for verification
+        Object.entries(this.driverRoundPoints).forEach(([driverName, rounds]) => {
+            const totalFromRounds = Object.values(rounds).reduce((sum, points) => sum + (points || 0), 0);
+            const driverData = this.driversData.find(d => d.name === driverName);
+            if (driverData) {
+                console.log(`${driverName}: Standings points = ${driverData.points}, Sum of round points = ${totalFromRounds}`);
+            }
+        });
+    }
+
+    /**
+     * Add points to constructor points with multiple fallback options
+     */
+    addToConstructorPoints(teamDisplayName, teamCode, roundKey, points) {
+        if (!teamDisplayName || teamDisplayName === 'No Team' || !points) {
+            return;
+        }
+        
+        // Try exact match first
+        if (this.constructorRoundPoints[teamDisplayName]) {
+            this.constructorRoundPoints[teamDisplayName][roundKey] = 
+                (this.constructorRoundPoints[teamDisplayName][roundKey] || 0) + points;
+        }
+        // Try team code
+        else if (teamCode && this.constructorRoundPoints[teamCode]) {
+            this.constructorRoundPoints[teamCode][roundKey] = 
+                (this.constructorRoundPoints[teamCode][roundKey] || 0) + points;
+        }
+        // Try to find by partial match
+        else {
+            const matchingKey = Object.keys(this.constructorRoundPoints).find(key => 
+                key === teamDisplayName || 
+                key.includes(teamDisplayName) || 
+                teamDisplayName.includes(key)
+            );
+            
+            if (matchingKey) {
+                this.constructorRoundPoints[matchingKey][roundKey] = 
+                    (this.constructorRoundPoints[matchingKey][roundKey] || 0) + points;
+            }
+        }
+    }
+
+    /**
+     * Calculate sprint points from finishing position
+     */
+    calculateSprintPointsFromPosition(position) {
+        // Sprint points system (typically fewer points than races)
+        const sprintPoints = {
+            1: 8, 2: 7, 3: 6, 4: 5, 5: 4,
+            6: 3, 7: 2, 8: 1
+        };
+        return sprintPoints[position] || 0;
+    }
+
+    /**
+     * Calculate cumulative points for progression and graphs
+     */
+    calculateCumulativePoints() {
+        console.log('Calculating cumulative points...');
+        
+        // Initialize cumulative points structures
+        this.driverCumulativePoints = {};
+        this.constructorCumulativePoints = {};
+        
+        // Calculate cumulative points for each driver
+        this.driversData.forEach(driver => {
+            const driverName = driver.name;
+            this.driverCumulativePoints[driverName] = {};
+            
+            let cumulative = 0;
+            
+            // Add initial point at round 0
+            this.driverCumulativePoints[driverName][0] = 0;
+            
+            for (let i = 1; i <= this.totalRaces; i++) {
+                const roundKey = `Round ${i}`;
+                const roundPoints = this.driverRoundPoints[driverName]?.[roundKey] || 0;
+                
+                if (i <= this.completedRaces) {
+                    cumulative += roundPoints;
+                }
+                
+                // Store cumulative points up to this round
+                this.driverCumulativePoints[driverName][i] = i <= this.completedRaces ? cumulative : null;
+            }
+            
+            console.log(`${driverName} cumulative:`, this.driverCumulativePoints[driverName]);
+        });
+        
+        // Calculate cumulative points for each constructor
+        this.constructorsData.forEach(constructor => {
+            const teamName = constructor.displayName;
+            this.constructorCumulativePoints[teamName] = {};
+            
+            // Try to find the constructor's points data
+            let constructorRounds = this.constructorRoundPoints[teamName];
+            
+            // If not found by display name, try team code
+            if (!constructorRounds && constructor.teamCode) {
+                constructorRounds = this.constructorRoundPoints[constructor.teamCode];
+            }
+            
+            // If still not found, try to find by partial match
+            if (!constructorRounds) {
+                const matchingKey = Object.keys(this.constructorRoundPoints).find(key => 
+                    key === teamName || 
+                    key.includes(teamName) || 
+                    teamName.includes(key)
+                );
+                if (matchingKey) {
+                    constructorRounds = this.constructorRoundPoints[matchingKey];
+                }
+            }
+            
+            let cumulative = 0;
+            
+            // Add initial point at round 0
+            this.constructorCumulativePoints[teamName][0] = 0;
+            
+            for (let i = 1; i <= this.totalRaces; i++) {
+                const roundKey = `Round ${i}`;
+                const roundPoints = constructorRounds?.[roundKey] || 0;
+                
+                if (i <= this.completedRaces) {
+                    cumulative += roundPoints;
+                }
+                
+                // Store cumulative points up to this round
+                this.constructorCumulativePoints[teamName][i] = i <= this.completedRaces ? cumulative : null;
+            }
+            
+            console.log(`${teamName} cumulative:`, this.constructorCumulativePoints[teamName]);
+        });
     }
 
     /**
@@ -427,6 +701,11 @@ class ChampionshipManager {
         this.updateDriversStandings();
         this.updateConstructorsStandings();
         this.updateProgressionViews();
+        
+        // Update graphs if active view is graph
+        if (this.activeView === 'graph') {
+            this.updateGraphs();
+        }
     }
 
     /**
@@ -560,7 +839,7 @@ class ChampionshipManager {
                 }
             }
             
-            const statusSpan = this.elements.championshipStatus.querySelector('span');
+            const statusSpan = this.elements.championshipStatus?.querySelector('span');
             if (statusSpan) {
                 statusSpan.textContent = this.elements.nextRaceInfo.textContent;
             }
@@ -671,12 +950,10 @@ class ChampionshipManager {
     }
 
     /**
-     * Update drivers progression view
+     * Update drivers progression view - FIXED: Uses cumulative points
      */
     updateDriversProgression() {
         if (!this.elements.driversProgressionBody || !this.elements.driversRoundsHeader) return;
-        
-        const completedRaces = this.completedRaces;
         
         // Clear previous content
         this.elements.driversProgressionBody.innerHTML = '';
@@ -699,6 +976,7 @@ class ChampionshipManager {
         headerHTML += `<div class="progression-name-header">DRIVER</div>`;
         headerHTML += `<div class="progression-total-header">TOTAL</div>`;
         
+        // Add round headers (R1, R2, etc.)
         for (let i = 1; i <= this.totalRaces; i++) {
             headerHTML += `<div class="progression-round-header">R${i}</div>`;
         }
@@ -713,16 +991,7 @@ class ChampionshipManager {
             const teamColor = this.getTeamColor(driver.teamCode);
             const roundPoints = this.driverRoundPoints[driverName] || {};
             const fastestLaps = this.driverRoundFastestLaps[driverName] || {};
-            
-            // Calculate total points
-            let totalPoints = 0;
-            for (let i = 1; i <= this.totalRaces; i++) {
-                const roundKey = `Round ${i}`;
-                const points = roundPoints[roundKey] || 0;
-                if (i <= completedRaces) {
-                    totalPoints += points;
-                }
-            }
+            const cumulativePoints = this.driverCumulativePoints[driverName] || {};
             
             let rowHTML = `<div class="progression-data-row">`;
             
@@ -734,32 +1003,28 @@ class ChampionshipManager {
                 </div>
             `;
             
-            // Total points column
-            rowHTML += `<div class="progression-total-cell">${totalPoints}</div>`;
+            // Total points column (show actual total from standings)
+            rowHTML += `<div class="progression-total-cell">${driver.points}</div>`;
             
-            // Round columns
+            // Round columns - show cumulative points after each round (race + sprint)
             for (let i = 1; i <= this.totalRaces; i++) {
                 const roundKey = `Round ${i}`;
-                const points = roundPoints[roundKey] || 0;
+                const points = roundPoints[roundKey] || 0; // Race + sprint points
+                const cumulative = cumulativePoints[i];
                 const hasFastestLap = fastestLaps[roundKey] || false;
                 
-                if (i <= completedRaces && points !== undefined) {
-                    // Determine point class based on point value
+                if (i <= this.completedRaces && cumulative !== undefined && cumulative !== null) {
+                    // Determine point class based on round points (race + sprint)
                     let pointClass = 'driver-regular';
-                    if (points === 25 || points === 26) { // 25 for win, 26 for win+FL
-                        pointClass = 'driver-gold';
-                    } else if (points === 18 || points === 19) { // 18 for 2nd, 19 for 2nd+FL
-                        pointClass = 'driver-silver';
-                    } else if (points === 15 || points === 16) { // 15 for 3rd, 16 for 3rd+FL
-                        pointClass = 'driver-bronze';
-                    }
+                    const racePoints = points; // This includes sprint points too
                     
-                    // Add fastest lap class if applicable
+                    // We'll just use regular styling since points now include sprints
+                    // But we can still show fastest lap indicator
                     const fastestLapClass = hasFastestLap ? 'has-fastest-lap' : '';
                     
                     rowHTML += `<div class="progression-round-cell ${fastestLapClass}">
                         <div class="round-points ${pointClass} ${fastestLapClass}">
-                            ${points}
+                            ${cumulative}
                         </div>
                     </div>`;
                 } else {
@@ -774,12 +1039,10 @@ class ChampionshipManager {
     }
 
     /**
-     * Update constructors progression view - FIXED: Better constructor points handling
+     * Update constructors progression view - FIXED: Uses cumulative points
      */
     updateConstructorsProgression() {
         if (!this.elements.constructorsProgressionBody || !this.elements.constructorsRoundsHeader) return;
-        
-        const completedRaces = this.completedRaces;
         
         // Clear previous content
         this.elements.constructorsProgressionBody.innerHTML = '';
@@ -802,6 +1065,7 @@ class ChampionshipManager {
         headerHTML += `<div class="progression-name-header">TEAM</div>`;
         headerHTML += `<div class="progression-total-header">TOTAL</div>`;
         
+        // Add round headers
         for (let i = 1; i <= this.totalRaces; i++) {
             headerHTML += `<div class="progression-round-header">R${i}</div>`;
         }
@@ -814,61 +1078,7 @@ class ChampionshipManager {
         constructors.forEach(constructor => {
             const teamName = constructor.displayName;
             const teamColor = constructor.primaryColor;
-            
-            // Find constructor points - try multiple name variations
-            let roundPoints = {};
-            
-            // First try exact match
-            if (this.constructorRoundPoints[teamName]) {
-                roundPoints = this.constructorRoundPoints[teamName];
-            } else {
-                // Try to find by partial match
-                const matchingKey = Object.keys(this.constructorRoundPoints).find(key => 
-                    key === teamName || 
-                    key.includes(teamName) || 
-                    teamName.includes(key)
-                );
-                
-                if (matchingKey) {
-                    roundPoints = this.constructorRoundPoints[matchingKey];
-                } else {
-                    // Try team code
-                    if (constructor.teamCode && this.constructorRoundPoints[constructor.teamCode]) {
-                        roundPoints = this.constructorRoundPoints[constructor.teamCode];
-                    }
-                }
-            }
-            
-            console.log(`Constructor ${teamName} round points:`, roundPoints);
-            
-            // Calculate total points
-            let totalPoints = 0;
-            for (let i = 1; i <= this.totalRaces; i++) {
-                const roundKey = `Round ${i}`;
-                const points = roundPoints[roundKey] || 0;
-                if (i <= completedRaces) {
-                    totalPoints += points;
-                }
-            }
-            
-            // If total points is 0 but constructor has points in standings, sum up from driver points
-            if (totalPoints === 0 && constructor.points > 0) {
-                console.log(`Constructor ${teamName} has ${constructor.points} total points but 0 in progression. Checking drivers...`);
-                
-                // Sum points from all drivers in this team
-                constructor.drivers.forEach(driverName => {
-                    const driverRoundPoints = this.driverRoundPoints[driverName] || {};
-                    for (let i = 1; i <= this.totalRaces; i++) {
-                        const roundKey = `Round ${i}`;
-                        const points = driverRoundPoints[roundKey] || 0;
-                        if (i <= completedRaces) {
-                            totalPoints += points;
-                            if (!roundPoints[roundKey]) roundPoints[roundKey] = 0;
-                            roundPoints[roundKey] += points;
-                        }
-                    }
-                });
-            }
+            const cumulativePoints = this.constructorCumulativePoints[teamName] || {};
             
             let rowHTML = `<div class="progression-data-row">`;
             
@@ -878,17 +1088,16 @@ class ChampionshipManager {
             </div>`;
             
             // Total points column
-            rowHTML += `<div class="progression-total-cell">${totalPoints}</div>`;
+            rowHTML += `<div class="progression-total-cell">${constructor.points}</div>`;
             
-            // Round columns
+            // Round columns - show cumulative points after each round
             for (let i = 1; i <= this.totalRaces; i++) {
-                const roundKey = `Round ${i}`;
-                const points = roundPoints[roundKey] || 0;
+                const cumulative = cumulativePoints[i];
                 
-                if (i <= completedRaces && points !== undefined) {
+                if (i <= this.completedRaces && cumulative !== undefined && cumulative !== null) {
                     rowHTML += `<div class="progression-round-cell">
                         <div class="round-points constructor-regular">
-                            ${points}
+                            ${cumulative}
                         </div>
                     </div>`;
                 } else {
@@ -900,6 +1109,512 @@ class ChampionshipManager {
             
             this.elements.constructorsProgressionBody.innerHTML += rowHTML;
         });
+    }
+
+    /**
+     * Initialize graphs
+     */
+    initializeGraphs() {
+        // Remove area and bar chart options from select
+        if (this.elements.graphTypeSelect) {
+            // Keep only line chart option
+            this.elements.graphTypeSelect.innerHTML = '<option value="line">Line Chart</option>';
+        }
+        
+        // Assign colors to drivers who have points
+        this.driversData.forEach((driver, index) => {
+            if (driver.points > 0) { // Only assign colors to drivers with points
+                const teamColor = this.getTeamColor(driver.teamCode);
+                // Use team color if available, otherwise use palette
+                this.driverColors[driver.name] = teamColor !== '#00f7ff' ? teamColor : 
+                    this.colorPalette[index % this.colorPalette.length];
+            }
+        });
+        
+        // Assign colors to constructors who have points
+        this.constructorsData.forEach((constructor, index) => {
+            if (constructor.points > 0) { // Only assign colors to constructors with points
+                // Use team primary color if available, otherwise use palette
+                this.constructorColors[constructor.displayName] = constructor.primaryColor !== '#00f7ff' ? 
+                    constructor.primaryColor : this.colorPalette[index % this.colorPalette.length];
+            }
+        });
+        
+        console.log('Initialized graph colors:', {
+            driverColors: this.driverColors,
+            constructorColors: this.constructorColors
+        });
+    }
+
+    /**
+     * Update graphs based on active tab
+     */
+    updateGraphs() {
+        if (this.activeTab === 'drivers') {
+            this.updateDriversGraph();
+        } else {
+            this.updateConstructorsGraph();
+        }
+    }
+
+    /**
+     * Update drivers points graph - FIXED: Starts from round 0, only shows drivers with points
+     */
+    updateDriversGraph() {
+        if (!this.elements.driversChartCanvas) return;
+        
+        // Filter drivers to only include those with points
+        const driversWithPoints = this.filteredDriversData.filter(driver => driver.points > 0);
+        if (driversWithPoints.length === 0) {
+            this.showNoGraphData('drivers');
+            return;
+        }
+        
+        // Prepare labels starting from round 0
+        const labels = ['Start'];
+        for (let i = 1; i <= this.totalRaces; i++) {
+            labels.push(`R${i}`);
+        }
+        
+        // Show all completed rounds + 1 for future rounds
+        const displayRounds = Math.max(this.completedRaces, 1); // At least 1 round (Start)
+        const displayLabels = labels.slice(0, displayRounds + 1); // +1 for Start at 0
+        
+        const datasets = [];
+        const hiddenSet = this.graphSettings.drivers.hiddenData;
+        
+        // Sort drivers by total points for better visual hierarchy
+        const sortedDrivers = [...driversWithPoints].sort((a, b) => b.points - a.points);
+        
+        sortedDrivers.forEach(driver => {
+            const driverName = driver.name;
+            const teamColor = this.getTeamColor(driver.teamCode);
+            const graphColor = this.driverColors[driverName] || teamColor;
+            const cumulativePoints = this.driverCumulativePoints[driverName] || {};
+            
+            // Prepare data points from cumulative points starting from round 0
+            const dataPoints = [0]; // Start at 0 points
+            for (let i = 1; i <= this.totalRaces; i++) {
+                const cumulative = cumulativePoints[i];
+                dataPoints.push(cumulative !== null ? cumulative : null);
+            }
+            
+            // Limit to completed rounds + 1 for future rounds
+            const displayData = dataPoints.slice(0, displayRounds + 1);
+            
+            datasets.push({
+                label: driverName,
+                data: displayData,
+                borderColor: graphColor,
+                backgroundColor: graphColor + '40', // Add transparency
+                borderWidth: 2,
+                fill: false, // No fill for line chart
+                tension: 0.3,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                hidden: hiddenSet.has(driverName)
+            });
+        });
+        
+        // Create or update chart
+        if (this.driversChart) {
+            this.driversChart.data.labels = displayLabels;
+            this.driversChart.data.datasets = datasets;
+            this.driversChart.update();
+        } else {
+            const ctx = this.elements.driversChartCanvas.getContext('2d');
+            this.driversChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: displayLabels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false // We'll use our custom legend
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.dataset.label || '';
+                                    const value = context.parsed.y;
+                                    return `${label}: ${value} points`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Cumulative Points',
+                                color: '#00f7ff',
+                                font: {
+                                    weight: 'bold'
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)',
+                                stepSize: 25
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Race Round',
+                                color: '#00f7ff',
+                                font: {
+                                    weight: 'bold'
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'nearest'
+                    },
+                    animation: {
+                        duration: 750,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+        }
+        
+        // Update legend
+        this.updateDriversLegend(sortedDrivers);
+    }
+
+    /**
+     * Update constructors points graph - FIXED: Starts from round 0, only shows constructors with points
+     */
+    updateConstructorsGraph() {
+        if (!this.elements.constructorsChartCanvas) return;
+        
+        // Filter constructors to only include those with points
+        const constructorsWithPoints = this.filteredConstructorsData.filter(constructor => constructor.points > 0);
+        if (constructorsWithPoints.length === 0) {
+            this.showNoGraphData('constructors');
+            return;
+        }
+        
+        // Prepare labels starting from round 0
+        const labels = ['Start'];
+        for (let i = 1; i <= this.totalRaces; i++) {
+            labels.push(`R${i}`);
+        }
+        
+        // Show all completed rounds + 1 for future rounds
+        const displayRounds = Math.max(this.completedRaces, 1); // At least 1 round (Start)
+        const displayLabels = labels.slice(0, displayRounds + 1); // +1 for Start at 0
+        
+        const datasets = [];
+        const hiddenSet = this.graphSettings.constructors.hiddenData;
+        
+        // Sort constructors by total points for better visual hierarchy
+        const sortedConstructors = [...constructorsWithPoints].sort((a, b) => b.points - a.points);
+        
+        sortedConstructors.forEach(constructor => {
+            const teamName = constructor.displayName;
+            const graphColor = this.constructorColors[teamName] || constructor.primaryColor;
+            const cumulativePoints = this.constructorCumulativePoints[teamName] || {};
+            
+            // Prepare data points from cumulative points starting from round 0
+            const dataPoints = [0]; // Start at 0 points
+            for (let i = 1; i <= this.totalRaces; i++) {
+                const cumulative = cumulativePoints[i];
+                dataPoints.push(cumulative !== null ? cumulative : null);
+            }
+            
+            // Limit to completed rounds + 1 for future rounds
+            const displayData = dataPoints.slice(0, displayRounds + 1);
+            
+            datasets.push({
+                label: teamName,
+                data: displayData,
+                borderColor: graphColor,
+                backgroundColor: graphColor + '40', // Add transparency
+                borderWidth: 3, // Thicker lines for constructors
+                fill: false, // No fill for line chart
+                tension: 0.3,
+                pointRadius: 5,
+                pointHoverRadius: 7,
+                hidden: hiddenSet.has(teamName)
+            });
+        });
+        
+        // Create or update chart
+        if (this.constructorsChart) {
+            this.constructorsChart.data.labels = displayLabels;
+            this.constructorsChart.data.datasets = datasets;
+            this.constructorsChart.update();
+        } else {
+            const ctx = this.elements.constructorsChartCanvas.getContext('2d');
+            this.constructorsChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: displayLabels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false // We'll use our custom legend
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.dataset.label || '';
+                                    const value = context.parsed.y;
+                                    return `${label}: ${value} points`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Cumulative Points',
+                                color: '#00f7ff',
+                                font: {
+                                    weight: 'bold'
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)',
+                                stepSize: 25
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Race Round',
+                                color: '#00f7ff',
+                                font: {
+                                    weight: 'bold'
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'nearest'
+                    },
+                    animation: {
+                        duration: 750,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+        }
+        
+        // Update legend
+        this.updateConstructorsLegend(sortedConstructors);
+    }
+
+    /**
+     * Update drivers graph legend
+     */
+    updateDriversLegend(drivers) {
+        if (!this.elements.driversLegend) return;
+        
+        const hiddenSet = this.graphSettings.drivers.hiddenData;
+        
+        const legendHTML = drivers.map(driver => {
+            const driverName = driver.name;
+            const teamName = driver.teamDisplayName;
+            const color = this.driverColors[driverName] || this.getTeamColor(driver.teamCode);
+            const isHidden = hiddenSet.has(driverName);
+            
+            return `
+                <div class="legend-item ${isHidden ? 'hidden' : ''}" data-driver="${driverName}">
+                    <div class="legend-color" style="background: ${color}"></div>
+                    <div class="legend-info">
+                        <div class="legend-name">${driverName}</div>
+                        <div class="legend-team">${teamName}</div>
+                    </div>
+                    <button class="legend-toggle" data-driver="${driverName}">
+                        <i class="fas fa-${isHidden ? 'eye' : 'eye-slash'}"></i>
+                    </button>
+                </div>
+            `;
+        }).join('');
+        
+        this.elements.driversLegend.innerHTML = legendHTML;
+        
+        // Add click handlers to legend items
+        this.elements.driversLegend.querySelectorAll('.legend-toggle').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const driverName = button.getAttribute('data-driver');
+                this.toggleDriverVisibility(driverName);
+            });
+        });
+        
+        // Add click handlers to legend items (toggle on item click)
+        this.elements.driversLegend.querySelectorAll('.legend-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                if (!e.target.classList.contains('legend-toggle')) {
+                    const driverName = item.getAttribute('data-driver');
+                    this.toggleDriverVisibility(driverName);
+                }
+            });
+        });
+    }
+
+    /**
+     * Update constructors graph legend
+     */
+    updateConstructorsLegend(constructors) {
+        if (!this.elements.constructorsLegend) return;
+        
+        const hiddenSet = this.graphSettings.constructors.hiddenData;
+        
+        const legendHTML = constructors.map(constructor => {
+            const teamName = constructor.displayName;
+            const color = this.constructorColors[teamName] || constructor.primaryColor;
+            const isHidden = hiddenSet.has(teamName);
+            const driversCount = constructor.drivers.length;
+            
+            return `
+                <div class="legend-item ${isHidden ? 'hidden' : ''}" data-team="${teamName}">
+                    <div class="legend-color" style="background: ${color}"></div>
+                    <div class="legend-info">
+                        <div class="legend-name">${teamName}</div>
+                        <div class="legend-team">${driversCount} driver${driversCount !== 1 ? 's' : ''}</div>
+                    </div>
+                    <button class="legend-toggle" data-team="${teamName}">
+                        <i class="fas fa-${isHidden ? 'eye' : 'eye-slash'}"></i>
+                    </button>
+                </div>
+            `;
+        }).join('');
+        
+        this.elements.constructorsLegend.innerHTML = legendHTML;
+        
+        // Add click handlers to legend items
+        this.elements.constructorsLegend.querySelectorAll('.legend-toggle').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const teamName = button.getAttribute('data-team');
+                this.toggleConstructorVisibility(teamName);
+            });
+        });
+        
+        // Add click handlers to legend items (toggle on item click)
+        this.elements.constructorsLegend.querySelectorAll('.legend-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                if (!e.target.classList.contains('legend-toggle')) {
+                    const teamName = item.getAttribute('data-team');
+                    this.toggleConstructorVisibility(teamName);
+                }
+            });
+        });
+    }
+
+    /**
+     * Toggle driver visibility in graph
+     */
+    toggleDriverVisibility(driverName) {
+        const hiddenSet = this.graphSettings.drivers.hiddenData;
+        
+        if (hiddenSet.has(driverName)) {
+            hiddenSet.delete(driverName);
+        } else {
+            hiddenSet.add(driverName);
+        }
+        
+        // Update chart
+        if (this.driversChart) {
+            const datasetIndex = this.driversChart.data.datasets.findIndex(ds => ds.label === driverName);
+            if (datasetIndex !== -1) {
+                this.driversChart.data.datasets[datasetIndex].hidden = hiddenSet.has(driverName);
+                this.driversChart.update();
+            }
+        }
+        
+        // Update legend
+        this.updateDriversLegend(this.filteredDriversData.filter(d => d.points > 0).sort((a, b) => b.points - a.points));
+    }
+
+    /**
+     * Toggle constructor visibility in graph
+     */
+    toggleConstructorVisibility(teamName) {
+        const hiddenSet = this.graphSettings.constructors.hiddenData;
+        
+        if (hiddenSet.has(teamName)) {
+            hiddenSet.delete(teamName);
+        } else {
+            hiddenSet.add(teamName);
+        }
+        
+        // Update chart
+        if (this.constructorsChart) {
+            const datasetIndex = this.constructorsChart.data.datasets.findIndex(ds => ds.label === teamName);
+            if (datasetIndex !== -1) {
+                this.constructorsChart.data.datasets[datasetIndex].hidden = hiddenSet.has(teamName);
+                this.constructorsChart.update();
+            }
+        }
+        
+        // Update legend
+        this.updateConstructorsLegend(this.filteredConstructorsData.filter(c => c.points > 0).sort((a, b) => b.points - a.points));
+    }
+
+    /**
+     * Show no data for graph
+     */
+    showNoGraphData(type) {
+        const chartElement = type === 'drivers' ? this.elements.driversChartCanvas : this.elements.constructorsChartCanvas;
+        const legendElement = type === 'drivers' ? this.elements.driversLegend : this.elements.constructorsLegend;
+        
+        if (chartElement) {
+            const parent = chartElement.parentElement;
+            if (parent) {
+                parent.innerHTML = `
+                    <div class="no-results-content">
+                        <i class="fas fa-chart-line"></i>
+                        <h3>No Data Available for Graph</h3>
+                        <p>No ${type} with points available to display in the graph.</p>
+                    </div>
+                `;
+            }
+        }
+        
+        if (legendElement) {
+            legendElement.innerHTML = '';
+        }
     }
 
     /**
@@ -985,6 +1700,38 @@ class ChampionshipManager {
             });
         }
         
+        // Graph controls - only line chart is available
+        if (this.elements.graphTypeSelect) {
+            this.elements.graphTypeSelect.addEventListener('change', (e) => {
+                const type = e.target.value;
+                if (this.activeTab === 'drivers') {
+                    this.graphSettings.drivers.type = type;
+                    if (this.driversChart) {
+                        this.driversChart.config.type = type;
+                        this.driversChart.update();
+                    }
+                } else {
+                    this.graphSettings.constructors.type = type;
+                    if (this.constructorsChart) {
+                        this.constructorsChart.config.type = type;
+                        this.constructorsChart.update();
+                    }
+                }
+            });
+        }
+        
+        if (this.elements.toggleAllDriversBtn) {
+            this.elements.toggleAllDriversBtn.addEventListener('click', () => {
+                this.toggleAllVisibility();
+            });
+        }
+        
+        if (this.elements.resetGraphBtn) {
+            this.elements.resetGraphBtn.addEventListener('click', () => {
+                this.resetGraph();
+            });
+        }
+        
         // Refresh button
         const refreshBtn = document.createElement('button');
         refreshBtn.textContent = '🔄';
@@ -1004,6 +1751,114 @@ class ChampionshipManager {
             } else {
                 this.elements.clearSearchBtn.classList.remove('show');
             }
+        }
+    }
+
+    /**
+     * Toggle all driver/constructor visibility
+     */
+    toggleAllVisibility() {
+        if (this.activeTab === 'drivers') {
+            const hiddenSet = this.graphSettings.drivers.hiddenData;
+            const showAll = this.graphSettings.drivers.showAll;
+            
+            if (showAll) {
+                // Hide all except top 3
+                const driversWithPoints = this.filteredDriversData.filter(d => d.points > 0);
+                driversWithPoints.forEach((driver, index) => {
+                    if (index >= 3) {
+                        hiddenSet.add(driver.name);
+                    }
+                });
+                this.graphSettings.drivers.showAll = false;
+                this.elements.toggleAllDriversBtn.innerHTML = '<i class="fas fa-eye-slash"></i> Show All';
+            } else {
+                // Show all
+                hiddenSet.clear();
+                this.graphSettings.drivers.showAll = true;
+                this.elements.toggleAllDriversBtn.innerHTML = '<i class="fas fa-eye"></i> Show Top 3';
+            }
+            
+            // Update chart
+            if (this.driversChart) {
+                this.driversChart.data.datasets.forEach(dataset => {
+                    dataset.hidden = hiddenSet.has(dataset.label);
+                });
+                this.driversChart.update();
+            }
+            
+            // Update legend
+            this.updateDriversLegend(this.filteredDriversData.filter(d => d.points > 0).sort((a, b) => b.points - a.points));
+        } else {
+            const hiddenSet = this.graphSettings.constructors.hiddenData;
+            const showAll = this.graphSettings.constructors.showAll;
+            
+            if (showAll) {
+                // Hide all except top 3
+                const constructorsWithPoints = this.filteredConstructorsData.filter(c => c.points > 0);
+                constructorsWithPoints.forEach((constructor, index) => {
+                    if (index >= 3) {
+                        hiddenSet.add(constructor.displayName);
+                    }
+                });
+                this.graphSettings.constructors.showAll = false;
+                this.elements.toggleAllDriversBtn.innerHTML = '<i class="fas fa-eye-slash"></i> Show All';
+            } else {
+                // Show all
+                hiddenSet.clear();
+                this.graphSettings.constructors.showAll = true;
+                this.elements.toggleAllDriversBtn.innerHTML = '<i class="fas fa-eye"></i> Show Top 3';
+            }
+            
+            // Update chart
+            if (this.constructorsChart) {
+                this.constructorsChart.data.datasets.forEach(dataset => {
+                    dataset.hidden = hiddenSet.has(dataset.label);
+                });
+                this.constructorsChart.update();
+            }
+            
+            // Update legend
+            this.updateConstructorsLegend(this.filteredConstructorsData.filter(c => c.points > 0).sort((a, b) => b.points - a.points));
+        }
+    }
+
+    /**
+     * Reset graph to default state
+     */
+    resetGraph() {
+        if (this.activeTab === 'drivers') {
+            this.graphSettings.drivers.hiddenData.clear();
+            this.graphSettings.drivers.showAll = true;
+            this.elements.graphTypeSelect.value = 'line';
+            this.graphSettings.drivers.type = 'line';
+            
+            if (this.driversChart) {
+                this.driversChart.data.datasets.forEach(dataset => {
+                    dataset.hidden = false;
+                });
+                this.driversChart.config.type = 'line';
+                this.driversChart.update();
+            }
+            
+            this.updateDriversLegend(this.filteredDriversData.filter(d => d.points > 0).sort((a, b) => b.points - a.points));
+            this.elements.toggleAllDriversBtn.innerHTML = '<i class="fas fa-eye"></i> Show Top 3';
+        } else {
+            this.graphSettings.constructors.hiddenData.clear();
+            this.graphSettings.constructors.showAll = true;
+            this.elements.graphTypeSelect.value = 'line';
+            this.graphSettings.constructors.type = 'line';
+            
+            if (this.constructorsChart) {
+                this.constructorsChart.data.datasets.forEach(dataset => {
+                    dataset.hidden = false;
+                });
+                this.constructorsChart.config.type = 'line';
+                this.constructorsChart.update();
+            }
+            
+            this.updateConstructorsLegend(this.filteredConstructorsData.filter(c => c.points > 0).sort((a, b) => b.points - a.points));
+            this.elements.toggleAllDriversBtn.innerHTML = '<i class="fas fa-eye"></i> Show Top 3';
         }
     }
 
@@ -1059,6 +1914,15 @@ class ChampionshipManager {
         // Store active view
         this.activeView = viewType;
         
+        // Show/hide graph controls
+        if (this.elements.graphControls) {
+            if (viewType === 'graph') {
+                this.elements.graphControls.style.display = 'flex';
+            } else {
+                this.elements.graphControls.style.display = 'none';
+            }
+        }
+        
         // Hide all view contents for current tab
         const tabContents = document.querySelectorAll(`#${this.activeTab}-tab .view-content`);
         tabContents.forEach(content => {
@@ -1075,6 +1939,10 @@ class ChampionshipManager {
         if (viewType === 'progression') {
             this.updateProgressionViews();
         }
+        // Update graphs if needed
+        else if (viewType === 'graph') {
+            this.updateGraphs();
+        }
     }
 
     /**
@@ -1086,17 +1954,18 @@ class ChampionshipManager {
         }
         
         const calendar = this.dataLoader.dataCache.raceCalendar || [];
-        const completedRaces = this.completedRaces;
         
         // If season hasn't started yet
-        if (completedRaces === 0 && calendar.length > 0) {
+        if (this.completedRaces === 0 && calendar.length > 0) {
             const firstRace = calendar[0];
             this.updateCountdown(firstRace.date);
         }
         // If season is in progress
-        else if (completedRaces < calendar.length && calendar.length > 0) {
-            const nextRace = calendar[completedRaces];
-            this.updateCountdown(nextRace.date);
+        else if (this.completedRaces < this.totalRaces && calendar.length > 0) {
+            const nextRace = calendar[this.completedRaces];
+            if (nextRace) {
+                this.updateCountdown(nextRace.date);
+            }
         }
         // If season is completed
         else {
@@ -1253,8 +2122,14 @@ class ChampionshipManager {
         this.totalRaces = 10;
         this.completedRaces = 3;
         
-        // Generate mock round points
+        // Generate mock round points (including sprint points)
         this.generateMockRoundPoints();
+        
+        // Calculate cumulative points
+        this.calculateCumulativePoints();
+        
+        // Initialize graphs
+        this.initializeGraphs();
         
         this.updateChampionshipStats();
         this.updateAllStandings();
@@ -1268,7 +2143,7 @@ class ChampionshipManager {
     }
 
     /**
-     * Generate mock round points for fallback data
+     * Generate mock round points for fallback data (race + sprint combined)
      */
     generateMockRoundPoints() {
         // Initialize data structures
@@ -1276,7 +2151,7 @@ class ChampionshipManager {
         this.driverRoundFastestLaps = {};
         this.constructorRoundPoints = {};
         
-        // Initialize driver round points
+        // Initialize driver round points (race + sprint combined)
         this.driversData.forEach(driver => {
             if (!driver || !driver.name) return;
             
@@ -1284,30 +2159,37 @@ class ChampionshipManager {
             this.driverRoundFastestLaps[driver.name] = {};
             
             for (let i = 1; i <= this.totalRaces; i++) {
-                let points = 0;
+                let totalPoints = 0;
                 let hasFastestLap = false;
                 
                 if (i <= this.completedRaces) {
-                    // For testing the color system with fastest laps
+                    // Race points
+                    let racePoints = 0;
                     if (i === 1) { 
-                        points = 25; // Gold - 1st place
+                        racePoints = 25; // 1st place
                         hasFastestLap = Math.random() > 0.5;
                     } else if (i === 2) { 
-                        points = 18; // Silver - 2nd place
+                        racePoints = 18; // 2nd place
                         hasFastestLap = Math.random() > 0.5;
                     } else if (i === 3) { 
-                        points = 15; // Bronze - 3rd place
+                        racePoints = 15; // 3rd place
                         hasFastestLap = Math.random() > 0.5;
                     } else {
-                        points = Math.floor(Math.random() * 14) + 1;
+                        racePoints = Math.floor(Math.random() * 14) + 1;
                     }
                     
                     // Add fastest lap point if applicable
                     if (hasFastestLap) {
-                        points += 1;
+                        racePoints += 1;
                     }
+                    
+                    // Sprint points (add to same round)
+                    const sprintPoints = Math.floor(Math.random() * 9); // 0-8 points for sprints
+                    
+                    totalPoints = racePoints + sprintPoints;
                 }
-                this.driverRoundPoints[driver.name][`Round ${i}`] = points;
+                
+                this.driverRoundPoints[driver.name][`Round ${i}`] = totalPoints;
                 this.driverRoundFastestLaps[driver.name][`Round ${i}`] = hasFastestLap;
             }
         });
@@ -1336,7 +2218,7 @@ class ChampionshipManager {
             });
         });
         
-        console.log('Mock constructor round points:', this.constructorRoundPoints);
+        console.log('Mock constructor round points (race + sprint):', this.constructorRoundPoints);
     }
 
     /**

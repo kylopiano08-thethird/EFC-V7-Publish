@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,6 +9,8 @@
     <link rel="stylesheet" href="css/championship.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Add Chart.js for graph functionality -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <!-- Header Bar -->
@@ -83,6 +86,20 @@
                         <div class="results-count" id="results-count">
                             Showing <span id="shown-count">0</span> of <span id="total-count">0</span> results
                         </div>
+                        <!-- Graph Controls (Hidden by default) -->
+                        <div class="graph-controls" id="graph-controls" style="display: none;">
+                            <select id="graph-type-select" class="graph-select">
+                                <option value="line">Line Chart</option>
+                                <option value="area">Area Chart</option>
+                                <option value="bar">Bar Chart</option>
+                            </select>
+                            <button id="toggle-all-drivers" class="graph-btn">
+                                <i class="fas fa-eye"></i> Show All
+                            </button>
+                            <button id="reset-graph" class="graph-btn">
+                                <i class="fas fa-redo"></i> Reset
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -92,6 +109,9 @@
                         <span class="option-label">VIEW:</span>
                         <button class="view-option active" data-view="current">CURRENT STANDINGS</button>
                         <button class="view-option" data-view="progression">POINTS PROGRESSION</button>
+                        <button class="view-option" data-view="graph">
+                            <i class="fas fa-chart-line"></i> POINTS GRAPH
+                        </button>
                     </div>
                     <div class="season-info">
                         <span class="season-label">SEASON 2</span>
@@ -141,6 +161,18 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Points Graph View -->
+                    <div class="view-content" id="drivers-graph">
+                        <div class="graph-container">
+                            <div class="graph-wrapper">
+                                <canvas id="drivers-chart"></canvas>
+                            </div>
+                            <div class="graph-legend" id="drivers-legend">
+                                <!-- Legend will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Constructors Championship Content -->
@@ -176,6 +208,18 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Points Graph View -->
+                    <div class="view-content" id="constructors-graph">
+                        <div class="graph-container">
+                            <div class="graph-wrapper">
+                                <canvas id="constructors-chart"></canvas>
+                            </div>
+                            <div class="graph-legend" id="constructors-legend">
+                                <!-- Legend will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Championship Notes -->
@@ -184,7 +228,7 @@
                     <div class="notes-content">
                         <p><strong>Points System:</strong> P1 = 25, P2 = 18, P3 = 15, P4 = 12, P5 = 10, P6 = 8, P7 = 6, P8 = 4, P9 = 2, P10 = 1</p>
                         <p><strong>Tie-breakers:</strong> 1. Number of wins, 2. Number of podiums, 3. Number of pole positions, 4. Best finish</p>
-                        <p id="championship-status">Season has not started yet. First race: <span id="next-race-info">TBD</span></p>
+                        <p id="championship-status">Next race: <span id="next-race-info">TBD</span></p>
                     </div>
                 </div>
             </div>
