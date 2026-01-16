@@ -133,6 +133,66 @@ class EFCDataLoader {
     }
 
     /**
+     * Load and process data specifically for the calendar page
+     */
+    async loadCalendarData() {
+        // Return cached data if available
+        if (this.dataCache.calendarData) {
+            console.log('Returning cached calendar data');
+            return this.dataCache.calendarData;
+        }
+
+        console.log('Loading calendar data...');
+
+        try {
+            // Load required sheets for calendar
+            const [raceCalendarData, circuitMasterData, raceResultsData] = await Promise.all([
+                this.fetchCSV(this.sheetNames.raceCalendar),
+                this.fetchCSV(this.sheetNames.circuitMaster),
+                this.fetchCSV(this.sheetNames.raceResults)
+            ]);
+
+            // Process the data
+            const races = this.processRaceCalendarForCalendar(raceCalendarData, circuitMasterData, raceResultsData);
+            const circuits = this.processCircuitMaster(circuitMasterData);
+            const nextRace = this.findNextRaceForCalendar(races);
+            const stats = this.calculateCalendarStats(races);
+            
+            // Store in cache
+            this.dataCache.calendarData = {
+                races,
+                circuits,
+                nextRace,
+                stats
+            };
+
+            console.log('Calendar data loaded successfully:', {
+                races: races.length,
+                circuits: circuits.length,
+                nextRace: nextRace?.name
+            });
+            
+            return this.dataCache.calendarData;
+
+        } catch (error) {
+            console.error('Error loading calendar data:', error);
+            this.dataCache.calendarData = this.getMockCalendarData();
+            return this.dataCache.calendarData;
+        }
+    }
+
+    /**
+     * Get calendar data for calendar page
+     */
+    getCalendarData() {
+        if (!this.dataCache.calendarData) {
+            console.warn('Calendar data not loaded yet');
+            return this.getMockCalendarData();
+        }
+        return this.dataCache.calendarData;
+    }
+
+    /**
      * Process SprintResults data - Same structure as RaceResults
      */
     processSprintResults(csvText) {
@@ -250,51 +310,6 @@ class EFCDataLoader {
     }
 
     /**
-     * Load and process data specifically for the calendar page
-     */
-    async loadCalendarData() {
-        if (this.dataCache.calendarData) {
-            return this.dataCache.calendarData;
-        }
-
-        try {
-            console.log('Loading calendar data...');
-            
-            // Load required sheets for calendar
-            const [raceCalendarData, circuitMasterData, raceResultsData] = await Promise.all([
-                this.fetchCSV(this.sheetNames.raceCalendar),
-                this.fetchCSV(this.sheetNames.circuitMaster),
-                this.fetchCSV(this.sheetNames.raceResults)
-            ]);
-
-            // Process the data
-            const races = this.processRaceCalendarForCalendar(raceCalendarData, circuitMasterData, raceResultsData);
-            const circuits = this.processCircuitMaster(circuitMasterData);
-            const nextRace = this.findNextRaceForCalendar(races);
-            const stats = this.calculateCalendarStats(races);
-            
-            this.dataCache.calendarData = {
-                races,
-                circuits,
-                nextRace,
-                stats
-            };
-
-            console.log('Calendar data loaded:', {
-                races: races.length,
-                circuits: circuits.length,
-                nextRace: nextRace?.name
-            });
-            
-            return this.dataCache.calendarData;
-
-        } catch (error) {
-            console.error('Error loading calendar data:', error);
-            return this.getMockCalendarData();
-        }
-    }
-
-    /**
      * Process RaceCalendar specifically for calendar page
      */
     processRaceCalendarForCalendar(csvText, circuitMasterData, raceResultsData) {
@@ -359,7 +374,8 @@ class EFCDataLoader {
                 circuitId: circuitInfo.id || `CIRC${i}`,
                 laps: circuitInfo.laps || Math.floor(Math.random() * 20) + 50, // Mock laps if not available
                 length: circuitInfo.length || 'TBA',
-                record: circuitInfo.record || 'TBA'
+                record: circuitInfo.record || 'TBA',
+                distance: circuitInfo.distance || 'TBA'
             });
         }
         
@@ -1612,12 +1628,14 @@ class EFCDataLoader {
         for (let i = 0; i < circuitNames.length; i++) {
             circuits.push({
                 id: `CIRC${i + 1}`,
-                name: circuitNames[i],
+                raceName: `${locations[i].split(',')[0]} Grand Prix`,
+                circuitName: circuitNames[i],
                 location: locations[i],
                 length: `${(4 + Math.random() * 3).toFixed(3)} km`,
                 laps: Math.floor(50 + Math.random() * 20),
                 record: `${Math.floor(1 + Math.random() * 2)}:${Math.floor(10 + Math.random() * 49)}.${Math.floor(100 + Math.random() * 899)}`,
-                description: `The ${circuitNames[i]} is one of the most challenging circuits on the calendar, featuring a mix of high-speed straights and technical corners.`
+                description: `The ${circuitNames[i]} is one of the most challenging circuits on the calendar, featuring a mix of high-speed straights and technical corners.`,
+                trackLayoutImage: '' // No image in mock data
             });
         }
         
@@ -1632,21 +1650,22 @@ class EFCDataLoader {
             
             races.push({
                 round: `Round ${i}`,
-                name: `${circuitNames[circuitIndex].split(' ')[0]} Grand Prix`,
+                name: `${circuits[circuitIndex].raceName}`,
                 date: raceDate.toLocaleDateString('en-US', { 
                     month: 'long', 
                     day: 'numeric', 
                     year: 'numeric' 
                 }),
                 rawDate: raceDate.toISOString().split('T')[0],
-                circuit: circuits[circuitIndex].name,
+                circuit: circuits[circuitIndex].circuitName,
                 location: circuits[circuitIndex].location,
                 status: status,
                 winner: status === 'completed' ? `Driver ${Math.floor(Math.random() * 20) + 1}` : null,
                 circuitId: circuits[circuitIndex].id,
                 laps: circuits[circuitIndex].laps,
                 length: circuits[circuitIndex].length,
-                record: circuits[circuitIndex].record
+                record: circuits[circuitIndex].record,
+                distance: `${(parseFloat(circuits[circuitIndex].length.split(' ')[0]) * circuits[circuitIndex].laps).toFixed(2)} km`
             });
         }
         
