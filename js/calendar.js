@@ -1,4 +1,3 @@
-
 /**
  * Calendar Page Script - TRACK-FOCUSED VERSION
  * Makes track images the main focus with gallery functionality
@@ -6,13 +5,10 @@
 
 class TrackCalendarManager {
     constructor() {
-        this.dataLoader = efcDataLoader;
+        this.dataLoader = window.efcDataLoader || efcDataLoader;
         this.isInitialized = false;
         this.selectedTrack = null;
         this.countdownInterval = null;
-        
-        // Store laps data from RaceCalendar row 5
-        this.raceLapsData = {};
         
         // DOM Elements
         this.elements = {
@@ -51,13 +47,11 @@ class TrackCalendarManager {
             totalTrackLength: document.getElementById('total-track-length'),
             totalLaps: document.getElementById('total-laps'),
             totalDistance: document.getElementById('total-distance'),
-            avgTrackLength: document.getElementById('avg-track-length'),
             
             // Gallery modal
             trackGalleryModal: document.getElementById('track-gallery-modal'),
             modalTrackName: document.getElementById('modal-track-name'),
             galleryMainImage: document.getElementById('gallery-main-image'),
-            galleryThumbnails: document.getElementById('gallery-thumbnails'),
             modalClose: document.getElementById('modal-close'),
             
             // Buttons and controls
@@ -75,98 +69,37 @@ class TrackCalendarManager {
         console.log('Initializing track-focused calendar...');
         
         try {
-            await this.dataLoader.loadCalendarData();
-            const calendarData = this.dataLoader.getCalendarData();
+            // Use the data loader's existing method to get calendar data
+            const calendarData = await this.dataLoader.loadCalendarData();
             
-            if (calendarData && calendarData.races && calendarData.races.length > 0) {
-                // Load laps data from RaceCalendar row 5
-                await this.loadRaceLapsData();
-                this.updateAllTrackDisplays(calendarData);
-                this.setupEventListeners();
-                this.startCountdownTimer();
-                
-                // Select next race by default
-                const nextRace = calendarData.races.find(race => race.status === 'next') || 
-                                calendarData.races.find(race => race.status === 'upcoming') ||
-                                calendarData.races[0];
-                
-                if (nextRace) {
-                    this.selectTrack(nextRace, calendarData.circuits);
-                }
-                
-                this.isInitialized = true;
-                console.log('Track calendar initialized successfully');
-            } else {
+            if (!calendarData || !calendarData.races || calendarData.races.length === 0) {
+                console.warn('No calendar data available, using mock data');
                 this.updateWithFallbackData();
+                return;
             }
+            
+            console.log('Calendar data loaded:', calendarData.races);
+            console.log('Circuits:', calendarData.circuits);
+            
+            // Update all displays
+            this.updateAllTrackDisplays(calendarData);
+            this.setupEventListeners();
+            this.startCountdownTimer(calendarData.nextRace);
+            
+            // Select next race by default
+            if (calendarData.nextRace) {
+                this.selectTrack(calendarData.nextRace, calendarData.circuits);
+            } else if (calendarData.races.length > 0) {
+                this.selectTrack(calendarData.races[0], calendarData.circuits);
+            }
+            
+            this.isInitialized = true;
+            console.log('Track calendar initialized successfully');
             
         } catch (error) {
             console.error('Failed to initialize track calendar:', error);
             this.updateWithFallbackData();
         }
-    }
-    
-    /**
-     * Load laps data from RaceCalendar row 5
-     */
-    async loadRaceLapsData() {
-        try {
-            const sheetId = '1q5C96pUBR5SUsW3lTyF8LFbzkSlPYVa8w-hrW564Rxo';
-            const sheetName = 'RaceCalendar';
-            const apiKey = this.dataLoader.API_KEY;
-            
-            // Fetch RaceCalendar sheet data
-            const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetName}?key=${apiKey}`;
-            const response = await fetch(url);
-            
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            
-            const data = await response.json();
-            
-            if (data.values && data.values.length >= 5) {
-                // Row 5 contains laps data (0-based index, so row 5 is index 4)
-                const lapsRow = data.values[4];
-                
-                // Row structure: 
-                // Column A: "Laps" header
-                // Columns B-L: Laps for each race (Round 1-11)
-                
-                if (lapsRow && lapsRow.length >= 2) {
-                    // Skip column A (header) and get laps for each race
-                    for (let i = 1; i < lapsRow.length; i++) {
-                        const roundNumber = i; // i=1 = Round 1, i=2 = Round 2, etc.
-                        const lapsValue = lapsRow[i];
-                        
-                        // Store laps data by round number
-                        this.raceLapsData[`Round ${roundNumber}`] = lapsValue;
-                        
-                        console.log(`Round ${roundNumber}: ${lapsValue} laps`);
-                    }
-                }
-            }
-        } catch (error) {
-            console.warn('Could not load laps data from RaceCalendar:', error);
-        }
-    }
-    
-    /**
-     * Get laps for a specific round
-     */
-    getLapsForRound(roundName) {
-        if (this.raceLapsData[roundName]) {
-            return this.raceLapsData[roundName];
-        }
-        
-        // Try to extract round number from different formats
-        const roundMatch = roundName?.match(/Round\s*(\d+)/i);
-        if (roundMatch) {
-            const roundNum = parseInt(roundMatch[1]);
-            return this.raceLapsData[`Round ${roundNum}`];
-        }
-        
-        return null;
     }
     
     /**
@@ -184,7 +117,7 @@ class TrackCalendarManager {
         // Update track grid with laps data
         this.updateTrackGrid(races, circuits);
         
-        // Update track statistics with laps data
+        // Update track statistics
         this.updateTrackStatistics(races, circuits);
         
         // Update header countdown
@@ -202,9 +135,7 @@ class TrackCalendarManager {
         }
         
         if (this.elements.upcomingRaces) {
-            // Calculate upcoming races: total - completed
-            const upcoming = stats.total - stats.completed;
-            this.elements.upcomingRaces.textContent = Math.max(0, upcoming) || 0;
+            this.elements.upcomingRaces.textContent = stats.upcoming || 0;
         }
         
         if (this.elements.totalRaces) {
@@ -282,6 +213,8 @@ class TrackCalendarManager {
     updateMainTrackDisplay(track, circuit) {
         if (!track) return;
         
+        console.log('Updating main track display:', { track, circuit });
+        
         // Get track image from CircuitMaster column H
         const trackImageUrl = circuit?.trackLayoutImage || '';
         
@@ -325,8 +258,7 @@ class TrackCalendarManager {
      * Update track details panel
      */
     updateTrackDetails(track, circuit) {
-        // Get laps from RaceCalendar row 5
-        const lapsFromCalendar = this.getLapsForRound(track.round);
+        console.log('Updating track details:', { track, circuit });
         
         // Update basic info
         if (this.elements.trackRaceStatus) {
@@ -338,15 +270,12 @@ class TrackCalendarManager {
         }
         
         if (this.elements.trackLaps) {
-            // Priority: 1. RaceCalendar row 5, 2. CircuitMaster, 3. Race data
-            this.elements.trackLaps.textContent = lapsFromCalendar || circuit?.laps || track.laps || 'TBA';
+            // Laps data is already in track object from data-loader
+            this.elements.trackLaps.textContent = track.laps || circuit?.laps || 'TBA';
         }
         
         if (this.elements.trackDistance) {
-            this.elements.trackDistance.textContent = 
-                track.distance || 
-                this.calculateRaceDistance(circuit, track, lapsFromCalendar) || 
-                'TBA';
+            this.elements.trackDistance.textContent = track.distance || 'TBA';
         }
         
         if (this.elements.trackRecord) {
@@ -385,14 +314,13 @@ class TrackCalendarManager {
             return;
         }
         
+        console.log('Updating track grid with', races.length, 'races');
+        
         const trackCards = races.map(race => {
             const circuit = circuits.find(c => c.id === race.circuitId) || {};
             const trackImageUrl = circuit?.trackLayoutImage || '';
             
-            // Get laps for this race from RaceCalendar row 5
-            const lapsFromCalendar = this.getLapsForRound(race.round);
-            
-            return this.createTrackCardHTML(race, circuit, trackImageUrl, lapsFromCalendar);
+            return this.createTrackCardHTML(race, circuit, trackImageUrl);
         }).join('');
         
         this.elements.trackGrid.innerHTML = trackCards;
@@ -404,16 +332,15 @@ class TrackCalendarManager {
     /**
      * Create HTML for a track card with laps data
      */
-    createTrackCardHTML(race, circuit, trackImageUrl, lapsFromCalendar) {
+    createTrackCardHTML(race, circuit, trackImageUrl) {
         const statusClass = race.status || 'upcoming';
         const statusText = race.status ? race.status.toUpperCase() : 'UPCOMING';
+        
+        console.log('Creating card for:', race.name, 'laps:', race.laps);
         
         // Check if we have a valid image
         const hasImage = trackImageUrl && trackImageUrl.trim() !== '' && 
                         (trackImageUrl.startsWith('http://') || trackImageUrl.startsWith('https://'));
-        
-        // Determine which laps value to use
-        const lapsValue = lapsFromCalendar || race.laps || circuit?.laps || 'TBA';
         
         return `
             <div class="track-card ${statusClass}" data-track-id="${race.circuitId || ''}">
@@ -447,7 +374,7 @@ class TrackCalendarManager {
                         </div>
                         <div class="track-card-spec">
                             <span class="track-card-spec-label">Laps</span>
-                            <span class="track-card-spec-value">${lapsValue}</span>
+                            <span class="track-card-spec-value">${race.laps || 'TBA'}</span>
                         </div>
                         <div class="track-card-spec">
                             <span class="track-card-spec-label">Date</span>
@@ -455,7 +382,7 @@ class TrackCalendarManager {
                         </div>
                         <div class="track-card-spec">
                             <span class="track-card-spec-label">Distance</span>
-                            <span class="track-card-spec-value">${this.calculateRaceDistance(circuit, race, lapsFromCalendar) || 'TBA'}</span>
+                            <span class="track-card-spec-value">${race.distance || 'TBA'}</span>
                         </div>
                     </div>
                     <div class="track-card-actions">
@@ -495,47 +422,30 @@ class TrackCalendarManager {
                 }
             }
             
-            // Calculate total laps using RaceCalendar row 5 data
-            const lapsFromCalendar = this.getLapsForRound(race.round);
-            let lapsValue;
-            
-            if (lapsFromCalendar) {
-                // Parse laps from RaceCalendar
-                const lapsMatch = lapsFromCalendar.match(/(\d+)/);
-                lapsValue = lapsMatch ? parseInt(lapsMatch[1]) : 0;
-            } else if (race.laps) {
-                // Fallback to race data
+            // Calculate laps from race data
+            if (race.laps) {
                 const lapsMatch = race.laps.toString().match(/(\d+)/);
-                lapsValue = lapsMatch ? parseInt(lapsMatch[1]) : 0;
-            } else if (circuit?.laps) {
-                // Fallback to circuit data
-                const lapsMatch = circuit.laps.toString().match(/(\d+)/);
-                lapsValue = lapsMatch ? parseInt(lapsMatch[1]) : 0;
-            } else {
-                lapsValue = 0;
-            }
-            
-            if (!isNaN(lapsValue) && lapsValue > 0) {
-                totalLaps += lapsValue;
-            }
-            
-            // Calculate distance
-            const distanceStr = race.distance;
-            if (distanceStr) {
-                const match = distanceStr.match(/(\d+\.?\d*)/);
-                if (match) {
-                    totalDistance += parseFloat(match[1]);
+                if (lapsMatch) {
+                    const laps = parseInt(lapsMatch[1]);
+                    if (!isNaN(laps)) {
+                        totalLaps += laps;
+                    }
                 }
-            } else if (circuit?.length && lapsValue > 0) {
-                // Calculate distance from circuit length and laps
-                const lengthMatch = circuit.length.match(/(\d+\.?\d*)/);
-                if (lengthMatch) {
-                    const lengthKm = parseFloat(lengthMatch[1]);
-                    const distance = lengthKm * lapsValue;
-                    totalDistance += distance;
+            }
+            
+            // Calculate distance from race data
+            if (race.distance) {
+                const match = race.distance.match(/(\d+\.?\d*)/);
+                if (match) {
+                    const distance = parseFloat(match[1]);
+                    if (!isNaN(distance)) {
+                        totalDistance += distance;
+                    }
                 }
             }
         });
+        
+        console.log('Track stats calculated:', { totalLength, totalLaps, totalDistance });
         
         // Update UI
         if (this.elements.totalTrackLength) {
@@ -549,54 +459,6 @@ class TrackCalendarManager {
         if (this.elements.totalDistance) {
             this.elements.totalDistance.textContent = `${totalDistance.toFixed(2)} km`;
         }
-        
-        if (this.elements.avgTrackLength && circuitsWithLength > 0) {
-            const avgLength = totalLength / circuitsWithLength;
-            this.elements.avgTrackLength.textContent = `${avgLength.toFixed(2)} km`;
-        }
-    }
-    
-    /**
-     * Calculate race distance with laps data
-     */
-    calculateRaceDistance(circuit, track, lapsFromCalendar = null) {
-        // Try track data first
-        if (track.distance && track.distance.trim() !== '') {
-            return track.distance;
-        }
-        
-        // Try circuit data with laps
-        if (!circuit?.length) return null;
-        
-        try {
-            const lengthMatch = circuit.length.match(/(\d+\.?\d*)/);
-            if (!lengthMatch) return null;
-            
-            const lengthKm = parseFloat(lengthMatch[1]);
-            let lapsValue;
-            
-            // Determine laps value (priority: RaceCalendar > track data > circuit data)
-            if (lapsFromCalendar) {
-                const lapsMatch = lapsFromCalendar.match(/(\d+)/);
-                lapsValue = lapsMatch ? parseInt(lapsMatch[1]) : 0;
-            } else if (track.laps) {
-                const lapsMatch = track.laps.toString().match(/(\d+)/);
-                lapsValue = lapsMatch ? parseInt(lapsMatch[1]) : 0;
-            } else if (circuit?.laps) {
-                const lapsMatch = circuit.laps.toString().match(/(\d+)/);
-                lapsValue = lapsMatch ? parseInt(lapsMatch[1]) : 0;
-            } else {
-                return null;
-            }
-            
-            if (isNaN(lengthKm) || isNaN(lapsValue) || lapsValue <= 0) return null;
-            
-            const distance = lengthKm * lapsValue;
-            return `${distance.toFixed(2)} km`;
-        } catch (error) {
-            console.error('Error calculating race distance:', error);
-            return null;
-        }
     }
     
     /**
@@ -609,6 +471,8 @@ class TrackCalendarManager {
             if (trackCard) {
                 const trackId = trackCard.dataset.trackId;
                 const calendarData = this.dataLoader.getCalendarData();
+                if (!calendarData) return;
+                
                 const race = calendarData.races.find(r => r.circuitId === trackId);
                 const circuit = calendarData.circuits.find(c => c.id === trackId);
                 
@@ -637,6 +501,8 @@ class TrackCalendarManager {
             if (quickItem) {
                 const trackId = quickItem.dataset.trackId;
                 const calendarData = this.dataLoader.getCalendarData();
+                if (!calendarData) return;
+                
                 const race = calendarData.races.find(r => r.circuitId === trackId);
                 const circuit = calendarData.circuits.find(c => c.id === trackId);
                 
@@ -736,6 +602,8 @@ class TrackCalendarManager {
      */
     openTrackGallery(trackId) {
         const calendarData = this.dataLoader.getCalendarData();
+        if (!calendarData) return;
+        
         const race = calendarData.races.find(r => r.circuitId === trackId);
         const circuit = calendarData.circuits.find(c => c.id === trackId);
         
@@ -798,7 +666,12 @@ class TrackCalendarManager {
      * Update header countdown
      */
     updateHeaderCountdown(nextRace) {
-        if (!nextRace) return;
+        if (!nextRace) {
+            if (this.elements.timerDisplay) {
+                this.elements.timerDisplay.textContent = 'LOADING...';
+            }
+            return;
+        }
         
         if (nextRace.status === 'upcoming' || nextRace.status === 'next') {
             this.updateHeaderTimer(nextRace.rawDate || nextRace.date);
@@ -861,17 +734,24 @@ class TrackCalendarManager {
             }
         };
         
+        // Clear any existing interval
+        if (this.countdownInterval) {
+            clearInterval(this.countdownInterval);
+        }
+        
         // Update immediately
         updateTimer();
+        
+        // Update every second
+        this.countdownInterval = setInterval(updateTimer, 1000);
     }
     
     /**
      * Start countdown timer
      */
-    startCountdownTimer() {
-        const calendarData = this.dataLoader.getCalendarData();
-        if (calendarData && calendarData.nextRace) {
-            this.updateHeaderCountdown(calendarData.nextRace);
+    startCountdownTimer(nextRace) {
+        if (nextRace) {
+            this.updateHeaderCountdown(nextRace);
         }
     }
     
@@ -893,16 +773,67 @@ class TrackCalendarManager {
                     status: "upcoming",
                     circuitId: "CIRC1",
                     laps: "33",
-                    distance: "150.942 km"
+                    distance: "150.942 km",
+                    rawDate: "2024-03-30"
+                },
+                {
+                    round: "Round 2",
+                    name: "Australia Grand Prix",
+                    date: "April 13, 2024",
+                    circuit: "Albert Park",
+                    location: "Melbourne, Australia",
+                    status: "upcoming",
+                    circuitId: "CIRC2",
+                    laps: "58",
+                    distance: "307.574 km",
+                    rawDate: "2024-04-13"
+                },
+                {
+                    round: "Round 3",
+                    name: "Japan Grand Prix",
+                    date: "April 27, 2024",
+                    circuit: "Suzuka Circuit",
+                    location: "Suzuka, Japan",
+                    status: "upcoming",
+                    circuitId: "CIRC3",
+                    laps: "53",
+                    distance: "307.573 km",
+                    rawDate: "2024-04-27"
                 }
             ],
             circuits: [
                 {
                     id: "CIRC1",
+                    raceName: "Germany Grand Prix",
                     circuitName: "Hockenheimring",
                     location: "Hockenheim, Germany",
                     length: "4.574 km",
-                    description: "A challenging mix of high-speed straights and technical stadium complex."
+                    laps: "33",
+                    record: "1:13.780",
+                    description: "A challenging mix of high-speed straights and technical stadium complex.",
+                    trackLayoutImage: ""
+                },
+                {
+                    id: "CIRC2",
+                    raceName: "Australia Grand Prix",
+                    circuitName: "Albert Park",
+                    location: "Melbourne, Australia",
+                    length: "5.303 km",
+                    laps: "58",
+                    record: "1:20.260",
+                    description: "A street circuit set around Albert Park Lake featuring fast flowing corners.",
+                    trackLayoutImage: ""
+                },
+                {
+                    id: "CIRC3",
+                    raceName: "Japan Grand Prix",
+                    circuitName: "Suzuka Circuit",
+                    location: "Suzuka, Japan",
+                    length: "5.807 km",
+                    laps: "53",
+                    record: "1:27.064",
+                    description: "A challenging figure-eight circuit known for its unique crossover section.",
+                    trackLayoutImage: ""
                 }
             ],
             nextRace: {
@@ -916,8 +847,8 @@ class TrackCalendarManager {
             },
             stats: {
                 completed: 0,
-                upcoming: 1,
-                total: 1,
+                upcoming: 3,
+                total: 3,
                 progress: 0
             }
         };
@@ -940,9 +871,13 @@ document.addEventListener('DOMContentLoaded', () => {
     refreshBtn.className = 'refresh-btn';
     refreshBtn.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:1000;background:var(--primary);color:white;border:none;border-radius:50%;width:40px;height:40px;cursor:pointer;';
     refreshBtn.addEventListener('click', () => {
-        trackCalendarManager.dataLoader.dataCache = {};
+        trackCalendarManager.dataLoader.dataCache.calendarData = null;
         trackCalendarManager.isInitialized = false;
-        trackCalendarManager.raceLapsData = {};
+        trackCalendarManager.selectedTrack = null;
+        if (trackCalendarManager.countdownInterval) {
+            clearInterval(trackCalendarManager.countdownInterval);
+            trackCalendarManager.countdownInterval = null;
+        }
         trackCalendarManager.initialize();
     });
     document.body.appendChild(refreshBtn);
