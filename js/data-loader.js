@@ -1,6 +1,8 @@
 /**
  * EFC Data Loader - Loads and processes CSV data from Google Sheets
- * Updated with Sprint Results and Sprint Calendar support
+ * Updated with Sprint Results, Sprint Calendar, and Driver Movement support
+ * FIXED: Driver movement parsing preserves exact driver names
+ * UPDATED: Discards drivers with no round assignments
  */
 
 class EFCDataLoader {
@@ -23,8 +25,9 @@ class EFCDataLoader {
             pointsTable: 'PointsTable',
             hof: 'HOF',
             media: 'Media',
-            sprintResults: 'SprintResults',    // Added
-            sprintCalendar: 'SprintCalendar'   // Added
+            sprintResults: 'SprintResults',
+            sprintCalendar: 'SprintCalendar',
+            driverMovement: 'Driver Movement'
         };
         
         // Team abbreviations mapping
@@ -39,7 +42,29 @@ class EFCDataLoader {
             'ALF': 'Alfa Romeo',
             'WIL': 'Williams',
             'RBU': 'Racing Bulls',
+            'BMW': 'BMW',
+            'POR': 'Porsche',
+            'SAU': 'Sauber',
+            'AUD': 'Audi',
             'Default': 'Unknown Team'
+        };
+        
+        // Team name to code mapping (preserve exact case for matching)
+        this.teamNameToCode = {
+            'Williams': 'WIL',
+            'Ferrari': 'FER',
+            'BMW': 'BMW',
+            'Mercedes': 'MER',
+            'Porsche': 'POR',
+            'Racing Bulls': 'RBU',
+            'Haas': 'HAA',
+            'Sauber': 'SAU',
+            'Aston Martin': 'AST',
+            'Red Bull': 'RBR',
+            'Mclaren': 'MCL',
+            'McLaren': 'MCL',
+            'Alpine': 'ALP',
+            'Audi': 'AUD'
         };
         
         // Points system (P1 = 25, P2 = 18, etc.)
@@ -61,7 +86,7 @@ class EFCDataLoader {
         console.log('Loading homepage data...');
 
         try {
-            // Load all required sheets in parallel - ADDED SPRINT SHEETS
+            // Load all required sheets in parallel
             const [
                 driverMasterData,
                 teamMasterData,
@@ -72,7 +97,8 @@ class EFCDataLoader {
                 circuitMasterData,
                 mediaData,
                 sprintResultsData,
-                sprintCalendarData
+                sprintCalendarData,
+                driverMovementData
             ] = await Promise.all([
                 this.fetchCSV(this.sheetNames.driverMaster),
                 this.fetchCSV(this.sheetNames.teamMaster),
@@ -82,55 +108,213 @@ class EFCDataLoader {
                 this.fetchCSV(this.sheetNames.qualifyingResults),
                 this.fetchCSV(this.sheetNames.circuitMaster),
                 this.fetchCSV(this.sheetNames.media),
-                this.fetchCSV(this.sheetNames.sprintResults),    // Added
-                this.fetchCSV(this.sheetNames.sprintCalendar)    // Added
+                this.fetchCSV(this.sheetNames.sprintResults),
+                this.fetchCSV(this.sheetNames.sprintCalendar),
+                this.fetchCSV(this.sheetNames.driverMovement)
             ]);
 
-            // Process each sheet with its specific structure
-            this.dataCache = {
-                driverMaster: this.processDriverMaster(driverMasterData),
-                teamMaster: this.processTeamMaster(teamMasterData),
-                raceCalendar: this.processRaceCalendar(raceCalendarData),
-                driverStats: this.processDriverStats(driverStatsData),
-                raceResults: this.processRaceResults(raceResultsData),
-                qualifyingResults: this.processQualifyingResults(qualifyingResultsData),
-                circuitMaster: this.processCircuitMaster(circuitMasterData),
-                media: this.processMedia(mediaData),
-                sprintResults: this.processSprintResults(sprintResultsData),     // Added
-                sprintCalendar: this.processSprintCalendar(sprintCalendarData)   // Added
-            };
+            // Process each sheet
+            const driverMaster = this.processDriverMaster(driverMasterData);
+            const teamMaster = this.processTeamMaster(teamMasterData);
+            const raceCalendar = this.processRaceCalendar(raceCalendarData);
+            const driverStats = this.processDriverStats(driverStatsData);
+            const raceResults = this.processRaceResults(raceResultsData);
+            const qualifyingResults = this.processQualifyingResults(qualifyingResultsData);
+            const circuitMaster = this.processCircuitMaster(circuitMasterData);
+            const media = this.processMedia(mediaData);
+            const sprintResults = this.processSprintResults(sprintResultsData);
+            const sprintCalendar = this.processSprintCalendar(sprintCalendarData);
+            const driverMovement = this.processDriverMovement(driverMovementData);
+            
+            // Filter out drivers with no round assignments from all relevant data
+            const filteredData = this.filterDriversWithNoAssignments({
+                driverMaster,
+                teamMaster,
+                raceCalendar,
+                driverStats,
+                raceResults,
+                qualifyingResults,
+                circuitMaster,
+                media,
+                sprintResults,
+                sprintCalendar,
+                driverMovement
+            });
 
-            console.log('Data loaded successfully:', {
+            this.dataCache = filteredData;
+
+            console.log('Data loaded and filtered successfully:', {
                 drivers: this.dataCache.driverMaster.length,
                 teams: this.dataCache.teamMaster.length,
                 races: this.dataCache.raceCalendar.length,
-                sprints: this.dataCache.sprintCalendar.length,  // Added
+                sprints: this.dataCache.sprintCalendar.length,
                 driverStats: this.dataCache.driverStats.length,
                 completedRaces: this.getCompletedRacesCount(),
-                completedSprints: this.dataCache.sprintResults?.completedSprints?.length || 0  // Added
+                completedSprints: this.dataCache.sprintResults?.completedSprints?.length || 0,
+                driverMovements: Object.keys(this.dataCache.driverMovement?.driverMovements || {}).length,
+                filteredDrivers: Object.keys(this.dataCache.driverMovement?.driverMovements || {}).length
             });
             
             return this.dataCache;
 
         } catch (error) {
             console.error('Error loading homepage data:', error);
-            // Return empty structure to prevent crashes
-            return {
-                driverMaster: [],
-                teamMaster: [],
-                raceCalendar: [],
-                driverStats: [],
-                raceResults: { headers: [], results: [], completedRaces: [] },
-                qualifyingResults: { headers: [], results: [] },
-                circuitMaster: [],
-                media: {},
-                sprintResults: { headers: [], results: [], completedSprints: [] },  // Added
-                sprintCalendar: []  // Added
-            };
+            return this.getEmptyDataCache();
         } finally {
             this.isLoading = false;
         }
     }
+
+    /**
+     * Filter out drivers with no round assignments from all data
+     */
+    filterDriversWithNoAssignments(data) {
+        const driverMovement = data.driverMovement || { driverMovements: {}, roundTeams: {} };
+        const activeDrivers = new Set(Object.keys(driverMovement.driverMovements || {}));
+        
+        console.log('Active drivers from movement data:', Array.from(activeDrivers));
+        
+        // Filter driverMaster
+        const filteredDriverMaster = (data.driverMaster || []).filter(driver => 
+            activeDrivers.has(driver.username)
+        );
+        
+        // Filter driverStats
+        const filteredDriverStats = (data.driverStats || []).filter(stat => 
+            activeDrivers.has(stat.driver)
+        );
+        
+        // Filter raceResults
+        const filteredRaceResults = {
+            ...(data.raceResults || {}),
+            results: (data.raceResults?.results || []).filter(result => 
+                activeDrivers.has(result.driver)
+            )
+        };
+        
+        // Filter qualifyingResults
+        const filteredQualifyingResults = {
+            ...(data.qualifyingResults || {}),
+            results: (data.qualifyingResults?.results || []).filter(result => 
+                activeDrivers.has(result.driver)
+            )
+        };
+        
+        // Filter sprintResults
+        const filteredSprintResults = {
+            ...(data.sprintResults || {}),
+            results: (data.sprintResults?.results || []).filter(result => 
+                activeDrivers.has(result.driver)
+            )
+        };
+        
+        return {
+            ...data,
+            driverMaster: filteredDriverMaster,
+            driverStats: filteredDriverStats,
+            raceResults: filteredRaceResults,
+            qualifyingResults: filteredQualifyingResults,
+            sprintResults: filteredSprintResults
+        };
+    }
+
+    /**
+     * Get empty data cache for error cases
+     */
+    getEmptyDataCache() {
+        return {
+            driverMaster: [],
+            teamMaster: [],
+            raceCalendar: [],
+            driverStats: [],
+            raceResults: { headers: [], results: [], completedRaces: [] },
+            qualifyingResults: { headers: [], results: [] },
+            circuitMaster: [],
+            media: {},
+            sprintResults: { headers: [], results: [], completedSprints: [] },
+            sprintCalendar: [],
+            driverMovement: { driverMovements: {}, roundTeams: {} }
+        };
+    }
+
+    /**
+ * Process Driver Movement data - FIXED to start from correct row
+ */
+processDriverMovement(csvText) {
+    if (!csvText) return { driverMovements: {}, roundTeams: {} };
+    
+    const lines = csvText.split('\n').filter(line => line.trim() !== '');
+    if (lines.length < 2) return { driverMovements: {}, roundTeams: {} };
+    
+    console.log('Driver movement CSV first 5 lines:', lines.slice(0, 5));
+    
+    const driverMovements = {};
+    const roundTeams = {};
+    
+    // Start from line 1 (index 1) - the first driver row
+    // Row 0 is the header row with round numbers
+    for (let i = 1; i < lines.length; i++) {
+        const values = this.parseCSVLine(lines[i]);
+        
+        // Log lines that might contain notunbeatable08
+        if (values[0] && values[0].includes('notunbeatable')) {
+            console.log(`FOUND notunbeatable08 at line ${i}:`, values);
+        }
+        
+        if (values.length < 2 || !values[0] || values[0] === '') continue;
+        
+        // Keep the driver name exactly as it appears
+        const driverName = values[0];
+        let hasAssignments = false;
+        driverMovements[driverName] = {};
+        
+        // Process each round (columns 1-12 = indices 1-12)
+        for (let round = 1; round <= 12; round++) {
+            if (round >= values.length) continue;
+            
+            const team = values[round];
+            if (team && team !== '') {
+                driverMovements[driverName][`Round ${round}`] = team;
+                hasAssignments = true;
+                
+                if (!roundTeams[`Round ${round}`]) {
+                    roundTeams[`Round ${round}`] = {};
+                }
+                roundTeams[`Round ${round}`][driverName] = team;
+            }
+        }
+        
+        // If driver has no assignments, remove them from the map
+        if (!hasAssignments) {
+            delete driverMovements[driverName];
+            console.log(`Removed ${driverName} - no round assignments`);
+        }
+    }
+    
+    // Also clean up roundTeams to only include drivers that exist in driverMovements
+    Object.keys(roundTeams).forEach(roundKey => {
+        const roundDrivers = roundTeams[roundKey];
+        Object.keys(roundDrivers).forEach(driverName => {
+            if (!driverMovements[driverName]) {
+                delete roundDrivers[driverName];
+            }
+        });
+        // Remove empty round objects
+        if (Object.keys(roundDrivers).length === 0) {
+            delete roundTeams[roundKey];
+        }
+    });
+    
+    console.log('Processed driver movements:', Object.keys(driverMovements).length, 'active drivers');
+    console.log('First 10 active drivers in movement data:', Object.keys(driverMovements).slice(0, 10));
+    console.log('Does notunbeatable08 exist in movement data?', 
+                Object.keys(driverMovements).includes('notunbeatable08') ? 'YES' : 'NO');
+    
+    return {
+        driverMovements,
+        roundTeams
+    };
+}
 
     /**
      * Load and process data specifically for the calendar page
@@ -193,7 +377,7 @@ class EFCDataLoader {
     }
 
     /**
-     * Process SprintResults data - Same structure as RaceResults
+     * Process SprintResults data
      */
     processSprintResults(csvText) {
         if (!csvText) return { 
@@ -218,7 +402,7 @@ class EFCDataLoader {
         // Check each sprint column (starting from column B)
         for (let i = 1; i < completionLine.length; i++) {
             if (completionLine[i] && completionLine[i].trim().toLowerCase() === 'x') {
-                completedSprints.push(i - 1); // Store index (0-based for Sprint 1)
+                completedSprints.push(i - 1);
             }
         }
         
@@ -276,7 +460,7 @@ class EFCDataLoader {
     }
 
     /**
-     * Process SprintCalendar data - Same structure as RaceCalendar
+     * Process SprintCalendar data
      */
     processSprintCalendar(csvText) {
         if (!csvText) return [];
@@ -329,9 +513,6 @@ class EFCDataLoader {
         const raceResults = this.parseRaceResultsForWinners(raceResultsData);
         const completedRaces = this.getCompletedRacesFromRaceResults(raceResultsData);
         
-        // Determine current date for status calculation
-        const currentDate = new Date();
-        
         // Start from Column B (index 1)
         for (let i = 1; i < raceNames.length; i++) {
             if (!raceNames[i] || raceNames[i].trim() === '') continue;
@@ -366,13 +547,13 @@ class EFCDataLoader {
                 round: roundLabel,
                 name: raceName,
                 date: formattedDate,
-                rawDate: dateStr, // Keep original for countdown
+                rawDate: dateStr,
                 circuit: circuitInfo.circuitName || raceName.replace('Grand Prix', '').trim() + ' Circuit',
                 location: circuitInfo.location || 'TBA',
                 status: status,
                 winner: winner,
                 circuitId: circuitInfo.id || `CIRC${i}`,
-                laps: circuitInfo.laps || Math.floor(Math.random() * 20) + 50, // Mock laps if not available
+                laps: circuitInfo.laps || Math.floor(Math.random() * 20) + 50,
                 length: circuitInfo.length || 'TBA',
                 record: circuitInfo.record || 'TBA',
                 distance: circuitInfo.distance || 'TBA'
@@ -430,7 +611,7 @@ class EFCDataLoader {
         // Check each race column (starting from column B)
         for (let i = 1; i < completionLine.length; i++) {
             if (completionLine[i] && completionLine[i].trim().toLowerCase() === 'x') {
-                completedRaces.push(i - 1); // Store index (0-based for Round 1)
+                completedRaces.push(i - 1);
             }
         }
         
@@ -474,7 +655,6 @@ class EFCDataLoader {
                 if (!c.raceName) return false;
                 const circuitNameLower = c.raceName.toLowerCase();
                 
-                // Check for common country/circuit patterns
                 return raceNameLower.includes('germany') && circuitNameLower.includes('germany') ||
                        raceNameLower.includes('australia') && circuitNameLower.includes('australia') ||
                        raceNameLower.includes('japan') && circuitNameLower.includes('japan') ||
@@ -655,7 +835,6 @@ class EFCDataLoader {
 
     /**
      * Process DriverMaster data
-     * Structure: 13 columns (including value), 20 drivers
      */
     processDriverMaster(csvText) {
         if (!csvText) return [];
@@ -683,11 +862,10 @@ class EFCDataLoader {
                 number: values[9] || '',
                 socials: values[10] || '',
                 description: values[11] || '',
-                value: values[12] || '', // Column M - Driver Value
+                value: values[12] || '',
                 teamName: this.getTeamNameFromCode(values[5] || '')
             };
             
-            // Only add if we have a username
             if (driver.username) {
                 drivers.push(driver);
             }
@@ -698,7 +876,6 @@ class EFCDataLoader {
 
     /**
      * Process TeamMaster data
-     * Structure: 16 columns, 14 teams
      */
     processTeamMaster(csvText) {
         if (!csvText) return [];
@@ -733,7 +910,6 @@ class EFCDataLoader {
                 fullName: this.getFullTeamName(values[0] || '')
             };
             
-            // Only add if we have a team ID
             if (team.id) {
                 teams.push(team);
             }
@@ -743,7 +919,7 @@ class EFCDataLoader {
     }
 
     /**
-     * Process RaceCalendar data - SIMPLE FIX
+     * Process RaceCalendar data
      */
     processRaceCalendar(csvText) {
         if (!csvText) return [];
@@ -754,11 +930,11 @@ class EFCDataLoader {
         const races = [];
         
         // Row 1: Race names
-        // Row 2: Dates (not round labels)
-        // Row 3: Round labels (not dates)
+        // Row 2: Dates
+        // Row 3: Round labels
         const raceNames = this.parseCSVLine(lines[0]);
-        const dates = this.parseCSVLine(lines[1]);      // This has dates
-        const roundLabels = this.parseCSVLine(lines[2]); // This has round labels
+        const dates = this.parseCSVLine(lines[1]);
+        const roundLabels = this.parseCSVLine(lines[2]);
         
         // Start from Column B (index 1)
         for (let i = 1; i < raceNames.length; i++) {
@@ -766,8 +942,8 @@ class EFCDataLoader {
             
             const race = {
                 name: raceNames[i].trim(),
-                round: (roundLabels[i] || `Round ${i}`).trim(),  // Get round from row 3
-                date: (dates[i] || '').trim(),                   // Get date from row 2
+                round: (roundLabels[i] || `Round ${i}`).trim(),
+                date: (dates[i] || '').trim(),
                 time: '',
                 laps: ''
             };
@@ -780,7 +956,6 @@ class EFCDataLoader {
 
     /**
      * Process DriverStats data
-     * Structure: 18 columns, 20 drivers
      */
     processDriverStats(csvText) {
         if (!csvText) return [];
@@ -816,7 +991,6 @@ class EFCDataLoader {
                 championships: this.parseNumber(values[17])
             };
             
-            // Only add if we have a driver name
             if (stat.driver) {
                 stats.push(stat);
             }
@@ -827,8 +1001,6 @@ class EFCDataLoader {
 
     /**
      * Process RaceResults data
-     * Special structure with 3 header rows
-     * Row 1 has "x" in each race column if completed
      */
     processRaceResults(csvText) {
         if (!csvText) return { 
@@ -853,11 +1025,11 @@ class EFCDataLoader {
         // Check each race column (starting from column B)
         for (let i = 1; i < completionLine.length; i++) {
             if (completionLine[i] && completionLine[i].trim().toLowerCase() === 'x') {
-                completedRaces.push(i - 1); // Store index (0-based for Round 1)
+                completedRaces.push(i - 1);
             }
         }
         
-        // Row 2: Race names (Row 1 is filler "x" cells)
+        // Row 2: Race names
         const raceNamesLine = this.parseCSVLine(lines[1]);
         const raceNames = raceNamesLine.slice(1);
         
@@ -912,7 +1084,6 @@ class EFCDataLoader {
 
     /**
      * Process QualifyingResults data
-     * Special structure with 2 header rows
      */
     processQualifyingResults(csvText) {
         if (!csvText) return { headers: [], results: [] };
@@ -984,7 +1155,7 @@ class EFCDataLoader {
                 record: values[4] || '',
                 description: values[5] || '',
                 circuitName: values[6] || '',
-                trackLayoutImage: values[7] || ''  // Column H - Track layout pictures
+                trackLayoutImage: values[7] || ''
             };
         
             if (circuit.raceName) {
@@ -997,7 +1168,6 @@ class EFCDataLoader {
 
     /**
      * Process Media data
-     * Column A row 2 = Driver of the Day
      */
     processMedia(csvText) {
         if (!csvText) return { dotd: '', articleLink: '', youtubeLink: '' };
@@ -1031,7 +1201,7 @@ class EFCDataLoader {
                 inQuotes = true;
             } else if (char === '"' && inQuotes && nextChar === '"') {
                 currentValue += '"';
-                i++; // Skip next quote
+                i++;
             } else if (char === '"' && inQuotes) {
                 inQuotes = false;
             } else if (char === ',' && !inQuotes) {
@@ -1079,7 +1249,11 @@ class EFCDataLoader {
             'HAA': 'Haas F1 Team',
             'ALF': 'Alfa Romeo',
             'WIL': 'Williams',
-            'RBU': 'Visa Cash App RB'
+            'RBU': 'Visa Cash App RB',
+            'BMW': 'BMW',
+            'POR': 'Porsche',
+            'SAU': 'Sauber',
+            'AUD': 'Audi'
         };
         
         // Check if teamName is a code
@@ -1096,6 +1270,40 @@ class EFCDataLoader {
         }
         
         return teamName;
+    }
+
+    /**
+     * Get team code from team name
+     */
+    getTeamCodeFromName(teamName) {
+        if (!teamName) return null;
+        
+        // Check direct mapping
+        if (this.teamNameToCode[teamName]) {
+            return this.teamNameToCode[teamName];
+        }
+        
+        // Check if it's already a code
+        if (this.teamAbbreviations[teamName]) {
+            return teamName;
+        }
+        
+        // Try case-insensitive match
+        const lowerTeamName = teamName.toLowerCase();
+        for (const [name, code] of Object.entries(this.teamNameToCode)) {
+            if (name.toLowerCase() === lowerTeamName) {
+                return code;
+            }
+        }
+        
+        // Try partial match
+        for (const [name, code] of Object.entries(this.teamNameToCode)) {
+            if (lowerTeamName.includes(name.toLowerCase()) || name.toLowerCase().includes(lowerTeamName)) {
+                return code;
+            }
+        }
+        
+        return null;
     }
 
     /**
@@ -1116,31 +1324,14 @@ class EFCDataLoader {
         }
 
         return {
-            // Hero stats
             heroStats: this.getHeroStats(),
-            
-            // Top drivers by points
             topDrivers: this.getTopDrivers(5),
-            
-            // Top constructors by points (calculated from driver points)
             topConstructors: this.getTopConstructors(5),
-            
-            // Top rated drivers
             topRatedDrivers: this.getTopRatedDrivers(5),
-            
-            // Next race info
             nextRace: this.getNextRace(),
-            
-            // Previous race info (from completed races)
             previousRace: this.getPreviousRace(),
-            
-            // Upcoming calendar
             upcomingRaces: this.getUpcomingRaces(5),
-            
-            // Driver of the day (from Media sheet)
             driverOfTheDay: this.getDriverOfTheDay(),
-            
-            // Latest article info (from Media sheet if available)
             latestArticle: this.getLatestArticle()
         };
     }
@@ -1170,15 +1361,12 @@ class EFCDataLoader {
         const driverMaster = this.dataCache.driverMaster || [];
         
         if (driverStats.length === 0) {
-            // Fallback to mock data
             return this.getMockTopDrivers(limit);
         }
         
-        // Sort by points (descending)
         const sortedStats = [...driverStats].sort((a, b) => b.points - a.points);
         
         return sortedStats.slice(0, limit).map((stat, index) => {
-            // Find driver info
             const driverInfo = driverMaster.find(d => d.username === stat.driver) || {};
             
             return {
@@ -1192,57 +1380,208 @@ class EFCDataLoader {
     }
 
     /**
-     * Get top constructors by points (calculated from driver points)
-     */
-    getTopConstructors(limit = 5) {
-        const driverStats = this.dataCache.driverStats || [];
-        const driverMaster = this.dataCache.driverMaster || [];
-        const teamMaster = this.dataCache.teamMaster || [];
-        
-        if (driverStats.length === 0) {
-            return this.getMockTopConstructors(limit);
-        }
-        
-        // Group points by team
-        const teamPoints = {};
-        const teamWins = {};
-        
-        driverStats.forEach(stat => {
-            const driverInfo = driverMaster.find(d => d.username === stat.driver);
-            if (driverInfo && driverInfo.teamCode) {
-                const teamCode = driverInfo.teamCode;
-                if (!teamPoints[teamCode]) {
-                    teamPoints[teamCode] = 0;
-                    teamWins[teamCode] = 0;
-                }
-                teamPoints[teamCode] += stat.points || 0;
-                teamWins[teamCode] += stat.wins || 0;
+ * Get top constructors by points using driver movement data
+ */
+getTopConstructors(limit = 5) {
+    const dataCache = this.dataCache;
+    const driverStats = dataCache.driverStats || [];
+    const driverMaster = dataCache.driverMaster || [];
+    const driverMovement = dataCache.driverMovement || { driverMovements: {}, roundTeams: {} };
+    const roundTeams = driverMovement.roundTeams || {};
+    const completedRaces = this.getCompletedRacesCount();
+    
+    if (driverStats.length === 0) {
+        return this.getMockTopConstructors(limit);
+    }
+    
+    console.log('Calculating constructor standings using driver movement...');
+    
+    // Get ALL team names from roundTeams
+    const teamNames = new Set();
+    Object.values(roundTeams).forEach(roundAssignments => {
+        Object.values(roundAssignments).forEach(team => {
+            if (team && team.trim() !== '') {
+                teamNames.add(team);
             }
         });
+    });
+    
+    console.log('All team names found:', Array.from(teamNames));
+    
+    // Initialize team points and stats
+    const teamPoints = {};
+    const teamWins = {};
+    const teamDrivers = {};
+    
+    teamNames.forEach(team => {
+        teamPoints[team] = 0;
+        teamWins[team] = 0;
+        teamDrivers[team] = new Set();
+    });
+    
+    // Calculate points per driver per round using race results
+    const raceResults = dataCache.raceResults || {};
+    const results = raceResults.results || [];
+    
+    // Create a map of driver points per round
+    const driverRoundPoints = {};
+    
+    results.forEach(driverResult => {
+        const driverName = driverResult.driver;
+        const driverRounds = driverResult.results || {};
         
-        // Convert to array and sort
-        const constructors = Object.entries(teamPoints)
-            .map(([teamCode, points]) => {
-                // Find team info
-                const teamInfo = teamMaster.find(t => t.id === teamCode) || {};
-                
-                // Get drivers for this team
-                const teamDrivers = driverMaster
-                    .filter(d => d.teamCode === teamCode)
-                    .map(d => d.username);
-                
-                return {
-                    teamCode: teamCode,
-                    name: teamInfo.name || this.getTeamNameFromCode(teamCode),
-                    points: points,
-                    wins: teamWins[teamCode] || 0,
-                    drivers: teamDrivers
-                };
-            })
-            .sort((a, b) => b.points - a.points);
+        driverRoundPoints[driverName] = {};
         
-        return constructors.slice(0, limit);
+        Object.entries(driverRounds).forEach(([roundKey, roundResult]) => {
+            if (!roundResult || roundResult.trim() === '' || roundResult === 'DNS' || roundResult === 'DNF') {
+                return;
+            }
+            
+            const roundMatch = roundKey.match(/Round\s*(\d+)/i);
+            if (!roundMatch) return;
+            
+            const roundNum = parseInt(roundMatch[1]);
+            if (roundNum > completedRaces) return;
+            
+            let racePoints = 0;
+            let hasFastestLap = false;
+            
+            if (roundResult.includes('Fastest Lap') || roundResult.includes('FL')) {
+                hasFastestLap = true;
+            }
+            
+            const positionMatch = roundResult.match(/P(\d+)/i);
+            if (positionMatch) {
+                const position = parseInt(positionMatch[1]);
+                racePoints = this.calculatePointsFromPosition(position);
+                
+                if (hasFastestLap && racePoints > 0) {
+                    racePoints += 1;
+                }
+            }
+            
+            driverRoundPoints[driverName][roundKey] = racePoints;
+        });
+    });
+    
+    // Add sprint points
+    const sprintResults = dataCache.sprintResults || {};
+    const sprints = sprintResults.results || [];
+    
+    sprints.forEach(driverResult => {
+        const driverName = driverResult.driver;
+        const driverSprints = driverResult.results || {};
+        
+        Object.entries(driverSprints).forEach(([sprintKey, sprintResult]) => {
+            if (!sprintResult || sprintResult.trim() === '' || sprintResult === 'DNS' || sprintResult === 'DNF') {
+                return;
+            }
+            
+            const sprintMatch = sprintKey.match(/Sprint\s*(\d+)/i);
+            if (!sprintMatch) return;
+            
+            const sprintNum = parseInt(sprintMatch[1]);
+            if (sprintNum > completedRaces) return;
+            
+            const roundKey = `Round ${sprintNum}`;
+            let sprintPoints = 0;
+            
+            const positionMatch = sprintResult.match(/P(\d+)/i);
+            if (positionMatch) {
+                const position = parseInt(positionMatch[1]);
+                sprintPoints = this.calculateSprintPointsFromPosition(position);
+            }
+            
+            if (!driverRoundPoints[driverName]) {
+                driverRoundPoints[driverName] = {};
+            }
+            
+            if (driverRoundPoints[driverName][roundKey]) {
+                driverRoundPoints[driverName][roundKey] += sprintPoints;
+            } else {
+                driverRoundPoints[driverName][roundKey] = sprintPoints;
+            }
+        });
+    });
+    
+    // For each completed round, assign points to the team the driver was in
+    for (let round = 1; round <= completedRaces; round++) {
+        const roundKey = `Round ${round}`;
+        const roundAssignments = roundTeams[roundKey] || {};
+        
+        // For each driver that has points this round
+        Object.entries(driverRoundPoints).forEach(([driverName, roundPoints]) => {
+            const pointsForRound = roundPoints[roundKey] || 0;
+            if (pointsForRound === 0) return;
+            
+            // Get the team for this driver in this round
+            const teamForRound = roundAssignments[driverName];
+            
+            if (teamForRound && teamForRound.trim() !== '') {
+                // Add points to this team
+                teamPoints[teamForRound] = (teamPoints[teamForRound] || 0) + pointsForRound;
+                teamDrivers[teamForRound].add(driverName);
+                
+                // Track wins (25 points or more indicates a win)
+                if (pointsForRound >= 25) {
+                    teamWins[teamForRound] = (teamWins[teamForRound] || 0) + 1;
+                }
+                
+                console.log(`Added ${pointsForRound} points to ${teamForRound} for ${driverName} in ${roundKey}`);
+            }
+        });
     }
+    
+    // Convert to array and sort
+    const constructors = Object.entries(teamPoints)
+        .map(([teamName, points]) => {
+            // Get team info from team master
+            const teamMaster = dataCache.teamMaster || [];
+            const teamInfo = teamMaster.find(t => t.name === teamName) || 
+                           teamMaster.find(t => t.name && teamName.includes(t.name)) || {};
+            
+            return {
+                position: 0, // Will be set after sorting
+                name: teamName,
+                points: points || 0,
+                wins: teamWins[teamName] || 0,
+                drivers: Array.from(teamDrivers[teamName] || []),
+                color: teamInfo.primaryColor || '#00f7ff'
+            };
+        })
+        .filter(team => team.points > 0) // Only show teams with points
+        .sort((a, b) => b.points - a.points)
+        .map((team, index) => ({
+            ...team,
+            position: index + 1
+        }));
+    
+    console.log('Constructor standings calculated:', constructors);
+    
+    return constructors.slice(0, limit);
+}
+
+/**
+ * Calculate points from finishing position
+ */
+calculatePointsFromPosition(position) {
+    const pointsSystem = {
+        1: 25, 2: 18, 3: 15, 4: 12, 5: 10,
+        6: 8, 7: 6, 8: 4, 9: 2, 10: 1
+    };
+    return pointsSystem[position] || 0;
+}
+
+/**
+ * Calculate sprint points from finishing position
+ */
+calculateSprintPointsFromPosition(position) {
+    const sprintPoints = {
+        1: 8, 2: 7, 3: 6, 4: 5, 5: 4,
+        6: 3, 7: 2, 8: 1
+    };
+    return sprintPoints[position] || 0;
+}
 
     /**
      * Get top rated drivers
@@ -1254,7 +1593,6 @@ class EFCDataLoader {
             return this.getMockTopRatedDrivers(limit);
         }
         
-        // Sort by driver rating (descending)
         const sortedStats = [...driverStats].sort((a, b) => b.driverRating - a.driverRating);
         
         return sortedStats.slice(0, limit).map((stat, index) => ({
@@ -1265,7 +1603,7 @@ class EFCDataLoader {
     }
 
     /**
-     * Get next race info - FIXED VERSION
+     * Get next race info
      */
     getNextRace() {
         const calendar = this.dataCache.raceCalendar || [];
@@ -1282,11 +1620,8 @@ class EFCDataLoader {
             };
         }
 
-        // If no races completed yet, next race is Round 1
         if (completedRaces === 0) {
             const firstRace = calendar[0];
-            
-            // Find circuit info for this race
             let circuitInfo = this.getCircuitInfo(firstRace.name, circuitMaster);
             
             return {
@@ -1299,11 +1634,8 @@ class EFCDataLoader {
             };
         }
         
-        // Otherwise, next race is after last completed race
         if (completedRaces < calendar.length) {
-            const nextRace = calendar[completedRaces]; // 0-based index
-            
-            // Find circuit info for this race
+            const nextRace = calendar[completedRaces];
             let circuitInfo = this.getCircuitInfo(nextRace.name, circuitMaster);
             
             return {
@@ -1316,7 +1648,6 @@ class EFCDataLoader {
             };
         }
 
-        // All races completed
         return {
             name: 'SEASON COMPLETED',
             round: '-',
@@ -1334,13 +1665,11 @@ class EFCDataLoader {
             return { location: '', circuitName: '' };
         }
         
-        // Try to find exact match first
         let circuit = circuitMaster.find(c => 
             c.raceName && raceName && 
             c.raceName.toLowerCase() === raceName.toLowerCase()
         );
         
-        // If not found, try partial match
         if (!circuit) {
             circuit = circuitMaster.find(c => 
                 c.raceName && raceName && 
@@ -1348,14 +1677,12 @@ class EFCDataLoader {
             );
         }
         
-        // If still not found, try matching by common patterns
         if (!circuit) {
             const raceNameLower = raceName.toLowerCase();
             circuit = circuitMaster.find(c => {
                 if (!c.raceName) return false;
                 const circuitNameLower = c.raceName.toLowerCase();
                 
-                // Check for common patterns
                 return raceNameLower.includes('germany') && circuitNameLower.includes('germany') ||
                        raceNameLower.includes('australia') && circuitNameLower.includes('australia') ||
                        raceNameLower.includes('japan') && circuitNameLower.includes('japan') ||
@@ -1371,30 +1698,23 @@ class EFCDataLoader {
 
     /**
      * Format date from M/D/YYYY to more readable format
-     * Sheet uses M/D/YYYY format (e.g., "3/14/2026" for March 14, 2026)
      */
     formatDate(dateStr) {
-        console.log('formatDate() called with:', dateStr);
-        
         if (!dateStr || dateStr.trim() === '' || dateStr.toLowerCase() === 'tbd') {
             return 'TBD';
         }
         
-        // Clean the date string
         dateStr = dateStr.trim();
         
         try {
-            // Handle DD/MM/YYYY format (like "14/03/2026" from Google Sheets)
             if (dateStr.includes('/')) {
                 const parts = dateStr.split('/').map(part => parseInt(part, 10));
                 
                 if (parts.length === 3 && !parts.some(isNaN)) {
-                    // Assume DD/MM/YYYY format from Google Sheets CSV export
                     const [day, month, year] = parts;
                     
-                    // Validate ranges
                     if (day < 1 || day > 31 || month < 1 || month > 12 || year < 2000) {
-                        return dateStr; // Return original if invalid
+                        return dateStr;
                     }
                     
                     const date = new Date(year, month - 1, day);
@@ -1403,7 +1723,6 @@ class EFCDataLoader {
                         return dateStr;
                     }
                     
-                    // Format as "Month Day, Year"
                     return date.toLocaleDateString('en-US', { 
                         month: 'long', 
                         day: 'numeric', 
@@ -1412,7 +1731,6 @@ class EFCDataLoader {
                 }
             }
             
-            // If not in slash format, try parsing as-is
             const date = new Date(dateStr);
             if (!isNaN(date.getTime())) {
                 return date.toLocaleDateString('en-US', { 
@@ -1422,7 +1740,6 @@ class EFCDataLoader {
                 });
             }
             
-            // Return original if all parsing fails
             return dateStr;
             
         } catch (error) {
@@ -1431,66 +1748,93 @@ class EFCDataLoader {
         }
     }
 
-    /**
-     * Get previous race info
-     */
-    getPreviousRace() {
-        const raceResults = this.dataCache.raceResults || {};
-        const calendar = this.dataCache.raceCalendar || [];
-        const completedRaces = this.getCompletedRacesCount();
-        
-        if (completedRaces === 0) {
-            return {
-                name: 'SEASON NOT STARTED',
-                winner: 'Awaiting Start',
-                fastestLap: 'N/A',
-                date: 'TBD',
-                status: 'not_started'
-            };
-        }
-
-        // Get last completed race
-        const lastCompletedIndex = completedRaces - 1; // 0-based
-        const lastRace = calendar[lastCompletedIndex];
-        
-        if (!lastRace) {
-            return {
-                name: 'NO RACE INFO',
-                winner: 'N/A',
-                fastestLap: 'N/A',
-                date: 'N/A',
-                status: 'none'
-            };
-        }
-        
-        // Try to get winner from race results
-        let winner = 'Unknown';
-        let fastestLap = 'N/A';
-        
-        if (raceResults.raceWinners && raceResults.raceWinners[`Round ${lastCompletedIndex + 1}`]) {
-            const raceWinner = raceResults.raceWinners[`Round ${lastCompletedIndex + 1}`];
-            winner = raceWinner.driver || 'Unknown';
-            
-            // For fastest lap, we need to parse race results
-            // This is simplified - would need to check all results for "(Fastest Lap)"
-            fastestLap = raceWinner.hasFastestLap ? winner : 'Unknown';
-        } else {
-            // Fallback: get top driver from stats
-            const topDrivers = this.getTopDrivers(1);
-            if (topDrivers.length > 0) {
-                winner = topDrivers[0].name;
-                fastestLap = topDrivers[0].name; // Simplified
-            }
-        }
-        
+        /**
+ * Get previous race info
+ */
+getPreviousRace() {
+    const raceResults = this.dataCache.raceResults || {};
+    const calendar = this.dataCache.raceCalendar || [];
+    const completedRaces = this.getCompletedRacesCount();
+    
+    if (completedRaces === 0) {
         return {
-            name: lastRace.name,
-            winner: winner,
-            fastestLap: fastestLap,
-            date: this.formatDate(lastRace.date),
-            status: 'completed'
+            name: 'SEASON NOT STARTED',
+            winner: 'Awaiting Start',
+            fastestLap: 'N/A',
+            date: 'TBD',
+            status: 'not_started'
         };
     }
+
+    const lastCompletedIndex = completedRaces - 1;
+    const lastRace = calendar[lastCompletedIndex];
+    
+    if (!lastRace) {
+        return {
+            name: 'NO RACE INFO',
+            winner: 'N/A',
+            fastestLap: 'N/A',
+            date: 'N/A',
+            status: 'none'
+        };
+    }
+    
+    const roundKey = `Round ${lastCompletedIndex + 1}`;
+    let winner = 'Unknown';
+    let fastestLap = 'Unknown';
+    
+    // STEP 1: Find the P1 winner by looking through ALL driver results
+    const allResults = raceResults.results || [];
+    
+    for (const driverResult of allResults) {
+        const result = driverResult.results?.[roundKey] || '';
+        
+        // Look for EXACT P1 (not P10, P11, etc.)
+        // Check if it contains "P1" but NOT "P10", "P11", "P12", etc.
+        if (result.includes('P1') && 
+            !result.includes('P10') && 
+            !result.includes('P11') && 
+            !result.includes('P12') && 
+            !result.includes('P13') && 
+            !result.includes('P14') && 
+            !result.includes('P15')) {
+            
+            winner = driverResult.driver;
+            console.log(`Found P1 winner: ${winner} with result: ${result}`);
+            
+            // STEP 2: Check if this driver also had fastest lap
+            if (result.includes('Fastest Lap') || result.includes('FL')) {
+                fastestLap = winner;
+                console.log(`Winner also had fastest lap`);
+            }
+            break;
+        }
+    }
+    
+    // STEP 3: If fastest lap not found with winner, look for anyone with fastest lap
+    if (fastestLap === 'Unknown') {
+        for (const driverResult of allResults) {
+            const result = driverResult.results?.[roundKey] || '';
+            
+            if (result.includes('Fastest Lap') || result.includes('FL')) {
+                fastestLap = driverResult.driver;
+                console.log(`Found fastest lap driver: ${fastestLap}`);
+                break;
+            }
+        }
+    }
+    
+    // STEP 4: Log what we found
+    console.log(`Previous race ${lastRace.name}: Winner = ${winner}, Fastest Lap = ${fastestLap}`);
+    
+    return {
+        name: lastRace.name,
+        winner: winner,
+        fastestLap: fastestLap,
+        date: this.formatDate(lastRace.date),
+        status: 'completed'
+    };
+}
 
     /**
      * Get upcoming races
@@ -1501,7 +1845,6 @@ class EFCDataLoader {
         
         if (calendar.length === 0) return [];
         
-        // Get races starting from the next one
         const upcoming = calendar.slice(completedRaces);
         
         return upcoming.slice(0, limit).map(race => ({
@@ -1519,16 +1862,25 @@ class EFCDataLoader {
         const media = this.dataCache.media || {};
         const driverMaster = this.dataCache.driverMaster || [];
         const driverStats = this.dataCache.driverStats || [];
+        const driverMovement = this.dataCache.driverMovement || {};
         
         let dotdDriver = media.dotd || '';
         
-        // If no DOTD in media sheet, use top rated driver
         if (!dotdDriver) {
             const topRated = this.getTopRatedDrivers(1)[0];
             dotdDriver = topRated?.name || '';
         }
         
-        // Find driver info
+        // Check if DOTD driver is active (has round assignments)
+        const isActive = driverMovement.driverMovements && driverMovement.driverMovements[dotdDriver];
+        
+        if (!isActive) {
+            console.log(`DOTD driver ${dotdDriver} is not active - using fallback`);
+            // Use first active driver as fallback
+            const activeDrivers = Object.keys(driverMovement.driverMovements || {});
+            dotdDriver = activeDrivers[0] || dotdDriver;
+        }
+        
         const driverInfo = driverMaster.find(d => d.username === dotdDriver);
         const driverStat = driverStats.find(d => d.driver === dotdDriver);
         
@@ -1609,7 +1961,6 @@ class EFCDataLoader {
         const races = [];
         const circuits = [];
         
-        // Mock circuits
         const circuitNames = [
             'Silverstone Circuit', 'Monza', 'Spa-Francorchamps', 
             'Circuit de Monaco', 'Red Bull Ring', 'Hungaroring',
@@ -1624,7 +1975,6 @@ class EFCDataLoader {
             'Le Castellet, France', 'Sochi, Russia', 'Singapore'
         ];
         
-        // Generate mock circuits
         for (let i = 0; i < circuitNames.length; i++) {
             circuits.push({
                 id: `CIRC${i + 1}`,
@@ -1635,15 +1985,14 @@ class EFCDataLoader {
                 laps: Math.floor(50 + Math.random() * 20),
                 record: `${Math.floor(1 + Math.random() * 2)}:${Math.floor(10 + Math.random() * 49)}.${Math.floor(100 + Math.random() * 899)}`,
                 description: `The ${circuitNames[i]} is one of the most challenging circuits on the calendar, featuring a mix of high-speed straights and technical corners.`,
-                trackLayoutImage: '' // No image in mock data
+                trackLayoutImage: ''
             });
         }
         
-        // Generate mock races
         const currentDate = new Date();
         for (let i = 1; i <= 12; i++) {
             const raceDate = new Date(currentDate);
-            raceDate.setDate(currentDate.getDate() + (i - 4) * 14); // Every 2 weeks
+            raceDate.setDate(currentDate.getDate() + (i - 4) * 14);
             
             const circuitIndex = (i - 1) % circuits.length;
             const status = i < 5 ? 'completed' : i === 5 ? 'next' : 'upcoming';

@@ -1,5 +1,6 @@
 /**
  * Results Page Script
+ * UPDATED: Uses driver movement system and team colors from TeamMaster (like championship.js)
  */
 
 class ResultsManager {
@@ -38,10 +39,20 @@ class ResultsManager {
         this.qualiResults = {};
         this.sprintResults = {};
         this.teamMasterMap = {};
+        this.driverMovementData = null;
         this.totalRaces = 0;
         this.totalSprints = 0;
         this.completedRaces = 0;
         this.completedSprints = 0;
+        
+        // Current round for determining active team
+        this.currentRound = 1;
+        
+        // Team colors from TeamMaster - map of team name to primary color (Column D)
+        this.teamColors = {};
+        
+        // Driver movement data - this is our source of truth
+        this.roundTeams = {}; // round -> { driver: team }
         
         // Search state
         this.searchQuery = '';
@@ -70,6 +81,22 @@ class ResultsManager {
             
             // Build team master map
             this.buildTeamMasterMap();
+            
+            // Get driver movement data
+            this.driverMovementData = this.dataLoader.dataCache.driverMovement || { driverMovements: {}, roundTeams: {} };
+            
+            // Get the driver movement data - this is our source of truth
+            this.roundTeams = this.dataLoader.dataCache.driverMovement?.roundTeams || {};
+            
+            // Load team colors from TeamMaster (like championship.js)
+            this.loadTeamColors();
+            
+            console.log('ROUND TEAMS LOADED:', this.roundTeams);
+            console.log('TEAM COLORS LOADED:', this.teamColors);
+            
+            // Determine current round based on completed races
+            this.completedRaces = this.dataLoader.getCompletedRacesCount();
+            this.currentRound = Math.max(1, this.completedRaces + 1);
             
             // Process data
             this.processResultsData();
@@ -109,6 +136,105 @@ class ResultsManager {
                 this.teamMasterMap[team.id] = team;
             }
         });
+    }
+
+    /**
+     * Load team colors from TeamMaster sheet (like championship.js)
+     * Team Name is in Column A, Primary Color is in Column D (index 3)
+     */
+    loadTeamColors() {
+        const teamMaster = this.dataLoader.dataCache.teamMaster || [];
+        
+        teamMaster.forEach(team => {
+            // Team name is in column A (name property)
+            // Primary color is in column D (primaryColor property)
+            if (team && team.name && team.primaryColor) {
+                this.teamColors[team.name] = team.primaryColor;
+                console.log(`Loaded color for ${team.name}: ${team.primaryColor}`);
+            }
+        });
+        
+        // Also add some common variations
+        this.teamColors['Mclaren'] = this.teamColors['McLaren'] || '#ff8000';
+        this.teamColors['Red Bull'] = this.teamColors['Red Bull Racing'] || '#0600ef';
+        this.teamColors['Racing Bulls'] = this.teamColors['Visa Cash App RB'] || '#6699ff';
+        this.teamColors['Alpine'] = this.teamColors['Alpine'] || '#0090ff';
+        this.teamColors['Aston Martin'] = this.teamColors['Aston Martin Aramco'] || '#006f62';
+        this.teamColors['Haas'] = this.teamColors['Haas F1 Team'] || '#b6babd';
+        this.teamColors['Williams'] = this.teamColors['Williams'] || '#005aff';
+        this.teamColors['Ferrari'] = this.teamColors['Scuderia Ferrari'] || '#dc0000';
+        this.teamColors['Mercedes'] = this.teamColors['Mercedes-AMG Petronas'] || '#00d2be';
+        this.teamColors['BMW'] = this.teamColors['BMW'] || '#1c69d4';
+        this.teamColors['Porsche'] = this.teamColors['Porsche'] || '#d5001c';
+        this.teamColors['Sauber'] = this.teamColors['Sauber'] || '#00e701';
+        this.teamColors['Audi'] = this.teamColors['Audi'] || '#000000';
+    }
+
+    /**
+     * Get team color for a team name (like championship.js)
+     */
+    getTeamColor(teamName) {
+        return this.teamColors[teamName] || '#00f7ff'; // Default cyan if not found
+    }
+
+    /**
+     * NEW: Get driver's current team based on driver movement (like championship.js)
+     */
+    getDriverCurrentTeam(driverUsername) {
+        if (!this.roundTeams || Object.keys(this.roundTeams).length === 0) {
+            // Fall back to teamCode from driver master if no movement data
+            const driver = this.dataLoader.dataCache.driverMaster?.find(d => d.username === driverUsername);
+            return driver?.teamCode || null;
+        }
+        
+        // Find the most recent round <= current round that has a team for this driver
+        for (let round = this.currentRound; round >= 1; round--) {
+            const roundKey = `Round ${round}`;
+            const team = this.roundTeams[roundKey]?.[driverUsername];
+            if (team && team.trim() !== '') {
+                return team;
+            }
+        }
+        
+        // No movement data found, fall back to teamCode from driver master
+        const driver = this.dataLoader.dataCache.driverMaster?.find(d => d.username === driverUsername);
+        return driver?.teamCode || null;
+    }
+
+    /**
+     * Get team info including colors from team name
+     */
+    getTeamInfo(teamName) {
+        if (!teamName) {
+            return {
+                name: 'Unknown Team',
+                primaryColor: '#666666',
+                secondaryColor: '#999999'
+            };
+        }
+        
+        const primaryColor = this.getTeamColor(teamName);
+        
+        return {
+            name: teamName,
+            primaryColor: primaryColor,
+            secondaryColor: this.lightenColor(primaryColor, 30) // Generate secondary color from primary
+        };
+    }
+
+    /**
+     * Lighten a color for secondary color
+     */
+    lightenColor(color, percent) {
+        if (!color.startsWith('#')) return '#ffffff';
+        
+        const num = parseInt(color.replace('#', ''), 16);
+        const amt = Math.round(2.55 * percent);
+        const R = Math.min(255, (num >> 16) + amt);
+        const G = Math.min(255, ((num >> 8) & 0x00FF) + amt);
+        const B = Math.min(255, (num & 0x0000FF) + amt);
+        
+        return '#' + (0x1000000 + (R * 0x10000) + (G * 0x100) + B).toString(16).slice(1);
     }
 
     /**
@@ -244,29 +370,23 @@ class ResultsManager {
         this.qualiResults = dataCache.qualifyingResults || {};
         this.sprintResults = dataCache.sprintResults || {};
         
-        // Process drivers data
+        // Process drivers data using driver movement
         this.driversData = driverMaster.map(driver => {
-            const teamCode = driver.teamCode || '';
-            const teamInfo = this.teamMasterMap[teamCode];
-            
-            let teamDisplayName = 'No Team';
-            if (teamInfo) {
-                teamDisplayName = teamInfo.name || teamCode;
-            } else if (teamCode) {
-                teamDisplayName = this.dataLoader.getTeamNameFromCode(teamCode) || teamCode;
-            }
+            // Get current team from movement data
+            const currentTeamName = this.getDriverCurrentTeam(driver.username) || driver.teamCode || 'Unknown';
+            const teamColor = this.getTeamColor(currentTeamName);
             
             // Get championship position (from race results only)
             const championshipPosition = this.championshipPositions[driver.username] || 999;
             
             return {
                 name: driver.username,
-                teamCode: teamCode,
-                teamDisplayName: teamDisplayName,
+                teamCode: currentTeamName,
+                teamDisplayName: currentTeamName,
                 number: driver.number || '',
                 nationality: driver.nationality || '',
                 photo: driver.photo || '',
-                teamColor: teamInfo?.primaryColor || '#00f7ff',
+                teamColor: teamColor,
                 championshipPosition: championshipPosition
             };
         });
@@ -494,8 +614,8 @@ class ResultsManager {
             
             // Team column
             rowHTML += `<div class="results-team-cell">
-                <div class="team-color-small" style="background: ${driverInfo.teamColor}"></div>
-                <div>${driverInfo.teamDisplayName}</div>
+                <div class="team-color-small" style="background: ${driverInfo.teamColor}; box-shadow: 0 0 5px ${driverInfo.teamColor};"></div>
+                <div style="color: ${driverInfo.teamColor};">${driverInfo.teamDisplayName}</div>
             </div>`;
             
             // Round columns
@@ -603,8 +723,8 @@ class ResultsManager {
             
             // Team column
             rowHTML += `<div class="results-team-cell">
-                <div class="team-color-small" style="background: ${driverInfo.teamColor}"></div>
-                <div>${driverInfo.teamDisplayName}</div>
+                <div class="team-color-small" style="background: ${driverInfo.teamColor}; box-shadow: 0 0 5px ${driverInfo.teamColor};"></div>
+                <div style="color: ${driverInfo.teamColor};">${driverInfo.teamDisplayName}</div>
             </div>`;
             
             // Round columns
@@ -700,8 +820,8 @@ class ResultsManager {
             
             // Team column
             rowHTML += `<div class="results-team-cell">
-                <div class="team-color-small" style="background: ${driverInfo.teamColor}"></div>
-                <div>${driverInfo.teamDisplayName}</div>
+                <div class="team-color-small" style="background: ${driverInfo.teamColor}; box-shadow: 0 0 5px ${driverInfo.teamColor};"></div>
+                <div style="color: ${driverInfo.teamColor};">${driverInfo.teamDisplayName}</div>
             </div>`;
             
             // Sprint columns (note: sprint results use "Sprint X" keys, not "Round X")
@@ -985,8 +1105,8 @@ class ResultsManager {
     updateWithFallbackData() {
         console.log('Using fallback data for results');
         
-        // Build team master map
-        this.buildTeamMasterMap();
+        // Load team colors for fallback
+        this.loadTeamColors();
         
         // Mock championship positions for fallback data
         this.championshipPositions = {
@@ -997,13 +1117,13 @@ class ResultsManager {
             'Driver 5': 5
         };
         
-        // Mock data
+        // Mock data with team colors
         this.driversData = [
-            { name: 'Driver 1', teamDisplayName: 'Mercedes', number: '44', teamColor: '#00d2be', championshipPosition: 1 },
-            { name: 'Driver 2', teamDisplayName: 'Ferrari', number: '63', teamColor: '#dc0000', championshipPosition: 2 },
-            { name: 'Driver 3', teamDisplayName: 'Red Bull', number: '16', teamColor: '#0600ef', championshipPosition: 3 },
-            { name: 'Driver 4', teamDisplayName: 'McLaren', number: '33', teamColor: '#ff8000', championshipPosition: 4 },
-            { name: 'Driver 5', teamDisplayName: 'Alpine', number: '31', teamColor: '#0090ff', championshipPosition: 5 }
+            { name: 'Driver 1', teamDisplayName: 'Mercedes', number: '44', teamColor: this.getTeamColor('Mercedes'), championshipPosition: 1 },
+            { name: 'Driver 2', teamDisplayName: 'Ferrari', number: '63', teamColor: this.getTeamColor('Ferrari'), championshipPosition: 2 },
+            { name: 'Driver 3', teamDisplayName: 'Red Bull', number: '16', teamColor: this.getTeamColor('Red Bull'), championshipPosition: 3 },
+            { name: 'Driver 4', teamDisplayName: 'McLaren', number: '33', teamColor: this.getTeamColor('McLaren'), championshipPosition: 4 },
+            { name: 'Driver 5', teamDisplayName: 'Alpine', number: '31', teamColor: this.getTeamColor('Alpine'), championshipPosition: 5 }
         ];
         
         this.totalRaces = 10;

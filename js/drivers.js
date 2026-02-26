@@ -17,9 +17,13 @@ document.addEventListener('DOMContentLoaded', function() {
     let teamsData = [];
     let raceResultsData = [];
     let qualifyingResultsData = [];
+    let driverMovementData = null; // Add driver movement data
     
     // Team cache for quick lookups
     let teamCache = new Map();
+    
+    // Current round for determining active team
+    let currentRound = 1; // Default to round 1
     
     // Initialize the page
     initDriversPage();
@@ -47,6 +51,10 @@ document.addEventListener('DOMContentLoaded', function() {
             teamsData = data.teamMaster || [];
             raceResultsData = data.raceResults || { results: [], headers: [] };
             qualifyingResultsData = data.qualifyingResults || { results: [], headers: [] };
+            driverMovementData = data.driverMovement || { driverMovements: {}, roundTeams: {} };
+            
+            // Determine current round based on completed races
+            currentRound = Math.max(1, (raceResultsData.completedRaces?.length || 0) + 1);
             
             // Build team cache for quick lookups
             buildTeamCache();
@@ -184,7 +192,32 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // REST OF YOUR EXISTING CODE BELOW - NO CHANGES
+    // ===== NEW: Get driver's current team based on driver movement =====
+    function getDriverCurrentTeam(driverUsername) {
+        if (!driverMovementData || !driverMovementData.driverMovements) {
+            // Fall back to teamCode from driver master if no movement data
+            const driver = driversData.find(d => d.username === driverUsername);
+            return driver?.teamCode || null;
+        }
+        
+        const driverMovements = driverMovementData.driverMovements[driverUsername];
+        
+        // If driver has movement data, find their team for current round
+        if (driverMovements) {
+            // Find the most recent round <= current round that has a team
+            for (let round = currentRound; round >= 1; round--) {
+                const teamForRound = driverMovements[`Round ${round}`];
+                if (teamForRound) {
+                    return teamForRound;
+                }
+            }
+        }
+        
+        // No movement data found, fall back to teamCode from driver master
+        const driver = driversData.find(d => d.username === driverUsername);
+        return driver?.teamCode || null;
+    }
+    
     // Build team cache for quick lookups
     function buildTeamCache() {
         teamCache.clear();
@@ -195,8 +228,16 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Get team info with proper full name - FIXED to use exact teamCode match
-    function getTeamInfo(teamCode) {
+    // Get team info with proper full name - UPDATED to use driver movement
+    function getTeamInfo(teamCode, driverUsername = null) {
+        // If driver username is provided, try to get their current team from movement data
+        if (driverUsername) {
+            const currentTeamCode = getDriverCurrentTeam(driverUsername);
+            if (currentTeamCode) {
+                teamCode = currentTeamCode;
+            }
+        }
+        
         if (!teamCode) {
             return {
                 id: '',
@@ -332,7 +373,7 @@ document.addEventListener('DOMContentLoaded', function() {
         ).toString(16).slice(1);
     }
     
-    // Display drivers in the grid
+    // Display drivers in the grid - UPDATED to pass driver username to getTeamInfo
     function displayDrivers(drivers) {
         driversGrid.innerHTML = '';
         
@@ -344,7 +385,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Sort drivers by points from DriverStats
         const driversWithStats = drivers.map(driver => {
             const stats = driverStatsData.find(s => s.driver === driver.username);
-            const teamInfo = getTeamInfo(driver.teamCode);
+            // Pass driver username to getTeamInfo to use driver movement data
+            const teamInfo = getTeamInfo(driver.teamCode, driver.username);
             
             return {
                 ...driver,
@@ -366,13 +408,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Create a driver card element
+    // Create a driver card element - UPDATED to show current team
     function createDriverCard(driver, position) {
         const card = document.createElement('div');
         card.className = 'driver-card';
         card.dataset.driverId = driver.username;
         
-        // Get team info
+        // Get team info (already includes driver movement in displayDrivers)
         const teamInfo = driver.teamInfo;
         const teamColor = teamInfo.primaryColor;
         const secondaryColor = teamInfo.secondaryColor;
@@ -507,7 +549,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return `$${numValue.toFixed(1)}M`;
     }
     
-    // Filter drivers based on search input
+    // Filter drivers based on search input - UPDATED to use driver movement for team lookup
     function filterDrivers() {
         const searchTerm = driverSearch.value.toLowerCase().trim();
         
@@ -517,13 +559,15 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         const filteredDrivers = driversData.filter(driver => {
-            const teamInfo = getTeamInfo(driver.teamCode);
+            // Get current team for this driver using movement data
+            const currentTeamCode = getDriverCurrentTeam(driver.username) || driver.teamCode;
+            const teamInfo = getTeamInfo(currentTeamCode);
             
             return (
                 driver.username.toLowerCase().includes(searchTerm) ||
                 (driver.nationality && driver.nationality.toLowerCase().includes(searchTerm)) ||
                 (teamInfo.name && teamInfo.name.toLowerCase().includes(searchTerm)) ||
-                (driver.teamCode && driver.teamCode.toLowerCase().includes(searchTerm)) ||
+                (currentTeamCode && currentTeamCode.toLowerCase().includes(searchTerm)) ||
                 (driver.value && driver.value.toString().toLowerCase().includes(searchTerm))
             );
         });
@@ -531,7 +575,7 @@ document.addEventListener('DOMContentLoaded', function() {
         displayDrivers(filteredDrivers);
     }
     
-    // Show driver details in modal
+    // Show driver details in modal - UPDATED to use driver movement
     async function showDriverModal(driverUsername) {
         // Find driver data
         const driver = driversData.find(d => d.username === driverUsername);
@@ -540,8 +584,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Find driver stats
         const stats = driverStatsData.find(s => s.driver === driverUsername) || getEmptyStats();
         
-        // Get team info
-        const teamInfo = getTeamInfo(driver.teamCode);
+        // Get team info using driver movement
+        const teamInfo = getTeamInfo(driver.teamCode, driverUsername);
         
         // Create gradients for modal
         const cardGradient = createTeamGradient(teamInfo.primaryColor, teamInfo.secondaryColor);
@@ -562,10 +606,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const driverValue = driver.value || driver.Value || 'N/A';
         const formattedValue = formatValue(driverValue);
         
-        // Get teammate (if any)
-        const teammates = driversData.filter(d => 
-            d.teamCode === driver.teamCode && d.username !== driver.username
-        );
+        // Get teammates using driver movement
+        const teammates = getDriverTeammates(driverUsername, driver.teamCode);
         
         // Parse socials/onboards from column K
         const socialsContent = parseSocials(driver.socials);
@@ -728,7 +770,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 const teammateValue = teammate.value || teammate.Value || 'N/A';
                                 const teammateFormattedValue = formatValue(teammateValue);
                                 
-                                const teammateTeamInfo = getTeamInfo(teammate.teamCode);
+                                const teammateTeamInfo = getTeamInfo(teammate.teamCode, teammate.username);
                                 const teammateGradient = createTeamGradient(teammateTeamInfo.primaryColor, teammateTeamInfo.secondaryColor);
                                 const teammateBrightColor = createBrightColor(teammateTeamInfo.primaryColor);
                                 const teammateVeryBrightColor = createVeryBrightColor(teammateTeamInfo.primaryColor);
@@ -758,6 +800,27 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                     </div>
                     ` : ''}
+                    
+                    ${driverMovementData && driverMovementData.driverMovements[driverUsername] ? `
+                    <div class="performance-section" style="background: ${cardGradient}; border-color: ${teamInfo.primaryColor}50;">
+                        <h3 class="performance-title" style="border-bottom-color: ${accentTeamColor}; color: ${brightTeamColor};">
+                            <i class="fas fa-exchange-alt" style="color: ${brightTeamColor}"></i> Team Changes
+                        </h3>
+                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                            ${Object.entries(driverMovementData.driverMovements[driverUsername])
+                                .map(([round, team]) => {
+                                    const movementTeamInfo = getTeamInfo(team);
+                                    return `
+                                    <div style="background: ${statsBackground}; padding: 0.5rem 1rem; border-radius: 20px; border: 1px solid ${movementTeamInfo.primaryColor};">
+                                        <span style="color: rgba(255,255,255,0.7);">${round}:</span>
+                                        <span style="color: ${createBrightColor(movementTeamInfo.primaryColor)}; font-weight: 600; margin-left: 0.5rem;">
+                                            ${movementTeamInfo.name}
+                                        </span>
+                                    </div>
+                                `}).join('')}
+                        </div>
+                    </div>
+                    ` : ''}
                 </div>
             </div>
         `;
@@ -778,6 +841,22 @@ document.addEventListener('DOMContentLoaded', function() {
         // Show the modal
         driverModalOverlay.classList.add('active');
         document.body.style.overflow = 'hidden';
+    }
+    
+    // NEW: Get driver's teammates based on current team
+    function getDriverTeammates(driverUsername, defaultTeamCode) {
+        // Get current team for this driver
+        const currentTeamCode = getDriverCurrentTeam(driverUsername) || defaultTeamCode;
+        
+        if (!currentTeamCode) return [];
+        
+        // Find all drivers currently in the same team
+        return driversData.filter(d => {
+            if (d.username === driverUsername) return false;
+            
+            const driverTeamCode = getDriverCurrentTeam(d.username) || d.teamCode;
+            return driverTeamCode === currentTeamCode;
+        });
     }
     
     // Parse socials/onboards from column K

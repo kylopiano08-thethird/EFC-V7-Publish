@@ -1,5 +1,6 @@
 /**
  * Homepage Script - Handles UI updates and interactions
+ * UPDATED: Fixed previous race winner detection and improved data handling
  */
 
 class HomepageManager {
@@ -22,7 +23,7 @@ class HomepageManager {
             nextGpName: document.getElementById('next-gp-name'),
             nextGpDate: document.getElementById('next-gp-date'),
             nextGpRound: document.getElementById('next-gp-round'),
-            nextGpCircuit: document.getElementById('next-gp-circuit') || document.getElementById('next-gp-location'), // Use circuit or fallback to location
+            nextGpCircuit: document.getElementById('next-gp-circuit') || document.getElementById('next-gp-location'),
             nextGpCountdown: document.getElementById('next-gp-countdown'),
             
             // Previous Race
@@ -67,6 +68,9 @@ class HomepageManager {
         console.log('Initializing homepage...');
         
         try {
+            // Show loading state
+            this.showLoadingState();
+            
             // Load data
             await this.dataLoader.loadHomepageData();
             
@@ -101,8 +105,22 @@ class HomepageManager {
         ];
         
         loadingElements.forEach(el => {
-            if (el) el.classList.add('loading');
+            if (el) {
+                el.classList.add('loading');
+                el.textContent = 'Loading...';
+            }
         });
+        
+        // Clear standings tables
+        if (this.elements.driverStandings) {
+            this.elements.driverStandings.innerHTML = '<div class="standings-row"><div class="pos">-</div><div class="driver">Loading...</div><div class="points">-</div></div>';
+        }
+        if (this.elements.constructorStandings) {
+            this.elements.constructorStandings.innerHTML = '<div class="standings-row"><div class="pos">-</div><div class="team">Loading...</div><div class="points">-</div></div>';
+        }
+        if (this.elements.driverRatings) {
+            this.elements.driverRatings.innerHTML = '<div class="ratings-row"><div class="pos">-</div><div class="driver">Loading...</div><div class="rating">-</div></div>';
+        }
     }
 
     /**
@@ -136,13 +154,13 @@ class HomepageManager {
         // Update Hero Stats
         this.updateHeroStats(widgetData.heroStats);
         
-        // Update Next Race - FIXED VERSION
+        // Update Next Race
         this.updateNextRace(widgetData.nextRace);
         
         // Update Previous Race
         this.updatePreviousRace(widgetData.previousRace);
         
-        // Update Driver of the Day - SIMPLIFIED
+        // Update Driver of the Day
         this.updateDriverOfTheDay(widgetData.driverOfTheDay);
         
         // Update Driver Standings
@@ -179,7 +197,7 @@ class HomepageManager {
     }
 
     /**
-     * Update Next Race widget - FIXED VERSION
+     * Update Next Race widget
      */
     updateNextRace(raceData) {
         if (!raceData) return;
@@ -240,12 +258,14 @@ class HomepageManager {
     }
 
     /**
-     * Update Previous Race widget
+     * Update Previous Race widget - FIXED to properly display P1 winner
      */
     updatePreviousRace(raceData) {
         if (!raceData) return;
         
         const { name, winner, fastestLap, date, status } = raceData;
+        
+        console.log('Previous Race Data:', { name, winner, fastestLap, date, status });
         
         if (this.elements.prevGpName) {
             this.elements.prevGpName.textContent = name;
@@ -256,9 +276,29 @@ class HomepageManager {
             }
         }
         
-        if (this.elements.prevGpWinner) this.elements.prevGpWinner.textContent = winner;
-        if (this.elements.prevGpFastest) this.elements.prevGpFastest.textContent = fastestLap;
-        if (this.elements.prevGpDate) this.elements.prevGpDate.textContent = date;
+        // Only show winner if it's not "Unknown" and status is completed
+        if (this.elements.prevGpWinner) {
+            if (status === 'completed' && winner && winner !== 'Unknown' && winner !== 'N/A') {
+                this.elements.prevGpWinner.textContent = winner;
+                this.elements.prevGpWinner.classList.remove('loading');
+            } else {
+                this.elements.prevGpWinner.textContent = '—';
+            }
+        }
+        
+        // Fastest lap
+        if (this.elements.prevGpFastest) {
+            if (status === 'completed' && fastestLap && fastestLap !== 'Unknown' && fastestLap !== 'N/A') {
+                this.elements.prevGpFastest.textContent = fastestLap;
+            } else {
+                this.elements.prevGpFastest.textContent = '—';
+            }
+        }
+        
+        // Date
+        if (this.elements.prevGpDate) {
+            this.elements.prevGpDate.textContent = date || '—';
+        }
         
         // Update result text
         if (this.elements.prevGpResult) {
@@ -266,15 +306,21 @@ class HomepageManager {
                 this.elements.prevGpResult.textContent = 'AWAITING SEASON START';
                 this.elements.prevGpResult.classList.add('awaiting-start');
             } else if (status === 'completed') {
-                this.elements.prevGpResult.textContent = 'RACE COMPLETED';
+                if (winner && winner !== 'Unknown') {
+                    this.elements.prevGpResult.textContent = `WINNER: ${winner}`;
+                } else {
+                    this.elements.prevGpResult.textContent = 'RACE COMPLETED';
+                }
+                this.elements.prevGpResult.classList.remove('awaiting-start');
             } else {
                 this.elements.prevGpResult.textContent = 'NO DATA AVAILABLE';
+                this.elements.prevGpResult.classList.remove('awaiting-start');
             }
         }
     }
 
     /**
-     * Update Driver of the Day widget - SIMPLIFIED
+     * Update Driver of the Day widget
      */
     updateDriverOfTheDay(driverData) {
         if (!driverData) {
@@ -452,42 +498,39 @@ class HomepageManager {
     /**
      * Update Latest Article
      */
-    /**
- * Update Latest Article
- */
-updateLatestArticle(articleData = null) {
-    if (articleData) {
-        // If we have real article data, use it but override the link to go to news page
-        const article = {
-            ...articleData,
-            link: 'news.html' // Always go to news page, not direct article link
-        };
-        
-        if (this.elements.articleDate) this.elements.articleDate.textContent = article.date;
-        if (this.elements.articleTitle) this.elements.articleTitle.textContent = article.title;
-        if (this.elements.articleExcerpt) this.elements.articleExcerpt.textContent = article.excerpt;
-        if (this.elements.articleLink) {
-            this.elements.articleLink.href = article.link;
-            this.elements.articleLink.textContent = 'READ FULL ARTICLE';
-        }
-    } else {
-        // Use default article data that links to news page
-        const article = {
-            title: 'EFC Season 2 Launch Announcement',
-            excerpt: 'The new season brings exciting changes and new competitors to the grid.',
-            date: '2024-03-10',
-            link: 'news.html' // Link to news page
-        };
-        
-        if (this.elements.articleDate) this.elements.articleDate.textContent = article.date;
-        if (this.elements.articleTitle) this.elements.articleTitle.textContent = article.title;
-        if (this.elements.articleExcerpt) this.elements.articleExcerpt.textContent = article.excerpt;
-        if (this.elements.articleLink) {
-            this.elements.articleLink.href = article.link;
-            this.elements.articleLink.textContent = 'READ FULL ARTICLE';
+    updateLatestArticle(articleData = null) {
+        if (articleData) {
+            // If we have real article data, use it but override the link to go to news page
+            const article = {
+                ...articleData,
+                link: 'news.html' // Always go to news page, not direct article link
+            };
+            
+            if (this.elements.articleDate) this.elements.articleDate.textContent = article.date;
+            if (this.elements.articleTitle) this.elements.articleTitle.textContent = article.title;
+            if (this.elements.articleExcerpt) this.elements.articleExcerpt.textContent = article.excerpt;
+            if (this.elements.articleLink) {
+                this.elements.articleLink.href = article.link;
+                this.elements.articleLink.textContent = 'READ FULL ARTICLE';
+            }
+        } else {
+            // Use default article data that links to news page
+            const article = {
+                title: 'EFC Season 2 Launch Announcement',
+                excerpt: 'The new season brings exciting changes and new competitors to the grid.',
+                date: '2024-03-10',
+                link: 'news.html' // Link to news page
+            };
+            
+            if (this.elements.articleDate) this.elements.articleDate.textContent = article.date;
+            if (this.elements.articleTitle) this.elements.articleTitle.textContent = article.title;
+            if (this.elements.articleExcerpt) this.elements.articleExcerpt.textContent = article.excerpt;
+            if (this.elements.articleLink) {
+                this.elements.articleLink.href = article.link;
+                this.elements.articleLink.textContent = 'READ FULL ARTICLE';
+            }
         }
     }
-}
 
     /**
      * Update race countdown

@@ -1166,3 +1166,298 @@
         max-width: 100%;
     }
 }
+/* Replace the problematic animations with these smoother ones */
+
+/* Fix for table rows - remove bounce on hover off */
+.standing-row {
+    transition: all 0.3s ease;
+    animation: fadeIn 0.4s ease both;
+    animation-delay: calc(var(--row-index, 0) * 0.05s);
+}
+
+.standing-row:hover {
+    background: rgba(0, 247, 255, 0.08);
+    transform: translateX(3px);
+}
+
+/* Fix for position gradients - remove animations that cause flicker */
+.standing-row.position-1 {
+    background: linear-gradient(90deg, rgba(255, 215, 0, 0.15), transparent);
+    border-left: 3px solid #FFD700;
+}
+
+.standing-row.position-2 {
+    background: linear-gradient(90deg, rgba(192, 192, 192, 0.15), transparent);
+    border-left: 3px solid #C0C0C0;
+}
+
+.standing-row.position-3 {
+    background: linear-gradient(90deg, rgba(205, 127, 50, 0.15), transparent);
+    border-left: 3px solid #CD7F32;
+}
+
+/* Fix for driver number animation */
+.driver-number {
+    transition: transform 0.3s ease;
+}
+
+.standing-row:hover .driver-number {
+    transform: scale(1.1);
+    background: rgba(0, 247, 255, 0.2);
+}
+
+/* Fix for progression rows */
+.progression-data-row {
+    transition: background 0.3s ease;
+    animation: fadeIn 0.4s ease both;
+    animation-delay: calc(var(--row-index, 0) * 0.05s);
+}
+
+.progression-data-row:hover {
+    background: rgba(0, 247, 255, 0.08);
+}
+
+/* Fix for round points */
+.round-points {
+    transition: color 0.2s ease;
+}
+
+.progression-data-row:hover .round-points {
+    color: var(--light);
+}
+
+/* Fix for gold/silver/bronze - remove continuous animations */
+.round-points.driver-gold {
+    color: #FFD700;
+}
+
+.round-points.driver-silver {
+    color: #C0C0C0;
+}
+
+.round-points.driver-bronze {
+    color: #CD7F32;
+}
+
+/* Fix for tab buttons - remove the expanding circle effect */
+.tab-button {
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.tab-button:hover {
+    color: var(--primary);
+    background: rgba(0, 247, 255, 0.05);
+}
+
+.tab-button.active {
+    color: #fff;
+    background: rgba(0, 247, 255, 0.1);
+}
+
+.tab-button.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--primary);
+    border-radius: 2px;
+}
+
+/* Fix for view options */
+.view-option {
+    transition: all 0.3s ease;
+}
+
+.view-option:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 247, 255, 0.15);
+}
+
+.view-option.active {
+    background: linear-gradient(135deg, rgba(0, 247, 255, 0.2), rgba(155, 48, 255, 0.2));
+    color: #fff;
+    border-color: var(--primary);
+}
+
+/* Fix for legend items */
+.legend-item {
+    transition: all 0.3s ease;
+}
+
+.legend-item:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+.legend-color {
+    transition: box-shadow 0.3s ease;
+}
+
+.legend-item:hover .legend-color {
+    box-shadow: 0 0 15px currentColor;
+}
+
+/* Fix for search container */
+.search-container {
+    transition: all 0.3s ease;
+}
+
+.search-container:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(0, 247, 255, 0.1);
+}
+/* ===== CHAMPIONSHIP SCROLL REVEALS ===== */
+
+/* Hero section */
+.championship-hero .hero-title {
+    animation: slideInUp 1s ease;
+}
+
+.championship-hero .hero-subtitle {
+    animation: slideInUp 1s ease 0.2s both;
+}
+
+/* Tabs reveal */
+.championship-tabs {
+    animation: fadeInUp 0.8s ease;
+}
+
+/* View options reveal */
+.view-options {
+    animation: fadeInUp 0.8s ease 0.1s both;
+}
+
+/* Table container */
+.championship-table {
+    animation: fadeInUp 0.8s ease 0.2s both;
+}
+
+/* Table rows staggered reveal */
+.table-body .standing-row {
+    opacity: 0;
+    animation: slideInRight 0.5s ease forwards;
+    animation-delay: calc(0.3s + var(--row-index, 0) * 0.05s);
+}
+
+/* Constructors table */
+.constructors-table {
+    animation: fadeInUp 0.8s ease 0.2s both;
+}
+
+.constructors-table .constructors-row {
+    opacity: 0;
+    animation: slideInRight 0.5s ease forwards;
+    animation-delay: calc(0.3s + var(--row-index, 0) * 0.05s);
+}
+
+/* Points progression */
+.progression-container {
+    animation: fadeInUp 0.8s ease 0.2s both;
+}
+
+.progression-data-row {
+    opacity: 0;
+    animation: slideInRight 0.5s ease forwards;
+    animation-delay: calc(0.3s + var(--row-index, 0) * 0.05s);
+}
+
+/* Graph container */
+.graph-container {
+    animation: fadeInUp 0.8s ease 0.2s both;
+}
+
+.graph-wrapper {
+    opacity: 0;
+    animation: scaleIn 0.8s ease 0.3s forwards;
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.graph-legend .legend-item {
+    opacity: 0;
+    animation: slideInLeft 0.4s ease forwards;
+    animation-delay: calc(0.4s + var(--item-index, 0) * 0.05s);
+}
+
+/* Search and filter bar */
+.search-filter-bar {
+    animation: fadeInUp 0.8s ease;
+}
+
+.search-container {
+    animation: slideInLeft 0.6s ease 0.1s both;
+}
+
+.filter-controls {
+    animation: slideInRight 0.6s ease 0.1s both;
+}
+
+/* Season info */
+.season-info {
+    animation: fadeInUp 0.8s ease;
+}
+
+.season-label {
+    animation: slideInLeft 0.5s ease 0.2s both;
+}
+
+.round-count {
+    animation: slideInRight 0.5s ease 0.2s both;
+}
+
+.results-count {
+    animation: scaleIn 0.5s ease 0.3s both;
+}
+
+/* Championship notes */
+.championship-notes {
+    animation: fadeInUp 0.8s ease 0.3s both;
+}
+
+.notes-content p {
+    opacity: 0;
+    animation: slideInLeft 0.5s ease forwards;
+    animation-delay: calc(0.4s + var(--note-index, 0) * 0.1s);
+}
+
+/* No results message */
+.no-results-message {
+    animation: scaleIn 0.6s ease;
+}
+
+.no-results-content i {
+    animation: float 3s ease-in-out infinite;
+}
+
+/* Tab content transitions */
+.tab-content {
+    transition: opacity 0.4s ease;
+}
+
+.tab-content.active {
+    animation: fadeIn 0.5s ease;
+}
+
+/* View content transitions */
+.view-content {
+    transition: opacity 0.4s ease;
+}
+
+.view-content.active {
+    animation: fadeIn 0.5s ease;
+}
+

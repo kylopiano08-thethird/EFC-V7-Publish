@@ -772,3 +772,351 @@
 .results-tabs[data-active-tab="sprint"]::after {
     transform: translateX(200%);
 }
+/* Fix for tab button hover effect */
+
+.results-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+    border-bottom: 2px solid rgba(0, 247, 255, 0.2);
+    padding-bottom: 0;
+    margin-top: 0;
+    position: relative;
+}
+
+.tab-button {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    padding: 15px 30px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 8px 8px 0 0;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+}
+
+/* Remove the pseudo-element that causes the solid rectangle */
+.tab-button::before {
+    display: none;
+}
+
+.tab-button:hover {
+    color: var(--primary);
+    background: rgba(0, 247, 255, 0.05);
+}
+
+/* Active tab styling - only the bottom line, no background change on hover */
+.tab-button.active {
+    color: #fff;
+    background: rgba(0, 247, 255, 0.1);
+}
+
+.tab-button.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--primary);
+    border-radius: 2px;
+}
+
+/* Hovering on active tab should not change background further */
+.tab-button.active:hover {
+    background: rgba(0, 247, 255, 0.1);
+    color: #fff;
+}
+
+/* Fix for data row animations */
+.results-data-row {
+    transition: background 0.3s ease, transform 0.2s ease;
+    animation: fadeIn 0.4s ease both;
+    animation-delay: calc(var(--row-index, 0) * 0.05s);
+}
+
+.results-data-row:hover {
+    background: rgba(0, 247, 255, 0.08);
+    transform: translateX(3px);
+}
+
+/* Fix for position colors - remove continuous animations */
+.position-gold {
+    color: #FFD700;
+}
+
+.position-silver {
+    color: #C0C0C0;
+}
+
+.position-bronze {
+    color: #CD7F32;
+}
+
+/* Only glow on hover */
+.results-data-row:hover .position-gold {
+    text-shadow: 0 0 10px #FFD700;
+}
+
+.results-data-row:hover .position-silver {
+    text-shadow: 0 0 10px #C0C0C0;
+}
+
+.results-data-row:hover .position-bronze {
+    text-shadow: 0 0 10px #CD7F32;
+}
+
+/* Fix for driver number animation */
+.results-driver-number {
+    transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.results-data-row:hover .results-driver-number {
+    transform: scale(1.1);
+    background: rgba(0, 247, 255, 0.2);
+}
+
+/* Fix for filter buttons */
+.filter-btn, .sort-btn {
+    transition: all 0.3s ease;
+}
+
+.filter-btn:hover, .sort-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    transform: translateY(-2px);
+}
+
+.filter-btn.active, .sort-btn.active {
+    background: linear-gradient(135deg, rgba(0, 247, 255, 0.2), rgba(155, 48, 255, 0.2));
+    color: #fff;
+    border-color: var(--primary);
+}
+
+/* Fix for season info */
+.season-info {
+    animation: fadeIn 0.6s ease;
+}
+/* ===== RESULTS SCROLL REVEALS ===== */
+
+/* Hero section */
+.hero-title {
+    animation: slideInLeft 1s ease;
+}
+
+.hero-subtitle {
+    animation: slideInRight 1s ease 0.2s both;
+}
+
+/* Results tabs */
+.results-tabs {
+    animation: fadeInUp 0.8s ease;
+}
+
+.tab-button {
+    animation: slideInUp 0.5s ease both;
+    animation-delay: calc(0.1s + var(--tab-index, 0) * 0.05s);
+}
+
+/* Search and filter bar */
+.search-filter-bar {
+    animation: fadeInUp 0.8s ease 0.1s both;
+}
+
+.search-container {
+    animation: slideInLeft 0.6s ease 0.2s both;
+}
+
+.filter-controls {
+    animation: slideInRight 0.6s ease 0.2s both;
+}
+
+.filter-btn, .sort-btn {
+    opacity: 0;
+    animation: slideInUp 0.4s ease forwards;
+    animation-delay: calc(0.3s + var(--btn-index, 0) * 0.05s);
+}
+
+/* Season info */
+.season-info {
+    animation: fadeInUp 0.8s ease 0.2s both;
+}
+
+.season-label {
+    animation: slideInLeft 0.5s ease 0.3s both;
+}
+
+.round-count {
+    animation: slideInRight 0.5s ease 0.3s both;
+}
+
+.results-count {
+    animation: scaleIn 0.5s ease 0.4s both;
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Results container */
+.results-container {
+    animation: fadeInUp 0.8s ease 0.3s both;
+}
+
+/* Header row */
+.results-header-row {
+    animation: slideInLeft 0.5s ease;
+}
+
+.results-name-header, .results-total-header, .round-header-cell {
+    animation: fadeInUp 0.4s ease both;
+    animation-delay: calc(0.1s + var(--header-index, 0) * 0.03s);
+}
+
+/* Data rows */
+.results-data-row {
+    opacity: 0;
+    animation: slideInRight 0.4s ease forwards;
+    animation-delay: calc(0.3s + var(--row-index, 0) * 0.03s);
+}
+
+/* Driver cell */
+.results-driver-cell {
+    animation: slideInLeft 0.4s ease 0.4s both;
+}
+
+.results-driver-number {
+    animation: rotateIn 0.5s ease 0.5s both;
+}
+
+@keyframes rotateIn {
+    from {
+        opacity: 0;
+        transform: rotate(-180deg) scale(0.5);
+    }
+    to {
+        opacity: 1;
+        transform: rotate(0) scale(1);
+    }
+}
+
+.results-driver-name {
+    animation: slideInRight 0.4s ease 0.5s both;
+}
+
+/* Team cell */
+.results-team-cell {
+    animation: fadeInUp 0.4s ease 0.5s both;
+}
+
+.team-color-small {
+    animation: scaleIn 0.4s ease 0.6s both;
+}
+
+/* Round cells */
+.results-round-cell {
+    animation: scaleIn 0.3s ease forwards;
+    animation-delay: calc(0.5s + var(--cell-index, 0) * 0.02s);
+}
+
+/* Position colors - subtle reveal */
+.position-gold {
+    animation: goldReveal 0.5s ease 0.6s both;
+}
+
+@keyframes goldReveal {
+    from {
+        opacity: 0;
+        text-shadow: 0 0 0 #FFD700;
+    }
+    to {
+        opacity: 1;
+        text-shadow: 0 0 10px #FFD700;
+    }
+}
+
+.position-silver {
+    animation: silverReveal 0.5s ease 0.7s both;
+}
+
+@keyframes silverReveal {
+    from {
+        opacity: 0;
+        text-shadow: 0 0 0 #C0C0C0;
+    }
+    to {
+        opacity: 1;
+        text-shadow: 0 0 10px #C0C0C0;
+    }
+}
+
+.position-bronze {
+    animation: bronzeReveal 0.5s ease 0.8s both;
+}
+
+@keyframes bronzeReveal {
+    from {
+        opacity: 0;
+        text-shadow: 0 0 0 #CD7F32;
+    }
+    to {
+        opacity: 1;
+        text-shadow: 0 0 10px #CD7F32;
+    }
+}
+
+/* Fastest lap effect */
+.fastest-lap-glow {
+    animation: purpleGlow 0.6s ease 0.9s both;
+}
+
+@keyframes purpleGlow {
+    from {
+        background: rgba(155, 48, 255, 0);
+    }
+    to {
+        background: rgba(155, 48, 255, 0.15);
+    }
+}
+
+/* Results notes */
+.results-notes {
+    animation: fadeInUp 0.8s ease 0.4s both;
+}
+
+.notes-content p {
+    opacity: 0;
+    animation: slideInLeft 0.4s ease forwards;
+    animation-delay: calc(0.5s + var(--note-index, 0) * 0.1s);
+}
+
+/* No results message */
+.no-results-message {
+    animation: scaleIn 0.6s ease;
+}
+
+.no-results-content i {
+    animation: float 3s ease-in-out infinite;
+}
+
+/* Tab content transitions */
+.tab-content {
+    transition: opacity 0.4s ease;
+}
+
+.tab-content.active {
+    animation: fadeIn 0.5s ease;
+}
+

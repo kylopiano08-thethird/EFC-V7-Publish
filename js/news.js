@@ -1,5 +1,6 @@
 /**
  * EFC News Page JavaScript - ENHANCED WITH YOUTUBE EMBED
+ * UPDATED: Uses driver movement system for accurate team representation
  */
 
 class EFCNewsPage {
@@ -13,6 +14,12 @@ class EFCNewsPage {
         this.EFC_YOUTUBE_CHANNEL_ID = 'UCCOT_UICveuHIZFVRhXlLyg';
         this.EFC_LATEST_UPLOADS_PLAYLIST = 'UU' + this.EFC_YOUTUBE_CHANNEL_ID.substring(2);
         this.YOUTUBE_API_KEY = 'YOUR_YOUTUBE_API_KEY_HERE'; // Replace with actual API key
+        
+        // Add driver movement data
+        this.driverMovementData = null;
+        this.currentRound = 1;
+        this.driverMaster = [];
+        this.teamMaster = [];
         
         this.initialize();
     }
@@ -30,7 +37,15 @@ class EFCNewsPage {
             console.log('Loading all news data...');
             
             // Load data from Google Sheets
-            await this.dataLoader.loadHomepageData();
+            const data = await this.dataLoader.loadHomepageData();
+            
+            // Store data for driver lookups
+            this.driverMaster = data.driverMaster || [];
+            this.teamMaster = data.teamMaster || [];
+            this.driverMovementData = data.driverMovement || { driverMovements: {}, roundTeams: {} };
+            
+            // Determine current round based on completed races
+            this.currentRound = Math.max(1, (data.raceResults?.completedRaces?.length || 0) + 1);
             
             // Get media data directly
             this.mediaData = await this.fetchMediaData();
@@ -55,6 +70,64 @@ class EFCNewsPage {
             console.error('Error loading news data:', error);
             this.showError('Failed to load news data. Please check your connection.');
         }
+    }
+
+    /**
+     * NEW: Get driver's current team based on driver movement
+     */
+    getDriverCurrentTeam(driverUsername) {
+        if (!this.driverMovementData || !this.driverMovementData.driverMovements) {
+            // Fall back to teamCode from driver master if no movement data
+            const driver = this.driverMaster.find(d => d.username === driverUsername);
+            return driver?.teamCode || null;
+        }
+        
+        const driverMovements = this.driverMovementData.driverMovements[driverUsername];
+        
+        // If driver has movement data, find their team for current round
+        if (driverMovements) {
+            // Find the most recent round <= current round that has a team
+            for (let round = this.currentRound; round >= 1; round--) {
+                const teamForRound = driverMovements[`Round ${round}`];
+                if (teamForRound) {
+                    return teamForRound;
+                }
+            }
+        }
+        
+        // No movement data found, fall back to teamCode from driver master
+        const driver = this.driverMaster.find(d => d.username === driverUsername);
+        return driver?.teamCode || null;
+    }
+
+    /**
+     * Get team info from team code
+     */
+    getTeamInfo(teamCode) {
+        if (!teamCode) {
+            return {
+                name: 'Unknown Team',
+                primaryColor: '#666666',
+                secondaryColor: '#999999'
+            };
+        }
+        
+        const team = this.teamMaster.find(t => t.id === teamCode);
+        
+        if (team) {
+            return {
+                name: team.name || teamCode,
+                primaryColor: team.primaryColor || '#00f7ff',
+                secondaryColor: team.secondaryColor || '#ffffff'
+            };
+        }
+        
+        // Fallback to data loader mapping
+        return {
+            name: this.dataLoader.getTeamNameFromCode(teamCode) || teamCode,
+            primaryColor: '#00f7ff',
+            secondaryColor: '#ffffff'
+        };
     }
 
     async loadYouTubeVideo() {
@@ -230,21 +303,24 @@ class EFCNewsPage {
             const dotdDriver = this.mediaData['Dotd'];
             
             // Get driver info from data loader
-            const driverMaster = this.dataLoader.dataCache?.driverMaster || [];
-            const driverStats = this.dataLoader.dataCache?.driverStats || [];
-            
-            const driverInfo = driverMaster.find(d => 
+            const driverInfo = this.driverMaster.find(d => 
                 d.username && d.username.toLowerCase() === dotdDriver.toLowerCase()
             );
             
+            const driverStats = this.dataLoader.dataCache?.driverStats || [];
             const driverStat = driverStats.find(d => 
                 d.driver && d.driver.toLowerCase() === dotdDriver.toLowerCase()
             );
             
+            // Get current team from movement data
+            const currentTeamCode = this.getDriverCurrentTeam(dotdDriver);
+            const teamInfo = this.getTeamInfo(currentTeamCode || driverInfo?.teamCode);
+            
             dotdData = {
                 name: dotdDriver,
                 rating: driverStat ? driverStat.driverRating : 9.2,
-                team: driverInfo ? driverInfo.teamName : 'Unknown Team',
+                team: teamInfo.name,
+                teamColor: teamInfo.primaryColor,
                 points: driverStat ? driverStat.points : 0,
                 wins: driverStat ? driverStat.wins : 0,
                 podiums: driverStat ? driverStat.podiums : 0,
@@ -260,6 +336,7 @@ class EFCNewsPage {
                 name: 'notunbeatable08',
                 rating: 9.8,
                 team: 'McLaren',
+                teamColor: '#ff8000',
                 points: 156,
                 wins: 3,
                 podiums: 5,
@@ -288,6 +365,9 @@ class EFCNewsPage {
         
         // Set team class for styling
         dotdAvatar.className = `driver-avatar-large ${teamClass}`;
+        
+        // Apply team color to avatar border
+        dotdAvatar.style.borderColor = dotdData.teamColor;
         
         // Set avatar background with proper initials
         const avatarFallback = dotdAvatar.querySelector('.fallback');
@@ -489,111 +569,111 @@ class EFCNewsPage {
     }
 
     updateTransferSection() {
-    const transfersContainer = document.getElementById('transfers-container');
-    const transferStatus = document.getElementById('transfer-status');
-    
-    if (!this.mediaData) {
-        transfersContainer.innerHTML = `
-            <div class="transfer-card">
-                <div class="transfer-icon">
-                    <i class="fas fa-exchange-alt"></i>
-                </div>
-                <div class="transfer-content">
-                    <h4>Transfer Information</h4>
-                    <p>Transfer window details will be available here when announced.</p>
-                    <div class="transfer-date">Status: TBD</div>
-                </div>
-            </div>
-        `;
-        transferStatus.textContent = 'TBD';
-        transferStatus.style.background = 'rgba(255, 165, 0, 0.1)';
-        transferStatus.style.color = '#FFA500';
-        return;
-    }
-    
-    // Get data from columns D and E
-    const status = (this.mediaData['Transfer Window Status'] || 'TBD').toLowerCase();
-    const news = this.mediaData['Transfer Window News'] || '';
-    
-    // Set status text and color
-    transferStatus.textContent = status.toUpperCase();
-    
-    // Set color based on status
-    let statusColor, statusBg, statusBorder;
-    
-    if (status === 'open') {
-        statusColor = '#00FF00';
-        statusBg = 'rgba(0, 255, 0, 0.1)';
-        statusBorder = 'rgba(0, 255, 0, 0.3)';
-    } else if (status === 'closed') {
-        statusColor = '#FF0000';
-        statusBg = 'rgba(255, 0, 0, 0.1)';
-        statusBorder = 'rgba(255, 0, 0, 0.3)';
-    } else {
-        statusColor = '#FFA500';
-        statusBg = 'rgba(255, 165, 0, 0.1)';
-        statusBorder = 'rgba(255, 165, 0, 0.3)';
-    }
-    
-    // Apply styles to transfer status badge
-    transferStatus.style.background = statusBg;
-    transferStatus.style.color = statusColor;
-    transferStatus.style.border = `1px solid ${statusBorder}`;
-    
-    // Update transfer card with matching color
-    const iconColor = status === 'open' ? '#00FF00' : (status === 'closed' ? '#FF0000' : '#FFA500');
-    
-    if (news && news.trim() !== '') {
-        transfersContainer.innerHTML = `
-            <div class="transfer-card" style="background: linear-gradient(135deg, ${statusBg} 0%, rgba(10, 10, 22, 0.5) 100%); border: 1px solid ${statusBorder};">
-                <div class="transfer-icon" style="background: ${statusBg}; border: 2px solid ${statusBorder};">
-                    <i class="fas fa-exchange-alt" style="color: ${iconColor};"></i>
-                </div>
-                <div class="transfer-content">
-                    <h4 style="color: ${iconColor};">Transfer Window: ${status.toUpperCase()}</h4>
-                    <p>${news}</p>
-                    <div class="transfer-date" style="color: ${iconColor};">Status: ${status.toUpperCase()}</div>
-                </div>
-            </div>
-        `;
-    } else {
-        const defaultNews = status === 'open' 
-            ? 'The transfer window is currently open. Teams can now negotiate driver contracts and make team changes.'
-            : 'The transfer window is currently closed. No team changes can be made at this time.';
+        const transfersContainer = document.getElementById('transfers-container');
+        const transferStatus = document.getElementById('transfer-status');
         
-        transfersContainer.innerHTML = `
-            <div class="transfer-card" style="background: linear-gradient(135deg, ${statusBg} 0%, rgba(10, 10, 22, 0.5) 100%); border: 1px solid ${statusBorder};">
-                <div class="transfer-icon" style="background: ${statusBg}; border: 2px solid ${statusBorder};">
-                    <i class="fas fa-exchange-alt" style="color: ${iconColor};"></i>
+        if (!this.mediaData) {
+            transfersContainer.innerHTML = `
+                <div class="transfer-card">
+                    <div class="transfer-icon">
+                        <i class="fas fa-exchange-alt"></i>
+                    </div>
+                    <div class="transfer-content">
+                        <h4>Transfer Information</h4>
+                        <p>Transfer window details will be available here when announced.</p>
+                        <div class="transfer-date">Status: TBD</div>
+                    </div>
                 </div>
-                <div class="transfer-content">
-                    <h4 style="color: ${iconColor};">Transfer Window: ${status.toUpperCase()}</h4>
-                    <p>${defaultNews}</p>
-                    <div class="transfer-date" style="color: ${iconColor};">Status: ${status.toUpperCase()}</div>
+            `;
+            transferStatus.textContent = 'TBD';
+            transferStatus.style.background = 'rgba(255, 165, 0, 0.1)';
+            transferStatus.style.color = '#FFA500';
+            return;
+        }
+        
+        // Get data from columns D and E
+        const status = (this.mediaData['Transfer Window Status'] || 'TBD').toLowerCase();
+        const news = this.mediaData['Transfer Window News'] || '';
+        
+        // Set status text and color
+        transferStatus.textContent = status.toUpperCase();
+        
+        // Set color based on status
+        let statusColor, statusBg, statusBorder;
+        
+        if (status === 'open') {
+            statusColor = '#00FF00';
+            statusBg = 'rgba(0, 255, 0, 0.1)';
+            statusBorder = 'rgba(0, 255, 0, 0.3)';
+        } else if (status === 'closed') {
+            statusColor = '#FF0000';
+            statusBg = 'rgba(255, 0, 0, 0.1)';
+            statusBorder = 'rgba(255, 0, 0, 0.3)';
+        } else {
+            statusColor = '#FFA500';
+            statusBg = 'rgba(255, 165, 0, 0.1)';
+            statusBorder = 'rgba(255, 165, 0, 0.3)';
+        }
+        
+        // Apply styles to transfer status badge
+        transferStatus.style.background = statusBg;
+        transferStatus.style.color = statusColor;
+        transferStatus.style.border = `1px solid ${statusBorder}`;
+        
+        // Update transfer card with matching color
+        const iconColor = status === 'open' ? '#00FF00' : (status === 'closed' ? '#FF0000' : '#FFA500');
+        
+        if (news && news.trim() !== '') {
+            transfersContainer.innerHTML = `
+                <div class="transfer-card" style="background: linear-gradient(135deg, ${statusBg} 0%, rgba(10, 10, 22, 0.5) 100%); border: 1px solid ${statusBorder};">
+                    <div class="transfer-icon" style="background: ${statusBg}; border: 2px solid ${statusBorder};">
+                        <i class="fas fa-exchange-alt" style="color: ${iconColor};"></i>
+                    </div>
+                    <div class="transfer-content">
+                        <h4 style="color: ${iconColor};">Transfer Window: ${status.toUpperCase()}</h4>
+                        <p>${news}</p>
+                        <div class="transfer-date" style="color: ${iconColor};">Status: ${status.toUpperCase()}</div>
+                    </div>
                 </div>
-            </div>
-        `;
-    }
-    
-    // Add pulsing animation for open status
-    if (status === 'open') {
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes pulse-green-glow {
-                0%, 100% { 
-                    box-shadow: 0 0 5px ${statusBorder}, 0 0 10px ${statusBorder}; 
+            `;
+        } else {
+            const defaultNews = status === 'open' 
+                ? 'The transfer window is currently open. Teams can now negotiate driver contracts and make team changes.'
+                : 'The transfer window is currently closed. No team changes can be made at this time.';
+            
+            transfersContainer.innerHTML = `
+                <div class="transfer-card" style="background: linear-gradient(135deg, ${statusBg} 0%, rgba(10, 10, 22, 0.5) 100%); border: 1px solid ${statusBorder};">
+                    <div class="transfer-icon" style="background: ${statusBg}; border: 2px solid ${statusBorder};">
+                        <i class="fas fa-exchange-alt" style="color: ${iconColor};"></i>
+                    </div>
+                    <div class="transfer-content">
+                        <h4 style="color: ${iconColor};">Transfer Window: ${status.toUpperCase()}</h4>
+                        <p>${defaultNews}</p>
+                        <div class="transfer-date" style="color: ${iconColor};">Status: ${status.toUpperCase()}</div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Add pulsing animation for open status
+        if (status === 'open') {
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes pulse-green-glow {
+                    0%, 100% { 
+                        box-shadow: 0 0 5px ${statusBorder}, 0 0 10px ${statusBorder}; 
+                    }
+                    50% { 
+                        box-shadow: 0 0 15px ${statusBorder}, 0 0 30px ${statusBorder}; 
+                    }
                 }
-                50% { 
-                    box-shadow: 0 0 15px ${statusBorder}, 0 0 30px ${statusBorder}; 
+                .transfer-card[style*="border: 1px solid rgba(0, 255, 0"] {
+                    animation: pulse-green-glow 2s infinite;
                 }
-            }
-            .transfer-card[style*="border: 1px solid rgba(0, 255, 0"] {
-                animation: pulse-green-glow 2s infinite;
-            }
-        `;
-        document.head.appendChild(style);
+            `;
+            document.head.appendChild(style);
+        }
     }
-}
 
     updateFooterLinks() {
         if (!this.mediaData) return;

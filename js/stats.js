@@ -1,6 +1,6 @@
-
 /**
  * EFC Statistics Page - Displays driver and team statistics
+ * UPDATED: Uses driver movement system and team colors from TeamMaster (like championship.js)
  */
 
 class EFCStatsPage {
@@ -14,7 +14,17 @@ class EFCStatsPage {
         this.filteredTeamStats = [];
         this.currentSearchTerm = '';
         this.initialized = false;
-        this.countdownInterval = null; // Added: Countdown timer interval
+        this.countdownInterval = null;
+        
+        // Add driver movement data
+        this.driverMovementData = null;
+        this.currentRound = 1;
+        
+        // Team colors from TeamMaster - map of team name to primary color (Column D)
+        this.teamColors = {};
+        
+        // Driver movement data - this is our source of truth
+        this.roundTeams = {}; // round -> { driver: team }
         
         this.init();
     }
@@ -83,9 +93,24 @@ class EFCStatsPage {
 
             // Store data
             this.driverStats = data.driverStats;
-            this.teamStats = this.generateTeamStats(data);
             this.driverMaster = data.driverMaster;
             this.teamMaster = data.teamMaster;
+            this.driverMovementData = data.driverMovement || { driverMovements: {}, roundTeams: {} };
+            
+            // Get the driver movement data - this is our source of truth
+            this.roundTeams = data.driverMovement?.roundTeams || {};
+            
+            // Load team colors from TeamMaster (like championship.js)
+            this.loadTeamColors();
+            
+            console.log('ROUND TEAMS LOADED:', this.roundTeams);
+            console.log('TEAM COLORS LOADED:', this.teamColors);
+            
+            // Determine current round based on completed races
+            this.currentRound = Math.max(1, (data.raceResults?.completedRaces?.length || 0) + 1);
+            
+            // Generate team stats (now uses driver movement)
+            this.teamStats = this.generateTeamStats(data);
             
             // Filter data (initially no filter)
             this.filteredDriverStats = [...this.driverStats];
@@ -107,56 +132,162 @@ class EFCStatsPage {
         }
     }
 
+    /**
+     * Load team colors from TeamMaster sheet (like championship.js)
+     * Team Name is in Column A, Primary Color is in Column D (index 3)
+     */
+    loadTeamColors() {
+        const teamMaster = this.teamMaster || [];
+        
+        teamMaster.forEach(team => {
+            // Team name is in column A (name property)
+            // Primary color is in column D (primaryColor property)
+            if (team && team.name && team.primaryColor) {
+                this.teamColors[team.name] = team.primaryColor;
+                console.log(`Loaded color for ${team.name}: ${team.primaryColor}`);
+            }
+        });
+        
+        // Also add some common variations
+        this.teamColors['Mclaren'] = this.teamColors['McLaren'] || '#ff8000';
+        this.teamColors['Red Bull'] = this.teamColors['Red Bull Racing'] || '#0600ef';
+        this.teamColors['Racing Bulls'] = this.teamColors['Visa Cash App RB'] || '#6699ff';
+        this.teamColors['Alpine'] = this.teamColors['Alpine'] || '#0090ff';
+        this.teamColors['Aston Martin'] = this.teamColors['Aston Martin Aramco'] || '#006f62';
+        this.teamColors['Haas'] = this.teamColors['Haas F1 Team'] || '#b6babd';
+        this.teamColors['Williams'] = this.teamColors['Williams'] || '#005aff';
+        this.teamColors['Ferrari'] = this.teamColors['Scuderia Ferrari'] || '#dc0000';
+        this.teamColors['Mercedes'] = this.teamColors['Mercedes-AMG Petronas'] || '#00d2be';
+        this.teamColors['BMW'] = this.teamColors['BMW'] || '#1c69d4';
+        this.teamColors['Porsche'] = this.teamColors['Porsche'] || '#d5001c';
+        this.teamColors['Sauber'] = this.teamColors['Sauber'] || '#00e701';
+        this.teamColors['Audi'] = this.teamColors['Audi'] || '#000000';
+    }
+
+    /**
+     * Get team color for a team name (like championship.js)
+     */
+    getTeamColor(teamName) {
+        return this.teamColors[teamName] || '#00f7ff'; // Default cyan if not found
+    }
+
+    /**
+     * NEW: Get driver's current team based on driver movement (like championship.js)
+     */
+    getDriverCurrentTeam(driverUsername) {
+        if (!this.roundTeams || Object.keys(this.roundTeams).length === 0) {
+            // Fall back to teamCode from driver master if no movement data
+            const driver = this.driverMaster?.find(d => d.username === driverUsername);
+            return driver?.teamCode || null;
+        }
+        
+        // Find the most recent round <= current round that has a team for this driver
+        for (let round = this.currentRound; round >= 1; round--) {
+            const roundKey = `Round ${round}`;
+            const team = this.roundTeams[roundKey]?.[driverUsername];
+            if (team && team.trim() !== '') {
+                return team;
+            }
+        }
+        
+        // No movement data found, fall back to teamCode from driver master
+        const driver = this.driverMaster?.find(d => d.username === driverUsername);
+        return driver?.teamCode || null;
+    }
+
+    /**
+     * Get team info including colors from team name
+     */
+    getTeamInfo(teamName) {
+        if (!teamName) {
+            return {
+                name: 'Unknown Team',
+                primaryColor: '#666666',
+                secondaryColor: '#999999'
+            };
+        }
+        
+        const primaryColor = this.getTeamColor(teamName);
+        
+        return {
+            name: teamName,
+            primaryColor: primaryColor,
+            secondaryColor: this.lightenColor(primaryColor, 30) // Generate secondary color from primary
+        };
+    }
+
+    /**
+     * Lighten a color for secondary color
+     */
+    lightenColor(color, percent) {
+        if (!color.startsWith('#')) return '#ffffff';
+        
+        const num = parseInt(color.replace('#', ''), 16);
+        const amt = Math.round(2.55 * percent);
+        const R = Math.min(255, (num >> 16) + amt);
+        const G = Math.min(255, ((num >> 8) & 0x00FF) + amt);
+        const B = Math.min(255, (num & 0x0000FF) + amt);
+        
+        return '#' + (0x1000000 + (R * 0x10000) + (G * 0x100) + B).toString(16).slice(1);
+    }
+
+    /**
+     * Generate team stats using driver movement data
+     */
     generateTeamStats(data) {
         // Create team stats from driver stats and team master
         const teams = {};
         
-        // Initialize teams from team master
-        data.teamMaster.forEach(team => {
-            if (team.active === 'y' && team.id) {
-                teams[team.id] = {
-                    team: team.name,
-                    teamCode: team.id,
-                    points: 0,
-                    podiums: 0,
-                    wins: 0,
-                    teamRating: 0,
-                    fastestLaps: 0,
-                    poles: 0,
-                    dnfs: 0,
-                    pointsPerRace: 0,
-                    podiumRate: 0,
-                    championships: 0,
-                    driverCount: 0,
-                    primaryColor: team.primaryColor || '#00f7ff',
-                    secondaryColor: team.secondaryColor || '#ffffff',
-                    carImageUrl: team.carImageUrl || ''
-                };
-            }
+        // Get ALL team names from roundTeams
+        const teamNames = new Set();
+        Object.values(this.roundTeams).forEach(roundAssignments => {
+            Object.values(roundAssignments).forEach(team => {
+                if (team && team.trim() !== '') {
+                    teamNames.add(team);
+                }
+            });
+        });
+        
+        console.log('All team names found for stats:', Array.from(teamNames));
+        
+        // Initialize teams from team names
+        teamNames.forEach(teamName => {
+            teams[teamName] = {
+                team: teamName,
+                teamCode: teamName,
+                points: 0,
+                podiums: 0,
+                wins: 0,
+                teamRating: 0,
+                fastestLaps: 0,
+                poles: 0,
+                dnfs: 0,
+                pointsPerRace: 0,
+                podiumRate: 0,
+                championships: 0,
+                driverCount: 0,
+                primaryColor: this.getTeamColor(teamName),
+                secondaryColor: this.lightenColor(this.getTeamColor(teamName), 30),
+                carImageUrl: ''
+            };
         });
 
-        // Aggregate driver stats to team stats
+        // Aggregate driver stats to team stats using driver movement
         data.driverStats.forEach(driverStat => {
-            // Find driver's team
-            const driverInfo = data.driverMaster.find(d => d.username === driverStat.driver);
-            if (!driverInfo || !driverInfo.teamCode) return;
+            // Get driver's current team from movement data
+            const currentTeamName = this.getDriverCurrentTeam(driverStat.driver);
             
-            const teamCode = driverInfo.teamCode;
-            if (!teams[teamCode]) return;
+            if (!currentTeamName || !teams[currentTeamName]) return;
             
             // Add driver's stats to team
-            const team = teams[teamCode];
+            const team = teams[currentTeamName];
             team.points += driverStat.points || 0;
             team.podiums += driverStat.podiums || 0;
             team.wins += driverStat.wins || 0;
             team.fastestLaps += driverStat.fastestLaps || 0;
             team.dnfs += driverStat.dnfs || 0;
             team.driverCount += 1;
-            
-            // Add poles (need to get from qualifying results - simplified)
             team.poles += driverStat.poles || 0;
-            
-            // Calculate team rating as average of driver ratings
             team.teamRating += driverStat.driverRating || 0;
         });
 
@@ -190,7 +321,9 @@ class EFCStatsPage {
         
         sortedStats.forEach((stat, index) => {
             const driverInfo = this.driverMaster?.find(d => d.username === stat.driver) || {};
-            const teamName = this.getTeamName(driverInfo.teamCode);
+            // Get current team from movement data
+            const currentTeamName = this.getDriverCurrentTeam(stat.driver) || driverInfo.teamCode || 'Unknown';
+            const teamColor = this.getTeamColor(currentTeamName);
             
             // Determine value styling classes
             const pointsClass = stat.points ? 'points-value' : '';
@@ -214,25 +347,25 @@ class EFCStatsPage {
                     </td>
                     <td style="text-align: left;">
                         <div style="display: flex; align-items: center; gap: 8px;">
-                            <div style="width: 12px; height: 12px; border-radius: 50%; background: ${this.getTeamColor(driverInfo.teamCode)};"></div>
-                            <span>${teamName}</span>
+                            <div style="width: 12px; height: 12px; border-radius: 50%; background: ${teamColor}; box-shadow: 0 0 5px ${teamColor};"></div>
+                            <span style="color: ${teamColor};">${currentTeamName}</span>
                         </div>
                     </td>
                     <td>${stat.racesAttended || 0}</td>
-                    <td class="${pointsClass}">${stat.points || 0}</td>
+                    <td class="${pointsClass}" style="color: ${teamColor}; font-weight: 700;">${stat.points || 0}</td>
                     <td>${stat.ptsPerRace ? stat.ptsPerRace.toFixed(1) : '0.0'}</td>
                     <td>${stat.avgFinish ? stat.avgFinish.toFixed(1) : '0.0'}</td>
                     <td>${stat.avgQuali ? stat.avgQuali.toFixed(1) : '0.0'}</td>
-                    <td class="${winsClass}">${stat.wins || 0}</td>
-                    <td class="${podiumsClass}">${stat.podiums || 0}</td>
-                    <td class="${polesClass}">${stat.poles || 0}</td>
-                    <td class="${ratingClass}">${stat.driverRating ? stat.driverRating.toFixed(1) : '0.0'}</td>
+                    <td class="${winsClass}" style="color: ${teamColor};">${stat.wins || 0}</td>
+                    <td class="${podiumsClass}" style="color: ${teamColor};">${stat.podiums || 0}</td>
+                    <td class="${polesClass}" style="color: ${teamColor};">${stat.poles || 0}</td>
+                    <td class="${ratingClass}" style="color: ${teamColor};">${stat.driverRating ? stat.driverRating.toFixed(1) : '0.0'}</td>
                     <td>${stat.consistencyScore ? stat.consistencyScore.toFixed(1) : '0.0'}</td>
                     <td>${stat.fastestLaps || 0}</td>
                     <td>${stat.highestFinish || 'N/A'}</td>
                     <td>${stat.avgPosGainLoss ? stat.avgPosGainLoss.toFixed(1) : '0.0'}</td>
                     <td>${stat.podiumRate ? stat.podiumRate.toFixed(1) + '%' : '0%'}</td>
-                    <td class="${dnfsClass}">${stat.dnfs || 0}</td>
+                    <td class="${dnfsClass}" style="color: ${teamColor};">${stat.dnfs || 0}</td>
                     <td>${stat.championships || 0}</td>
                 </tr>
             `;
@@ -279,18 +412,18 @@ class EFCStatsPage {
                         <div style="display: flex; align-items: center; gap: 12px;">
                             ${stat.carImageUrl ? `<img src="${stat.carImageUrl}" alt="${stat.team}" style="width: 40px; height: 20px; object-fit: contain;">` : ''}
                             <div style="display: flex; align-items: center; gap: 8px;">
-                                <div style="width: 12px; height: 12px; border-radius: 50%; background: ${stat.primaryColor};"></div>
-                                <span style="font-weight: 600;">${stat.team}</span>
+                                <div style="width: 12px; height: 12px; border-radius: 50%; background: ${stat.primaryColor}; box-shadow: 0 0 5px ${stat.primaryColor};"></div>
+                                <span style="font-weight: 600; color: ${stat.primaryColor};">${stat.team}</span>
                             </div>
                         </div>
                     </td>
-                    <td class="${pointsClass}">${stat.points || 0}</td>
-                    <td class="${ratingClass}">${stat.teamRating || '0.0'}</td>
-                    <td class="${winsClass}">${stat.wins || 0}</td>
-                    <td class="${podiumsClass}">${stat.podiums || 0}</td>
+                    <td class="${pointsClass}" style="color: ${stat.primaryColor}; font-weight: 700;">${stat.points || 0}</td>
+                    <td class="${ratingClass}" style="color: ${stat.primaryColor};">${stat.teamRating || '0.0'}</td>
+                    <td class="${winsClass}" style="color: ${stat.primaryColor};">${stat.wins || 0}</td>
+                    <td class="${podiumsClass}" style="color: ${stat.primaryColor};">${stat.podiums || 0}</td>
                     <td>${stat.fastestLaps || 0}</td>
-                    <td class="${polesClass}">${stat.poles || 0}</td>
-                    <td class="${dnfsClass}">${stat.dnfs || 0}</td>
+                    <td class="${polesClass}" style="color: ${stat.primaryColor};">${stat.poles || 0}</td>
+                    <td class="${dnfsClass}" style="color: ${stat.primaryColor};">${stat.dnfs || 0}</td>
                     <td>${stat.pointsPerRace || '0.0'}</td>
                     <td>${stat.podiumRate ? stat.podiumRate + '%' : '0%'}</td>
                     <td>${stat.championships || 0}</td>
@@ -519,20 +652,6 @@ class EFCStatsPage {
             document.getElementById('team-stats-body').innerHTML = 
                 '<tr><td colspan="12" style="text-align: center; padding: 40px;">No teams match your search</td></tr>';
         }
-    }
-
-    getTeamName(teamCode) {
-        if (!this.teamMaster) return teamCode || 'Unknown';
-        
-        const team = this.teamMaster.find(t => t.id === teamCode);
-        return team ? team.name : teamCode || 'Unknown';
-    }
-
-    getTeamColor(teamCode) {
-        if (!this.teamMaster) return '#00f7ff';
-        
-        const team = this.teamMaster.find(t => t.id === teamCode);
-        return team ? (team.primaryColor || '#00f7ff') : '#00f7ff';
     }
 
     showEmptyState() {

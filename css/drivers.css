@@ -1021,3 +1021,347 @@
         font-size: 0.9rem;
     }
 }
+/* Add after existing styles */
+
+/* Enhanced animations */
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes cardPulse {
+    0%, 100% {
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        border-color: rgba(255, 0, 85, 0.15);
+    }
+    50% {
+        box-shadow: 0 20px 40px rgba(255, 0, 85, 0.3);
+        border-color: rgba(255, 0, 85, 0.4);
+    }
+}
+
+/* Hero animations */
+.drivers-hero {
+    animation: fadeIn 1s ease;
+}
+
+.drivers-hero-title {
+    animation: slideInLeft 1s ease, glow 3s ease-in-out infinite alternate;
+}
+
+.drivers-hero-subtitle {
+    animation: slideInRight 1s ease 0.2s both;
+}
+
+.drivers-search {
+    animation: fadeInUp 1s ease 0.3s both;
+}
+
+/* Search box animations */
+.search-box {
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.search-box:focus-within {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(255, 0, 85, 0.3);
+}
+
+.search-box input {
+    transition: all 0.3s ease;
+}
+
+/* Driver card animations */
+.driver-card {
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: fadeInUp 0.6s ease both;
+    animation-delay: calc(var(--card-index, 0) * 0.1s);
+}
+
+.driver-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(255, 0, 85, 0.3);
+    animation: cardPulse 2s infinite;
+}
+
+.driver-card-header {
+    transition: all 0.3s ease;
+}
+
+.driver-card:hover .driver-card-header {
+    background: linear-gradient(135deg, rgba(255, 0, 85, 0.2), rgba(0, 247, 255, 0.1));
+}
+
+/* Avatar animations */
+.driver-avatar-container {
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: float 6s ease-in-out infinite;
+    animation-delay: calc(var(--card-index, 0) * 0.1s);
+}
+
+.driver-card:hover .driver-avatar-container {
+    transform: scale(1.15) rotate(5deg);
+    border-color: var(--secondary);
+    box-shadow: 0 0 30px rgba(255, 0, 85, 0.5);
+}
+
+.driver-avatar {
+    transition: all 0.4s ease;
+}
+
+.driver-card:hover .driver-avatar {
+    transform: scale(1.1);
+}
+
+/* Points badge animations */
+.driver-points-badge {
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+}
+
+.driver-points-badge::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        45deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+    );
+    transform: rotate(45deg);
+    animation: shimmer 3s infinite;
+}
+
+.driver-card:hover .driver-points-badge {
+    transform: scale(1.05);
+    box-shadow: 0 5px 20px rgba(255, 0, 85, 0.4);
+}
+
+/* Value badge animations */
+.driver-value-badge {
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+}
+
+.driver-value-badge::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        45deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+    );
+    transform: rotate(45deg);
+    animation: shimmer 3s infinite 0.5s;
+}
+
+.driver-card:hover .driver-value-badge {
+    transform: scale(1.05);
+    box-shadow: 0 5px 20px rgba(255, 170, 0, 0.4);
+}
+
+/* Driver number animation */
+.driver-number {
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.driver-card:hover .driver-number {
+    transform: scale(1.2);
+    color: rgba(255, 255, 255, 0.2);
+}
+
+/* Stats mini animations */
+.driver-stats-mini {
+    animation: fadeInUp 0.6s ease 0.2s both;
+}
+
+.driver-stat-mini {
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: slideInUp 0.4s ease both;
+    animation-delay: calc(0.3s + var(--stat-index, 0) * 0.1s);
+}
+
+.driver-stat-mini:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 0, 85, 0.3);
+}
+
+.driver-stat-value {
+    transition: all 0.3s ease;
+}
+
+.driver-stat-mini:hover .driver-stat-value {
+    color: var(--secondary);
+    transform: scale(1.1);
+}
+
+/* Modal animations */
+.driver-modal-overlay {
+    transition: opacity 0.4s ease;
+}
+
+.driver-modal {
+    animation: slideInUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.modal-close {
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.modal-close:hover {
+    transform: rotate(90deg) scale(1.1);
+    background: rgba(255, 0, 85, 0.4);
+}
+
+/* Modal stats animations */
+.modal-stats-grid {
+    animation: fadeInUp 0.6s ease 0.2s both;
+}
+
+.modal-stat-item {
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: slideInUp 0.4s ease both;
+    animation-delay: calc(0.3s + var(--stat-index, 0) * 0.05s);
+}
+
+.modal-stat-item:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 10px 20px rgba(0, 247, 255, 0.2);
+}
+
+.modal-stat-value {
+    transition: all 0.3s ease;
+}
+
+.modal-stat-item:hover .modal-stat-value {
+    color: var(--secondary);
+    transform: scale(1.1);
+}
+
+/* Performance section animations */
+.performance-section {
+    animation: fadeInUp 0.6s ease 0.3s both;
+}
+
+.performance-grid {
+    display: grid;
+    gap: 1rem;
+}
+
+.performance-item {
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: slideInRight 0.4s ease both;
+    animation-delay: calc(0.4s + var(--perf-index, 0) * 0.05s);
+}
+
+.performance-item:hover {
+    transform: translateY(-5px) scale(1.05);
+    background: rgba(255, 0, 85, 0.1);
+    border-color: rgba(255, 0, 85, 0.3);
+}
+
+.performance-value {
+    transition: all 0.3s ease;
+}
+
+.performance-item:hover .performance-value {
+    color: var(--secondary);
+    transform: scale(1.1);
+}
+
+/* Info item animations */
+.info-item {
+    transition: all 0.3s ease;
+    animation: slideInLeft 0.4s ease both;
+    animation-delay: calc(0.5s + var(--info-index, 0) * 0.05s);
+}
+
+.info-item:hover {
+    transform: translateX(5px);
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    padding-left: 1rem;
+}
+
+.info-value {
+    transition: all 0.3s ease;
+}
+
+.info-item:hover .info-value {
+    color: var(--primary);
+}
+
+/* Socials animations */
+.socials-content {
+    animation: fadeInUp 0.6s ease 0.4s both;
+}
+
+.socials-content a {
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: slideInUp 0.4s ease both;
+    animation-delay: calc(0.5s + var(--social-index, 0) * 0.05s);
+}
+
+.socials-content a:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
+}
+
+.socials-content a i {
+    transition: transform 0.3s ease;
+}
+
+.socials-content a:hover i {
+    transform: scale(1.2) rotate(360deg);
+}
+
+/* Loading animations */
+.drivers-loading i {
+    animation: spin 1s linear infinite, pulse-glow 2s infinite;
+}
+
+/* No results animation */
+.no-results i {
+    animation: float 6s ease-in-out infinite;
+}
+

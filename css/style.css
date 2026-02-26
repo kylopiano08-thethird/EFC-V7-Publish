@@ -1570,3 +1570,458 @@ header {
 .main-nav {
     margin-left: auto;
 }
+/* Add after existing animations */
+
+/* Enhanced animations */
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+}
+
+@keyframes pulse-glow {
+    0%, 100% { 
+        box-shadow: 0 0 20px rgba(0, 247, 255, 0.3);
+        opacity: 1;
+    }
+    50% { 
+        box-shadow: 0 0 40px rgba(0, 247, 255, 0.6);
+        opacity: 0.8;
+    }
+}
+
+@keyframes shimmer {
+    0% { 
+        background-position: -200% center;
+    }
+    100% { 
+        background-position: 200% center;
+    }
+}
+
+@keyframes rotate-slow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes scale-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+}
+
+/* Enhanced hover effects */
+.stat-card {
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.stat-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0, 247, 255, 0.2);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.stat-card .card-header {
+    transition: background 0.3s ease;
+}
+
+.stat-card:hover .card-header {
+    background: rgba(0, 247, 255, 0.15);
+}
+
+/* Enhanced countdown timer */
+.countdown {
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.countdown::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        45deg,
+        transparent,
+        rgba(0, 247, 255, 0.1),
+        transparent
+    );
+    transform: rotate(45deg);
+    animation: shimmer 3s infinite;
+}
+
+/* Driver of the day enhancements */
+.driver-of-day {
+    transition: all 0.3s ease;
+}
+
+.driver-of-day .driver-avatar {
+    transition: all 0.4s ease;
+    animation: float 6s ease-in-out infinite;
+}
+
+.driver-of-day:hover .driver-avatar {
+    transform: scale(1.1) rotate(5deg);
+    border-color: var(--primary);
+    box-shadow: 0 0 30px rgba(0, 247, 255, 0.4);
+}
+
+/* Calendar items */
+.calendar-item {
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.calendar-item:hover {
+    transform: translateX(8px);
+    background: rgba(0, 247, 255, 0.1);
+}
+
+.calendar-item-round {
+    transition: all 0.3s ease;
+}
+
+.calendar-item:hover .calendar-item-round {
+    color: var(--light);
+    transform: scale(1.2);
+}
+
+/* Standings rows */
+.standings-row, .ratings-row {
+    transition: all 0.3s ease;
+}
+
+.standings-row:hover, .ratings-row:hover {
+    background: rgba(0, 247, 255, 0.08);
+    transform: translateX(5px);
+}
+
+.standings-row:hover .pos,
+.ratings-row:hover .pos {
+    color: var(--light);
+    transform: scale(1.1);
+}
+
+/* Hero section enhancements */
+.hero {
+    animation: fadeIn 1s ease;
+}
+
+.hero::before {
+    animation: pulse 8s ease-in-out infinite;
+}
+
+.hero-title {
+    animation: glow 3s ease-in-out infinite alternate;
+    transition: all 0.3s ease;
+}
+
+.hero-title:hover {
+    transform: scale(1.02);
+    letter-spacing: 4px;
+}
+
+/* Navigation enhancements */
+.main-nav a {
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+}
+
+.main-nav a::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--gradient-primary);
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.3s ease;
+}
+
+.main-nav a:hover::before {
+    transform: scaleX(1);
+    transform-origin: left;
+}
+
+.main-nav a:hover {
+    transform: translateY(-2px);
+}
+
+/* Card content animations */
+.card-content {
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover .card-content {
+    background: rgba(0, 247, 255, 0.02);
+}
+
+/* View more button */
+.view-more {
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+}
+
+.view-more:hover {
+    gap: 1rem;
+}
+
+.view-more i {
+    transition: transform 0.3s ease;
+}
+
+.view-more:hover i {
+    transform: translateX(5px);
+}
+
+/* Footer links */
+.footer-link {
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.footer-link::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: var(--primary);
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.3s ease;
+}
+
+.footer-link:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+}
+
+.footer-link:hover {
+    transform: translateY(-2px);
+}
+
+/* Loading spinner enhancement */
+.loading::after {
+    animation: spin 0.8s linear infinite;
+    box-shadow: 0 0 15px var(--primary);
+}
+
+/* Scrollbar enhancement */
+::-webkit-scrollbar-thumb {
+    transition: background 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    box-shadow: 0 0 15px var(--primary);
+}
+
+/* Add these general fixes to style.css */
+
+/* Base animation classes - more subtle */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Apply animations only on initial load, not continuously */
+.fade-in {
+    animation: fadeIn 0.5s ease;
+}
+
+.slide-up {
+    animation: slideInUp 0.5s ease;
+}
+
+/* Hover effects - smooth transitions only */
+.hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-3px);
+}
+
+.hover-glow {
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.hover-glow:hover {
+    box-shadow: 0 0 20px rgba(0, 247, 255, 0.3);
+    border-color: var(--primary);
+}
+
+/* Fix for countdown timer */
+.countdown {
+    transition: color 0.3s ease;
+}
+
+/* Fix for navigation */
+.main-nav a {
+    transition: color 0.3s ease, background 0.3s ease;
+}
+
+.main-nav a:hover {
+    color: var(--primary);
+    background: rgba(0, 247, 255, 0.1);
+}
+
+/* Remove any infinite animations that might cause flicker */
+.pulse, .glow, .float {
+    animation: none;
+}
+/* ===== SCROLL REVEAL ANIMATIONS ===== */
+
+/* Base reveal classes */
+.reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s cubic-bezier(0.5, 0, 0, 1), 
+                transform 0.8s cubic-bezier(0.5, 0, 0, 1);
+}
+
+.reveal.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Different reveal directions */
+.reveal-left {
+    opacity: 0;
+    transform: translateX(-30px);
+    transition: opacity 0.8s cubic-bezier(0.5, 0, 0, 1), 
+                transform 0.8s cubic-bezier(0.5, 0, 0, 1);
+}
+
+.reveal-left.active {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.reveal-right {
+    opacity: 0;
+    transform: translateX(30px);
+    transition: opacity 0.8s cubic-bezier(0.5, 0, 0, 1), 
+                transform 0.8s cubic-bezier(0.5, 0, 0, 1);
+}
+
+.reveal-right.active {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.reveal-scale {
+    opacity: 0;
+    transform: scale(0.9);
+    transition: opacity 0.8s cubic-bezier(0.5, 0, 0, 1), 
+                transform 0.8s cubic-bezier(0.5, 0, 0, 1);
+}
+
+.reveal-scale.active {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Stagger delays for children */
+.stagger-children > * {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s cubic-bezier(0.5, 0, 0, 1), 
+                transform 0.6s cubic-bezier(0.5, 0, 0, 1);
+    transition-delay: calc(var(--child-index, 0) * 0.1s);
+}
+
+.stagger-children.active > * {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Hero section always visible */
+.hero, .drivers-hero, .teams-hero, .calendar-hero, .news-hero {
+    opacity: 1;
+    transform: none;
+}
+
+/* Scroll indicator */
+.scroll-indicator {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    color: var(--primary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    animation: bounce 2s infinite;
+    z-index: 10;
+}
+
+.scroll-indicator i {
+    font-size: 1.5rem;
+    animation: bounce-arrow 2s infinite;
+}
+
+@keyframes bounce-arrow {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(10px); }
+}
+
+/* Progress bar for scroll */
+.scroll-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0%;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    z-index: 1001;
+    transition: width 0.1s ease;
+    box-shadow: 0 0 20px var(--primary);
+}
